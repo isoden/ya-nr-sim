@@ -4,6 +4,7 @@ import DeleteIcon from '@spectrum-icons/workflow/Delete'
 import { useState } from 'react'
 import { Form } from 'react-router'
 import { relicEffectMap } from '~/data/relics'
+import { ImportDialog } from './ImportDialog'
 
 export const SearchForm: React.FC = () => {
 	const [listState, setListState] = useState<{ effectId: number | null; amount: number }[]>([
@@ -13,6 +14,10 @@ export const SearchForm: React.FC = () => {
 	return (
 		<Form method="GET">
 			<h2>条件選択</h2>
+
+			<div className="flex justify-end">
+				<ImportDialog />
+			</div>
 
 			<Picker label="キャラクター" name="character" defaultSelectedKey={characterItems[0].name} items={characterItems}>
 				{(item) => <Item key={item.name}>{item.name}</Item>}
