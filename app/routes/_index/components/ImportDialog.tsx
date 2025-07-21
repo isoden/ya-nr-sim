@@ -1,28 +1,41 @@
-import { ButtonGroup, Content, Dialog, DialogTrigger, Divider, Heading, TextArea } from '@adobe/react-spectrum'
-import { ActionButton, Button } from '@react-spectrum/button'
+import {
+	Button,
+	ButtonGroup,
+	Content,
+	Dialog,
+	DialogTrigger,
+	Divider,
+	Heading,
+	Text,
+	TextArea,
+} from '@adobe/react-spectrum'
 import ImportIcon from '@spectrum-icons/workflow/Import'
 import { useId, useState } from 'react'
 
-export const ImportDialog: React.FC = () => {
+type Props = {
+	relicsCount: number
+}
+
+export const ImportDialog: React.FC<Props> = ({ relicsCount }) => {
 	const id = useId()
-	const [text, setText] = useState('')
+	const [jsonAsText, setJsonAsText] = useState('')
 
 	const importRelics = () => {
-		localStorage.setItem('relics', text)
+		localStorage.setItem('relics', jsonAsText)
 	}
 
 	return (
 		<DialogTrigger>
-			<ActionButton>
-				遺物をインポート
+			<Button variant="secondary">
+				<Text>遺物をインポート ({relicsCount})</Text>
 				<ImportIcon />
-			</ActionButton>
+			</Button>
 			{(close) => (
 				<Dialog>
 					<Heading id={id}>遺物をインポート</Heading>
 					<Divider />
 					<Content>
-						<TextArea aria-labelledby={id} width="100%" value={text} onChange={setText} />
+						<TextArea aria-labelledby={id} width="100%" value={jsonAsText} onChange={setJsonAsText} />
 					</Content>
 					<ButtonGroup>
 						<Button type="button" variant="secondary" onPress={close}>

@@ -1,91 +1,106 @@
-import { Button, ComboBox, Item, NumberField, Picker } from '@adobe/react-spectrum'
-import AddIcon from '@spectrum-icons/workflow/Add'
+import { Button, ComboBox, Item, NumberField, Picker, Text } from '@adobe/react-spectrum'
 import DeleteIcon from '@spectrum-icons/workflow/Delete'
 import { useState } from 'react'
 import { Form } from 'react-router'
 import { relicEffectMap } from '~/data/relics'
 import { ImportDialog } from './ImportDialog'
 
-export const SearchForm: React.FC = () => {
-	const [listState, setListState] = useState<{ effectId: number | null; amount: number }[]>([
-		{ effectId: null, amount: 1 },
-	])
+type Props = {
+	relicsCount: number
+	defaultValues?: {
+		character: string
+		effects: { id: number; amount: number }[]
+	}
+}
+
+export const SearchForm: React.FC<Props> = ({ defaultValues, relicsCount }) => {
+	const [listState, setListState] = useState<{ id: number | null; amount: number }[]>(
+		() => defaultValues?.effects ?? [{ id: null, amount: 1 }],
+	)
 
 	return (
-		<Form method="GET">
-			<h2>条件選択</h2>
+		<section className="bg-black/10 p-6 border border-gray-500/10 rounded-lg">
+			<Form method="GET">
+				<h2 className="text-xl font-bold">条件選択</h2>
 
-			<div className="flex justify-end">
-				<ImportDialog />
-			</div>
-
-			<Picker label="キャラクター" name="character" defaultSelectedKey={characterItems[0].name} items={characterItems}>
-				{(item) => <Item key={item.name}>{item.name}</Item>}
-			</Picker>
-
-			<div>
-				<div className="grid grid-cols-[1fr_repeat(2,min-content)] gap-4">
-					{listState.map((item, i) => {
-						return (
-							<div key={i} className="grid grid-cols-subgrid col-span-full items-end">
-								<ComboBox
-									name={`effects[${i}].effectId`}
-									label={i === 0 ? '遺物効果' : undefined}
-									aria-label={i === 0 ? undefined : '遺物効果'}
-									selectedKey={item.effectId}
-									onSelectionChange={(effectId) => {
-										setListState(listState.with(i, { ...item, effectId: effectId as number }))
-									}}
-									formValue="key"
-									defaultItems={effectItems}
-									width="100%"
-								>
-									{(item) => <Item key={item.id}>{item.name}</Item>}
-								</ComboBox>
-								<NumberField
-									name={`effects[${i}].amount`}
-									label={i === 0 ? '数量' : undefined}
-									aria-label={i === 0 ? undefined : '数量'}
-									value={item.amount}
-									onChange={(value) => {
-										setListState(listState.with(i, { ...item, amount: value }))
-									}}
-									minValue={1}
-									maxValue={3}
-									width="size-1600"
-								/>
-								<Button
-									aria-label="削除"
-									type="button"
-									variant="negative"
-									onPress={() => {
-										setListState(listState.toSpliced(i, 1))
-									}}
-									isDisabled={listState.length === 1}
-								>
-									<DeleteIcon />
-								</Button>
-							</div>
-						)
-					})}
+				<div className="flex justify-end">
+					<ImportDialog relicsCount={relicsCount} />
 				</div>
 
-				<Button
-					aria-label="追加"
-					type="button"
-					variant="primary"
-					onPress={() => {
-						setListState(listState.concat({ effectId: null, amount: 1 }))
-					}}
-				>
-					<AddIcon />
-				</Button>
-			</div>
+				<div className="flex flex-col gap-6">
+					<Picker
+						label="キャラクター"
+						name="character"
+						defaultSelectedKey={defaultValues?.character ?? characterItems[0].name}
+						items={characterItems}
+					>
+						{(item) => <Item key={item.name}>{item.name}</Item>}
+					</Picker>
 
-			<Button variant="accent" type="submit">
-				検索
-			</Button>
-		</Form>
+					<div className="grid grid-cols-[1fr_repeat(2,min-content)] gap-4">
+						{listState.map((item, i) => {
+							return (
+								<div key={i} className="grid grid-cols-subgrid col-span-full items-end">
+									<ComboBox
+										name={`effects[${i}][id]`}
+										label={i === 0 ? '遺物効果' : undefined}
+										aria-label={i === 0 ? undefined : '遺物効果'}
+										selectedKey={item.id}
+										onSelectionChange={(id) => {
+											setListState(listState.with(i, { ...item, id: id as number | null }))
+										}}
+										formValue="key"
+										defaultItems={effectItems}
+										width="100%"
+									>
+										{(item) => <Item>{item.name}</Item>}
+									</ComboBox>
+									<NumberField
+										name={`effects[${i}][amount]`}
+										label={i === 0 ? '数量' : undefined}
+										aria-label={i === 0 ? undefined : '数量'}
+										value={item.amount}
+										onChange={(value) => {
+											setListState(listState.with(i, { ...item, amount: value }))
+										}}
+										minValue={1}
+										maxValue={3}
+										width="size-1600"
+									/>
+									<Button
+										aria-label="削除"
+										type="button"
+										variant="negative"
+										onPress={() => {
+											setListState(listState.toSpliced(i, 1))
+										}}
+										isDisabled={listState.length === 1}
+									>
+										<DeleteIcon />
+									</Button>
+								</div>
+							)
+						})}
+					</div>
+
+					<Button
+						type="button"
+						variant="primary"
+						onPress={() => {
+							setListState(listState.concat({ id: null, amount: 1 }))
+						}}
+					>
+						<Text>遺物効果を追加</Text>
+					</Button>
+				</div>
+
+				<div className="mt-8">
+					<Button variant="accent" type="submit">
+						検索
+					</Button>
+				</div>
+			</Form>
+		</section>
 	)
 }
 
