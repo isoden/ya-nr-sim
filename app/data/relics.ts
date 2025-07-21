@@ -72,6 +72,9 @@ export const enum RelicColor {
   Free = 'Free',
 }
 
+/**
+ * @see https://docs.google.com/spreadsheets/d/1Gz6fqIBNr2BXr45te9ewTolHJr4zZ_Apbqa09gL3VbI/
+ */
 export const relicEffectMap: Record<number, string> = {
   10000: '攻撃連続時、FP回復',
   10001: '攻撃を受けると攻撃力上昇',

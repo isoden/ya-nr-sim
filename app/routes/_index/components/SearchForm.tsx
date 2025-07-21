@@ -3,33 +3,27 @@ import DeleteIcon from '@spectrum-icons/workflow/Delete'
 import { useState } from 'react'
 import { Form } from 'react-router'
 import { relicEffectMap } from '~/data/relics'
-import { ImportDialog } from './ImportDialog'
 
 type Props = {
-	relicsCount: number
 	defaultValues?: {
 		character: string
 		effects: { id: number; amount: number }[]
 	}
 }
 
-export const SearchForm: React.FC<Props> = ({ defaultValues, relicsCount }) => {
+export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 	const [listState, setListState] = useState<{ id: number | null; amount: number }[]>(
 		() => defaultValues?.effects ?? [{ id: null, amount: 1 }],
 	)
 
 	return (
-		<section className="bg-black/10 p-6 border border-gray-500/10 rounded-lg">
+		<section className="overflow-y-auto row-start-2 col-start-1">
 			<Form method="GET">
-				<h2 className="text-xl font-bold">条件選択</h2>
+				<h2 className="text-lg font-semibold">条件選択</h2>
 
-				<div className="flex justify-end">
-					<ImportDialog relicsCount={relicsCount} />
-				</div>
-
-				<div className="flex flex-col gap-6">
+				<div className="flex flex-col gap-4 mt-4">
 					<Picker
-						label="キャラクター"
+						label="キャラクター(献器)"
 						name="character"
 						defaultSelectedKey={defaultValues?.character ?? characterItems[0].name}
 						items={characterItems}
@@ -57,8 +51,8 @@ export const SearchForm: React.FC<Props> = ({ defaultValues, relicsCount }) => {
 									</ComboBox>
 									<NumberField
 										name={`effects[${i}][amount]`}
-										label={i === 0 ? '数量' : undefined}
-										aria-label={i === 0 ? undefined : '数量'}
+										label={i === 0 ? '個数' : undefined}
+										aria-label={i === 0 ? undefined : '個数'}
 										value={item.amount}
 										onChange={(value) => {
 											setListState(listState.with(i, { ...item, amount: value }))
@@ -68,7 +62,7 @@ export const SearchForm: React.FC<Props> = ({ defaultValues, relicsCount }) => {
 										width="size-1600"
 									/>
 									<Button
-										aria-label="削除"
+										aria-label={`${i + 1}番目の遺物効果を削除する`}
 										type="button"
 										variant="negative"
 										onPress={() => {

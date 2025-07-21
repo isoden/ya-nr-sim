@@ -10,5 +10,9 @@ const QuerySchema = z.object({
 })
 
 export const parseQuerySchema = (search: string) => {
-  return QuerySchema.parse(parse(search))
+  try {
+    return QuerySchema.parse(parse(search))
+  } catch {
+    return undefined
+  }
 }

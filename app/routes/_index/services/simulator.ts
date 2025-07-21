@@ -7,7 +7,7 @@ export type Build = {
   relics: Relic[]
 }
 
-type Result = {
+export type Result = {
   success: true
   data: Build[]
 } | {
@@ -17,6 +17,8 @@ type Result = {
 
 /**
  * 検索パラメーターに合致する器と遺物の組み合わせを検索する
+ * 
+ * TODO: Worker で実行する
  *
  * @param params - 検索パラメーター
  * @param relics - 所持遺物一覧
@@ -24,7 +26,7 @@ type Result = {
 export async function simulate(params: {
   character: string
   effects: { id: number; amount: number }[]
-}, { relics }: { relics: Relic[] }): Promise<Result> {
+}, { relics, volume = 5 }: { relics: Relic[]; volume?: number }): Promise<Result> {
   const baseVariables = new Map<string, Coefficients>()
   const baseConstraints = new Map<string, Constraint>()
 
@@ -75,7 +77,7 @@ export async function simulate(params: {
 
   try {
     const builds = solveRecursively({
-      remaining: 5,
+      remaining: volume,
       variables: baseVariables,
       constraints: baseConstraints,
       vessels,
@@ -136,6 +138,10 @@ function solveRecursively({
       vessels,
       relics,
     })
+  }
+
+  else if (result.status === 'infeasible') {
+    if (builds.length > 0) return builds
   }
 
   throw new Error('No solution found')
@@ -217,6 +223,7 @@ function slotsToVariables(vessel: Vessel): Coefficients {
 
   vessel.slots.forEach(color => {
     // 自由枠のスロットは全ての色を選択できる扱いにする
+    // FIXME: バグがありそう
     if (color === RelicColor.Free) {
       obj[`slot.${RelicColor.Red}`] -= 1
       obj[`slot.${RelicColor.Blue}`] -= 1
