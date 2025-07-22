@@ -20,6 +20,14 @@ export type Result = {
  * 
  * TODO: Worker で実行する
  *
+ * 整数線形計画法を使用して、以下の制約を満たすビルドを見つける：
+ * - 器は1つだけ選択
+ * - 遺物は最大3つまで装備
+ * - 遺物は器のスロットの色と一致するか、Freeスロットに装備
+ * - 指定された効果を指定された数以上持つ遺物を装備
+ * - 同じ遺物は1つしか装備できない
+ * - 重複するビルドは除外
+ *
  * @param params - 検索パラメーター
  * @param relics - 所持遺物一覧
  */
@@ -27,59 +35,16 @@ export async function simulate(params: {
   character: string
   effects: { id: number; amount: number }[]
 }, { relics, volume = 5 }: { relics: Relic[]; volume?: number }): Promise<Result> {
-  const baseVariables = new Map<string, Coefficients>()
-  const baseConstraints = new Map<string, Constraint>()
-
   const vessels = vesselsByCharacterMap[params.character]!
 
-  for (const vessel of vessels) {
-    baseVariables.set(`vessel.${vessel.name}`, {
-      vessel: 1,
-      ...slotsToVariables(vessel)
-    })
-  }
-
-  for (const relic of relics) {
-    baseVariables.set(`relic.${relic.id}`, {
-      relic: 1,
-      [`relic.${relic.id}`]: 1,
-      [`slot.${relic.color}`]: 1,
-      ...relic.normalizedEffectIds.reduce<Record<string, number>>((acc, effectId) => {
-        acc[`effectId.${effectId}`] ??= 0
-        acc[`effectId.${effectId}`] += 1
-
-        return acc
-      }, {}),
-    })
-
-    // 仕様上の制約
-    // - 同じ遺物は1つしか装備できない
-    baseConstraints.set(`relic.${relic.id}`, lessEq(1))
-  }
-
-  // 検索対象の遺物効果の数を満たす制約
-  for (const effect of params.effects) {
-    baseConstraints.set(`effectId.${effect.id}`, greaterEq(effect.amount))
-  }
-
-  /**
-   * 仕様上の制約
-   * - 一度に選択できる器は1つまで
-   * - 器に装備できる遺物は3つまで
-   * - 器に装備できる遺物は、器のスロットの色と一致する遺物のみ
-   */
-  baseConstraints.set('vessel', equalTo(1))
-  baseConstraints.set('relic', lessEq(3))
-  baseConstraints.set(`slot.${RelicColor.Red}`, lessEq(0))
-  baseConstraints.set(`slot.${RelicColor.Blue}`, lessEq(0))
-  baseConstraints.set(`slot.${RelicColor.Green}`, lessEq(0))
-  baseConstraints.set(`slot.${RelicColor.Yellow}`, lessEq(0))
-
   try {
+    const variables = createVariables(vessels, relics)
+    const constraints = createConstraints(vessels, relics, params.effects)
     const builds = solveRecursively({
       remaining: volume,
-      variables: baseVariables,
-      constraints: baseConstraints,
+      effects: params.effects,
+      variables,
+      constraints,
       vessels,
       relics,
     })
@@ -97,14 +62,12 @@ export async function simulate(params: {
 }
 
 /**
- * solverを再帰的に呼び出して、検索パラメーターに合致する器と遺物の組み合わせを検索する
- *
- * @param builds - 既に見つかったビルドの配列
- * @param remaining - 残りの検索回数
- * @param variables - 制約ソルバー用の変数
- * @param constraints - 制約ソルバー用の制約
- * @param vessels - 器一覧
- * @param relics - 所持遺物一覧
+ * solverを再帰的に呼び出す 
+ * 各再帰呼び出しで：
+ * 1. 現在の制約で最適解を見つける
+ * 2. 見つかったビルドを結果に追加
+ * 3. 重複排除の制約を追加して再帰呼び出し
+ * 4. 解が見つからなくなるまで(or remainingが0になるまで)繰り返す
  */
 function solveRecursively({
   builds = [],
@@ -113,6 +76,7 @@ function solveRecursively({
   constraints,
   vessels,
   relics,
+  effects,
 }: {
   builds?: Build[]
   remaining: number
@@ -120,6 +84,7 @@ function solveRecursively({
   constraints: Map<string, Constraint>
   vessels: Vessel[]
   relics: Relic[]
+  effects: { id: number; amount: number }[]
 }): Build[] {
   if (remaining === 0) return builds
 
@@ -127,6 +92,9 @@ function solveRecursively({
 
   if (result.status === 'optimal') {
     const build = createBuild(result.variables, vessels, relics)
+
+    // 重複排除の制約を追加（remainingをビルドIDとして使用）
+    // 既存の変数と制約に新しい制約を追加
     const updatedVariables = createExclusionVariables(variables, build.relics, remaining)
     const updatedConstraints = createExclusionConstraints(constraints, build.relics, remaining)
 
@@ -137,6 +105,7 @@ function solveRecursively({
       constraints: updatedConstraints,
       vessels,
       relics,
+      effects,
     })
   }
 
@@ -146,48 +115,201 @@ function solveRecursively({
 
   throw new Error('No solution found')
 }
+
+/**
+ * 変数を作成する
+ *
+ * 整数線形計画の変数を定義：
+ * - 器の変数: どの器を選択するか（0 or 1）
+ * - 遺物の変数: どの遺物を装備するか（0 or 1）
+ *
+ * 各変数は制約を表現する係数を持つ：
+ * - 器の変数: スロット制約の係数（負の値）
+ * - 遺物の変数: スロット制約の係数（正の値）、効果制約の係数
+ */
+function createVariables(vessels: Vessel[], relics: Relic[]): Map<string, Coefficients> {
+  const variables = new Map<string, Coefficients>()
+
+  // 器の変数を作成
+  // 各器について、選択された場合の制約を定義
+  for (const vessel of vessels) {
+    const vesselVars: Record<string, number> = {
+      vessel: 1,  // 器の選択制約用
+    }
+
+    // 各色のスロット数をカウント
+    // Freeスロットは独立した制約として扱う
+    const redSlots = vessel.slots.filter(slot => slot === RelicColor.Red).length
+    const blueSlots = vessel.slots.filter(slot => slot === RelicColor.Blue).length
+    const greenSlots = vessel.slots.filter(slot => slot === RelicColor.Green).length
+    const yellowSlots = vessel.slots.filter(slot => slot === RelicColor.Yellow).length
+    const freeSlots = vessel.slots.filter(slot => slot === RelicColor.Free).length
+
+    // 各色のスロット制約を設定
+    // 器が選択された場合、その色のスロット数分だけ負の係数を設定
+    if (redSlots > 0) {
+      vesselVars[`slot.${RelicColor.Red}`] = -redSlots
+    }
+    if (blueSlots > 0) {
+      vesselVars[`slot.${RelicColor.Blue}`] = -blueSlots
+    }
+    if (greenSlots > 0) {
+      vesselVars[`slot.${RelicColor.Green}`] = -greenSlots
+    }
+    if (yellowSlots > 0) {
+      vesselVars[`slot.${RelicColor.Yellow}`] = -yellowSlots
+    }
+
+    // Freeスロット制約を設定
+    // Freeスロットは独立した制約として扱い、どの色の遺物でも装備可能
+    if (freeSlots > 0) {
+      vesselVars[`freeSlot.${vessel.name}`] = -freeSlots
+    }
+
+    variables.set(`vessel.${vessel.name}`, vesselVars)
+  }
+
+  // 遺物の変数を作成
+  // 各遺物について、装備された場合の制約を定義
+  for (const relic of relics) {
+    const relicVars: Record<string, number> = {
+      relic: 1,  // 遺物の選択制約用
+      [`relic.${relic.id}`]: 1,  // 同じ遺物の重複防止用
+    }
+
+    // 色スロット制約（該当する色のスロットがある場合のみ）
+    // 遺物の色と一致するスロットがある器が選択された場合のみ装備可能
+    const hasMatchingSlot = vessels.some(vessel =>
+      vessel.slots.includes(relic.color)
+    )
+    if (hasMatchingSlot) {
+      relicVars[`slot.${relic.color}`] = 1
+    }
+
+    // Freeスロット制約（色スロットがない場合のみ）
+    // 遺物の色と一致するスロットがない場合、Freeスロットに装備可能
+    if (!hasMatchingSlot) {
+      for (const vessel of vessels) {
+        const freeSlotCount = vessel.slots.filter(slot => slot === RelicColor.Free).length
+        if (freeSlotCount > 0) {
+          relicVars[`freeSlot.${vessel.name}`] = 1
+        }
+      }
+    }
+
+    // 効果制約
+    // 遺物が持つ効果を制約に反映
+    for (const effectId of relic.normalizedEffectIds) {
+      // 遺物に同じ効果が複数設定されている場合もあるため、 0 初期化してから加算する
+      relicVars[`effect.${effectId}`] ??= 0
+      relicVars[`effect.${effectId}`] += 1
+    }
+
+    variables.set(`relic.${relic.id}`, relicVars)
+  }
+
+  return variables
+}
+
+/**
+ * 制約を作成する
+ *
+ * 整数線形計画の制約を定義：
+ * - 器の選択制約: 1つの器のみ選択
+ * - 遺物数制約: 最大3つまで装備
+ * - スロット制約: 各色のスロット数制限
+ * - Freeスロット制約: Freeスロット数制限
+ * - 効果制約: 指定された効果を指定された数以上
+ * - 重複防止制約: 同じ遺物は1つしか装備できない
+ */
+function createConstraints(vessels: Vessel[], relics: Relic[], effects: { id: number; amount: number }[]): Map<string, Constraint> {
+  const constraints = new Map<string, Constraint>()
+
+  // 器の選択制約（1つの器のみ選択）
+  constraints.set('vessel', equalTo(1))
+
+  // 遺物数制約（最大3つまで）
+  constraints.set('relic', lessEq(3))
+
+  // 各色のスロット制約
+  // 各色の遺物数 ≤ その色のスロット数
+  constraints.set(`slot.${RelicColor.Red}`, lessEq(0))
+  constraints.set(`slot.${RelicColor.Blue}`, lessEq(0))
+  constraints.set(`slot.${RelicColor.Green}`, lessEq(0))
+  constraints.set(`slot.${RelicColor.Yellow}`, lessEq(0))
+
+  // Freeスロット制約
+  // Freeスロットに装備された遺物数 ≤ Freeスロット数
+  for (const vessel of vessels) {
+    const freeSlotCount = vessel.slots.filter(slot => slot === RelicColor.Free).length
+    if (freeSlotCount > 0) {
+      constraints.set(`freeSlot.${vessel.name}`, lessEq(0))
+    }
+  }
+
+  // 効果制約（指定された数以上）
+  // 各効果について、その効果を持つ遺物の合計 ≥ 指定された数
+  for (const effect of effects) {
+    constraints.set(`effect.${effect.id}`, greaterEq(effect.amount))
+  }
+
+  // 同じ遺物は1つしか装備できない
+  for (const relic of relics) {
+    constraints.set(`relic.${relic.id}`, lessEq(1))
+  }
+
+  return constraints
+}
+
 /**
  * solverの結果の変数を実際のデータにマッピングしてビルドを作成する
  *
- * @param variables - solveの結果の変数
- * @param vessels - 器
- * @param relics - 所持遺物
+ * solverが返す変数の値（0 or 1）から、実際の器と遺物の組み合わせを作成
  */
 function createBuild(variables: [string, number][], vessels: Vessel[], relics: Relic[]): Build {
-  const solveData: Build = { vessel: null!, relics: [] }
+  const build: Build = { vessel: null!, relics: [] }
 
-  for (const [key] of variables) {
+  for (const [key, value] of variables) {
+    if (value === 0) continue
+
     const [type, id] = key.split('.')
 
     switch (type) {
       case 'vessel':
-        solveData.vessel = vessels.find(vessel => vessel.name === id)!
+        if (value === 1) {
+          build.vessel = vessels.find(vessel => vessel.name === id)!
+        }
         break
       case 'relic':
-        solveData.relics.push(relics.find(relic => relic.id === id)!)
+        if (value === 1) {
+          build.relics.push(relics.find(relic => relic.id === id)!)
+        }
         break
-      default:
-        throw new Error(`Unknown variable: ${key}`)
     }
   }
 
-  return solveData
+  return build
 }
 
 /**
  * 現在のビルドに含まれる遺物を除外するための変数を作成する
  *
- * @param variables - 変数
- * @param relics - 遺物
- * @param buildId - ビルドID(実際には検索のインデックスが渡される)
+ * 重複排除のため、既に選択された遺物の組み合わせを除外する制約を追加
+ *
+ * @param variables - 既存の変数Map
+ * @param relics - 選択された遺物
+ * @param buildId - ビルドID（重複排除の識別子）
  */
-function createExclusionVariables(variables: Map<string, Coefficients>, relics: Relic[], buildId: number) {
+function createExclusionVariables(variables: Map<string, Coefficients>, relics: Relic[], buildId: number): Map<string, Coefficients> {
   const nextVariables = new Map(variables)
+
+  // 選択された遺物にbuildIdを追加
+  // この遺物が選択された場合、buildId制約にカウントされる
   for (const relic of relics) {
-    const relicVariables = nextVariables.get(`relic.${relic.id}`)!
+    const relicVariable = nextVariables.get(`relic.${relic.id}`)!
 
     nextVariables.set(`relic.${relic.id}`, {
-      ...relicVariables,
+      ...relicVariable,
       [`buildId.${buildId}`]: 1,
     })
   }
@@ -198,44 +320,18 @@ function createExclusionVariables(variables: Map<string, Coefficients>, relics: 
 /**
  * 現在のビルドに含まれる遺物を除外するための制約を作成する
  *
- * @param constraints - 制約
- * @param relics - 遺物
- * @param buildId - ビルドID(実際には検索のインデックスが渡される)
- */
-function createExclusionConstraints(constraints: Map<string, Constraint>, relics: Relic[], buildId: number) {
-  const nextConstraints = new Map(constraints)
-  nextConstraints.set(`buildId.${buildId}`, lessEq(relics.length - 1))
-  return nextConstraints
-}
-
-/**
- * 器のスロットを変数用のオブジェクトに変換する
+ * 重複排除のため、既に選択された遺物の組み合わせ全体を除外する制約を追加
  *
- * @param vessel - 器
+ * @param constraints - 既存の制約Map
+ * @param relics - 選択された遺物
+ * @param buildId - ビルドID（重複排除の識別子）
  */
-function slotsToVariables(vessel: Vessel): Coefficients {
-  const obj = {
-    [`slot.${RelicColor.Red}`]: 0,
-    [`slot.${RelicColor.Blue}`]: 0,
-    [`slot.${RelicColor.Green}`]: 0,
-    [`slot.${RelicColor.Yellow}`]: 0,
-  }
+function createExclusionConstraints(constraints: Map<string, Constraint>, relics: Relic[], buildId: number): Map<string, Constraint> {
+  const nextConstraints = new Map(constraints)
 
-  vessel.slots.forEach(color => {
-    // 自由枠のスロットは全ての色を選択できる扱いにする
-    // FIXME: バグがありそう
-    if (color === RelicColor.Free) {
-      obj[`slot.${RelicColor.Red}`] -= 1
-      obj[`slot.${RelicColor.Blue}`] -= 1
-      obj[`slot.${RelicColor.Green}`] -= 1
-      obj[`slot.${RelicColor.Yellow}`] -= 1
-    }
+  // このビルドで使用した遺物の組み合わせを除外
+  // buildId制約の合計 ≤ 遺物数 - 1 により、全ての遺物が同時に選択されることを防ぐ
+  nextConstraints.set(`buildId.${buildId}`, lessEq(relics.length - 1))
 
-    // それ以外のスロットはその色の遺物のみ選択できる
-    else {
-      obj[`slot.${color}`] -= 1
-    }
-  })
-
-  return obj
+  return nextConstraints
 }
