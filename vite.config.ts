@@ -16,5 +16,10 @@ export default defineConfig({
 	// https://github.com/adobe/react-spectrum/discussions/8189#discussioncomment-13059244
 	define: {
 		'process.env': {},
-	}
+	},
+	test: {
+		environment: 'happy-dom',
+		setupFiles: ['./setupTests.ts'],
+		include: ['app/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+	},
 })
