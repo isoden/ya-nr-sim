@@ -1,10 +1,11 @@
 import type { Route } from './+types/route'
 import { BuildList } from './components/BuildList'
 import { SearchForm } from './components/SearchForm'
-import { simulate } from './services/simulator'
+import { simulate, type RequiredEffects } from './services/simulator'
 import { parseQuerySchema } from './schema/QuerySchema'
 import { Relic } from '~/data/relics'
 import { ImportDialog } from './components/ImportDialog'
+import { vesselsByCharacterMap } from '~/data/vessels'
 
 export function meta({}: Route.MetaArgs) {
 	return [{ title: 'YA-NR SIM' }]
@@ -19,7 +20,18 @@ export const clientLoader = async ({ request }: Route.ClientLoaderArgs) => {
 
 	if (!params) return { params: undefined, result: undefined, relicsCount: relics.length }
 
-	const result = await simulate(params, { relics })
+	const vessels = vesselsByCharacterMap[params.character]!
+	const requiredEffects = params.effects.reduce<RequiredEffects>((acc, effect) => {
+		acc[effect.id] = effect.amount
+		return acc
+	}, {})
+	const result = await simulate({
+		vessels,
+		relics,
+		requiredEffects,
+	})
+
+	console.log({ result })
 
 	return { params, result, relicsCount: relics.length }
 }

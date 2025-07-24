@@ -1,6 +1,6 @@
 import { equalTo, greaterEq, lessEq, solve, type Coefficients, type Constraint } from 'yalps'
 import { RelicColor, type Relic } from '~/data/relics'
-import { vesselsByCharacterMap, type Vessel } from '~/data/vessels'
+import { type Vessel } from '~/data/vessels'
 
 export type Build = {
   vessel: Vessel
@@ -14,6 +14,8 @@ export type Result = {
   success: false
   error: Error
 }
+
+export type RequiredEffects = Record<number, number>;
 
 /**
  * 検索パラメーターに合致する器と遺物の組み合わせを検索する
@@ -31,18 +33,23 @@ export type Result = {
  * @param params - 検索パラメーター
  * @param relics - 所持遺物一覧
  */
-export async function simulate(params: {
-  character: string
-  effects: { id: number; amount: number }[]
-}, { relics, volume = 5 }: { relics: Relic[]; volume?: number }): Promise<Result> {
-  const vessels = vesselsByCharacterMap[params.character]!
+export async function simulate({
+  vessels,
+  relics,
+  requiredEffects,
+  volume = 5
+}: {
+  vessels: Vessel[];
+  relics: Relic[];
+  requiredEffects: RequiredEffects;
+  volume?: number
+}): Promise<Result> {
 
   try {
     const variables = createVariables(vessels, relics)
-    const constraints = createConstraints(vessels, relics, params.effects)
+    const constraints = createConstraints(vessels, relics, requiredEffects)
     const builds = solveRecursively({
       remaining: volume,
-      effects: params.effects,
       variables,
       constraints,
       vessels,
@@ -76,7 +83,6 @@ function solveRecursively({
   constraints,
   vessels,
   relics,
-  effects,
 }: {
   builds?: Build[]
   remaining: number
@@ -84,7 +90,6 @@ function solveRecursively({
   constraints: Map<string, Constraint>
   vessels: Vessel[]
   relics: Relic[]
-  effects: { id: number; amount: number }[]
 }): Build[] {
   if (remaining === 0) return builds
 
@@ -105,7 +110,6 @@ function solveRecursively({
       constraints: updatedConstraints,
       vessels,
       relics,
-      effects,
     })
   }
 
@@ -222,7 +226,7 @@ function createVariables(vessels: Vessel[], relics: Relic[]): Map<string, Coeffi
  * - 効果制約: 指定された効果を指定された数以上
  * - 重複防止制約: 同じ遺物は1つしか装備できない
  */
-function createConstraints(vessels: Vessel[], relics: Relic[], effects: { id: number; amount: number }[]): Map<string, Constraint> {
+function createConstraints(vessels: Vessel[], relics: Relic[], requiredEffects: RequiredEffects): Map<string, Constraint> {
   const constraints = new Map<string, Constraint>()
 
   // 器の選択制約（1つの器のみ選択）
@@ -249,8 +253,8 @@ function createConstraints(vessels: Vessel[], relics: Relic[], effects: { id: nu
 
   // 効果制約（指定された数以上）
   // 各効果について、その効果を持つ遺物の合計 ≥ 指定された数
-  for (const effect of effects) {
-    constraints.set(`effect.${effect.id}`, greaterEq(effect.amount))
+  for (const [effectId, count] of Object.entries(requiredEffects)) {
+    constraints.set(`effect.${effectId}`, greaterEq(count))
   }
 
   // 同じ遺物は1つしか装備できない
