@@ -72,7 +72,7 @@ function Success({ builds }: { builds: Build[] }) {
 								{relic.normalizedEffectIds.map((effectId, i) => {
 									return (
 										<li key={`${effectId}.${i}`} className="mt-1">
-											{relicEffectMap[effectId]}
+											{relicEffectMap[effectId].name}
 										</li>
 									)
 								})}

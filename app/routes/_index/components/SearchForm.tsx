@@ -41,7 +41,7 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 										aria-label={i === 0 ? undefined : '遺物効果'}
 										selectedKey={item.id}
 										onSelectionChange={(id) => {
-											setListState(listState.with(i, { ...item, id: id as number | null }))
+											setListState(listState.with(i, { ...item, id: id as number | null, amount: 1 }))
 										}}
 										formValue="key"
 										defaultItems={effectItems}
@@ -59,6 +59,7 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 										}}
 										minValue={1}
 										maxValue={3}
+										isDisabled={!relicEffectMap[item.id!]?.stackable}
 										width="size-1600"
 									/>
 									<Button
@@ -98,7 +99,7 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 	)
 }
 
-const effectItems = Object.entries(relicEffectMap).map(([id, name]) => ({
+const effectItems = Object.entries(relicEffectMap).map(([id, { name }]) => ({
 	id: Number(id),
 	name,
 }))
