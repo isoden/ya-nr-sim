@@ -7,8 +7,7 @@ describe("マッチするパターン", () => {
 	test('マッチするパターン', async () => {
 		const vessels = vesselsByCharacterMap['revenant']
 		const relics = [
-			mockRelic({ id: '1', color: RelicColor.Red, effects: [7082600] }),
-			mockRelic({ id: '2', color: RelicColor.Blue, effects: [7126000, 7126001, 7126002] }),
+			mockRelic({ color: RelicColor.Red, effects: [7082600] }),
 		]
 
 		const result = await simulate({
@@ -16,18 +15,101 @@ describe("マッチするパターン", () => {
 			relics,
 			requiredEffects: {
 				[7082600]: 1,
-				[7126000]: 3,
 			},
 		})
 
+		// assert: マッチするパターン
 		expect(result).toEqual({
 			success: true,
 			data: [
 				{
-					vessel: vessels.find(v => v.name.includes("復讐者の高杯")),
-					relics: [relics[0], relics[1]]
+					vessel: vessels.find(v => v.name.includes("復讐者の盃")),
+					relics: [relics[0]]
 				},
 			]
+		})
+	})
+
+	describe("ビルドの遺物の並び順", () => {
+		test('遺物を献器のスロットの色順に並べ替える', async () => {
+			const vessels = vesselsByCharacterMap['ironeye']
+				// 赤青黄の順の献器
+				.filter(v => v.name.includes("鉄の目の盃"))
+			const blue = mockRelic({ color: RelicColor.Blue, effects: [7126000] })
+			const yellow = mockRelic({ color: RelicColor.Yellow, effects: [7126000] })
+			const red = mockRelic({ color: RelicColor.Red, effects: [7126000] })
+			const relics = [blue, yellow, red]
+
+			const result = await simulate({
+				vessels,
+				relics,
+				requiredEffects: { [7126000]: 3 },
+			})
+
+			// assert: 献器の色スロットの順番に並べ替える
+			expect(result).toEqual({
+				success: true,
+				data: [
+					{
+						vessel: vessels[0],
+						relics: [red, blue, yellow]
+					},
+				]
+			})
+		})
+
+		test('自由枠は最後に並べ替える', async () => {
+			const vessels = vesselsByCharacterMap['ironeye']
+				// 赤緑白の順の献器
+				.filter(v => v.name.includes("鉄の目の高杯"))
+			const green = mockRelic({ color: RelicColor.Green, effects: [7126000] })
+			const yellow = mockRelic({ color: RelicColor.Yellow, effects: [7126000] })
+			const red = mockRelic({ color: RelicColor.Red, effects: [7126000] })
+			const relics = [green, yellow, red]
+
+			const result = await simulate({
+				vessels,
+				relics,
+				requiredEffects: { [7126000]: 3 },
+			})
+
+			// assert: 自由枠は最後に並べ替える
+			expect(result).toEqual({
+				success: true,
+				data: [
+					{
+						vessel: vessels[0],
+						relics: [red, green, yellow]
+					},
+				]
+			})
+		})
+
+		test('同じ色の遺物はID順に並べ替える', async () => {
+			const vessels = vesselsByCharacterMap['ironeye']
+				// 赤青黄の順の献器
+				.filter(v => v.name.includes("黄金樹の聖杯"))
+			const yellow1 = mockRelic({ id: '1', color: RelicColor.Yellow, effects: [7126000] })
+			const yellow2 = mockRelic({ id: '2', color: RelicColor.Yellow, effects: [7126000] })
+			const yellow3 = mockRelic({ id: '3', color: RelicColor.Yellow, effects: [7126000] })
+			const relics = [yellow3, yellow1, yellow2]
+
+			const result = await simulate({
+				vessels,
+				relics,
+				requiredEffects: { [7126000]: 3 },
+			})
+
+			// assert: 遺物をID順に並べ替える
+			expect(result).toEqual({
+				success: true,
+				data: [
+					{
+						vessel: vessels[0],
+						relics: [yellow1, yellow2, yellow3]
+					},
+				]
+			})
 		})
 	})
 })
@@ -57,7 +139,17 @@ describe("マッチしないパターン", () => {
 	}
 })
 
-function mockRelic({ id = '1', color, effects, itemId = 1 }: { id?: string, color: RelicColor, effects: number[], itemId?: number }) {
+function mockRelic({
+	id = Math.random().toString(36).substring(2, 15),
+	color,
+	effects,
+	itemId = 1,
+}: {
+	id?: string
+	color: RelicColor
+	effects: number[]
+	itemId?: number
+}) {
 	return Relic.new({
 		id: `relic-${id}`,
 		color,

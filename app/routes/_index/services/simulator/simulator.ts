@@ -149,5 +149,22 @@ function createBuild(variables: [string, number][], vessels: Vessel[], relics: R
 		}
 	}
 
+	// 遺物を色スロットの順番に並べ替える
+	build.relics.sort((a, b) => {
+		const aIndex = build.vessel.slots.indexOf(a.color)
+		const bIndex = build.vessel.slots.indexOf(b.color)
+
+		// 色スロットがない場合はFreeスロットの順番に並べ替える
+		if (aIndex === -1) return 1
+		if (bIndex === -1) return -1
+
+		// 色スロットの順番に並べ替える
+		const diff = aIndex - bIndex
+		if (diff !== 0) return diff
+
+		// 色スロットが同じ場合は遺物のID順に並べ替える
+		return a.id.localeCompare(b.id)
+	})
+
 	return build
 }
