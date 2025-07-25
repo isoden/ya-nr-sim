@@ -1,11 +1,12 @@
 import type { Route } from './+types/route'
+import { Relic } from '~/data/relics'
+import { vesselsByCharacterMap } from '~/data/vessels'
+import { ImportDialog } from './components/ImportDialog'
 import { BuildList } from './components/BuildList'
 import { SearchForm } from './components/SearchForm'
-import { simulate, type RequiredEffects } from './services/simulator'
+import { parseStringifiedRelicsSchema } from './schema/StringifiedRelicsSchema'
 import { parseQuerySchema } from './schema/QuerySchema'
-import { Relic } from '~/data/relics'
-import { ImportDialog } from './components/ImportDialog'
-import { vesselsByCharacterMap } from '~/data/vessels'
+import { simulate, type RequiredEffects } from './services/simulator'
 
 export function meta({}: Route.MetaArgs) {
 	return [{ title: 'YA-NR SIM' }]
@@ -15,12 +16,11 @@ export const clientLoader = async ({ request }: Route.ClientLoaderArgs) => {
 	const url = new URL(request.url)
 	const params = parseQuerySchema(url.search.slice(1))
 
-	// FIXME: 型安全にする
-	const relics = (JSON.parse(localStorage.getItem('relics') ?? '[]') as any[]).map((item: any) => Relic.new(item))
+	const relics = parseStringifiedRelicsSchema(localStorage.getItem('relics')).map((item) => Relic.new(item))
 
 	if (!params) return { params: undefined, result: undefined, relicsCount: relics.length }
 
-	const vessels = vesselsByCharacterMap[params.character]!
+	const vessels = vesselsByCharacterMap[params.charId]
 	const requiredEffects = params.effects.reduce<RequiredEffects>((acc, effect) => {
 		acc[effect.id] = effect.amount
 		return acc

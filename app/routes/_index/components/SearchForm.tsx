@@ -2,11 +2,12 @@ import { Button, ComboBox, Item, NumberField, Picker, Text } from '@adobe/react-
 import DeleteIcon from '@spectrum-icons/workflow/Delete'
 import { useState } from 'react'
 import { Form } from 'react-router'
+import { characterMap } from '~/data/characters'
 import { relicEffectMap } from '~/data/relics'
 
 type Props = {
 	defaultValues?: {
-		character: string
+		charId: string
 		effects: { id: number; amount: number }[]
 	}
 }
@@ -24,11 +25,11 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 				<div className="flex flex-col gap-4 mt-4">
 					<Picker
 						label="キャラクター(献器)"
-						name="character"
-						defaultSelectedKey={defaultValues?.character ?? characterItems[0].name}
+						name="charId"
+						defaultSelectedKey={defaultValues?.charId ?? characterItems[0].name}
 						items={characterItems}
 					>
-						{(item) => <Item key={item.name}>{item.name}</Item>}
+						{(item) => <Item>{item.name}</Item>}
 					</Picker>
 
 					<div className="grid grid-cols-[1fr_repeat(2,min-content)] gap-4">
@@ -104,13 +105,7 @@ const effectItems = Object.entries(relicEffectMap).map(([id, { name }]) => ({
 	name,
 }))
 
-const characterItems = [
-	{ name: '追跡者' },
-	{ name: '守護者' },
-	{ name: '鉄の目' },
-	{ name: 'レディ' },
-	{ name: '無頼漢' },
-	{ name: '復讐者' },
-	{ name: '隠者' },
-	{ name: '執行者' },
-]
+const characterItems = Object.entries(characterMap).map(([id, { name }]) => ({
+	id,
+	name,
+}))

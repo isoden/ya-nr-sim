@@ -1,20 +1,32 @@
-export const enum SlotColor {
-	Red = 'Red',
-	Green = 'Green',
-	Blue = 'Blue',
-	Yellow = 'Yellow',
-	Free = 'Free',
-}
+import { characterMap } from './characters'
+import { RelicColor } from './relics'
+
+export type SlotColor = (typeof SlotColor)[keyof typeof SlotColor]
+export const SlotColor = {
+	...RelicColor,
+	Free: 'Free',
+} as const satisfies Record<string, string>
 
 /**
  * 献器の定義
  */
 export class Vessel {
+	/** 献器のID */
+	private static readonly idPrefix = 'vessel-'
+	private static idCounter = 0
+
+	/** 献器のIDを生成 */
+	private static generateId(): string {
+		return `${Vessel.idPrefix}${Vessel.idCounter++}`
+	}
+
 	static new(options: { name: string; slots: SlotColor[] }): Vessel {
-		return new Vessel(options.name, options.slots)
+		return new Vessel(this.generateId(), options.name, options.slots)
 	}
 
 	private constructor(
+		public id: string,
+
 		/** 献器の名前 */
 		public name: string,
 
@@ -231,13 +243,13 @@ const ExecutorVessels = [
 	}),
 ]
 
-export const vesselsByCharacterMap: Record<string, Vessel[]> = {
-	['追跡者']: [...WylderVessels, ...sharedVessels],
-	['守護者']: [...GuardianVessels, ...sharedVessels],
-	['鉄の目']: [...IroneyeVessels, ...sharedVessels],
-	['レディ']: [...DuchessVessels, ...sharedVessels],
-	['無頼漢']: [...RaiderVessels, ...sharedVessels],
-	['復讐者']: [...RevenantVessels, ...sharedVessels],
-	['隠者']: [...RecluseVessels, ...sharedVessels],
-	['執行者']: [...ExecutorVessels, ...sharedVessels],
+export const vesselsByCharacterMap = {
+	[characterMap.wylder.id]: [...WylderVessels, ...sharedVessels],
+	[characterMap.guardian.id]: [...GuardianVessels, ...sharedVessels],
+	[characterMap.ironeye.id]: [...IroneyeVessels, ...sharedVessels],
+	[characterMap.duchess.id]: [...DuchessVessels, ...sharedVessels],
+	[characterMap.raider.id]: [...RaiderVessels, ...sharedVessels],
+	[characterMap.revenant.id]: [...RevenantVessels, ...sharedVessels],
+	[characterMap.recluse.id]: [...RecluseVessels, ...sharedVessels],
+	[characterMap.executor.id]: [...ExecutorVessels, ...sharedVessels],
 }

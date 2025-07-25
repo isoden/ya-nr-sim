@@ -166,10 +166,10 @@ function createVariables(vessels: Vessel[], relics: Relic[]): Map<string, Coeffi
 		// Freeスロット制約を設定
 		// Freeスロットは独立した制約として扱い、どの色の遺物でも装備可能
 		if (freeSlots > 0) {
-			vesselVars[`freeSlot.${vessel.name}`] = -freeSlots
+			vesselVars[`freeSlot.${vessel.id}`] = -freeSlots
 		}
 
-		variables.set(`vessel.${vessel.name}`, vesselVars)
+		variables.set(`vessel.${vessel.id}`, vesselVars)
 	}
 
 	// 遺物の変数を作成
@@ -193,7 +193,7 @@ function createVariables(vessels: Vessel[], relics: Relic[]): Map<string, Coeffi
 			for (const vessel of vessels) {
 				const freeSlotCount = vessel.slots.filter((slot) => slot === SlotColor.Free).length
 				if (freeSlotCount > 0) {
-					relicVars[`freeSlot.${vessel.name}`] = 1
+					relicVars[`freeSlot.${vessel.id}`] = 1
 				}
 			}
 		}
@@ -248,7 +248,7 @@ function createConstraints(
 	for (const vessel of vessels) {
 		const freeSlotCount = vessel.slots.filter((slot) => slot === SlotColor.Free).length
 		if (freeSlotCount > 0) {
-			constraints.set(`freeSlot.${vessel.name}`, lessEq(0))
+			constraints.set(`freeSlot.${vessel.id}`, lessEq(0))
 		}
 	}
 
@@ -282,7 +282,7 @@ function createBuild(variables: [string, number][], vessels: Vessel[], relics: R
 		switch (type) {
 			case 'vessel':
 				if (value === 1) {
-					build.vessel = vessels.find((vessel) => vessel.name === id)!
+					build.vessel = vessels.find((vessel) => vessel.id === id)!
 				}
 				break
 			case 'relic':

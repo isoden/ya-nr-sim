@@ -58,12 +58,13 @@ export class Relic {
 	) {}
 }
 
-export const enum RelicColor {
-	Red = 'Red',
-	Blue = 'Blue',
-	Green = 'Green',
-	Yellow = 'Yellow',
-}
+export type RelicColor = (typeof RelicColor)[keyof typeof RelicColor]
+export const RelicColor = {
+	Red: 'Red',
+	Blue: 'Blue',
+	Green: 'Green',
+	Yellow: 'Yellow',
+} as const satisfies Record<string, string>
 
 /**
  * @see https://docs.google.com/spreadsheets/d/1Gz6fqIBNr2BXr45te9ewTolHJr4zZ_Apbqa09gL3VbI/

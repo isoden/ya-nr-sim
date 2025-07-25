@@ -1,5 +1,6 @@
 import React from 'react'
-import { RelicColor, relicEffectMap } from '~/data/relics'
+import { relicEffectMap } from '~/data/relics'
+import { SlotColor } from '~/data/vessels'
 import type { Build, Result } from '../services/simulator'
 
 type Props = {
@@ -95,9 +96,9 @@ function Failure({ children }: { children: React.ReactNode }) {
 }
 
 const bgColorMap = {
-	[RelicColor.Red]: 'bg-red-700',
-	[RelicColor.Blue]: 'bg-blue-700',
-	[RelicColor.Green]: 'bg-green-700',
-	[RelicColor.Yellow]: 'bg-yellow-700',
-	[RelicColor.Free]: 'bg-gray-700',
+	[SlotColor.Red]: 'bg-red-700',
+	[SlotColor.Blue]: 'bg-blue-700',
+	[SlotColor.Green]: 'bg-green-700',
+	[SlotColor.Yellow]: 'bg-yellow-700',
+	[SlotColor.Free]: 'bg-gray-700',
 }
