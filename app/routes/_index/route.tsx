@@ -22,17 +22,14 @@ export const clientLoader = async ({ request }: Route.ClientLoaderArgs) => {
 	const vessels = vesselsByCharacterMap[params.charId]
 	const requiredEffects = Object.fromEntries(params.effects.map((effect) => [effect.id, effect.amount]))
 
-	console.time('simulate')
-	const result = await simulate({
+	const resultPromise = simulate({
 		vessels,
 		relics,
 		requiredEffects,
 		volume: 50,
 	})
-	console.timeEnd('simulate')
-	console.log({ result })
 
-	return { params, result, relicsCount: relics.length }
+	return { params, result: resultPromise, relicsCount: relics.length }
 }
 
 export default function Home({ loaderData: { params, result, relicsCount } }: Route.ComponentProps) {
@@ -43,7 +40,7 @@ export default function Home({ loaderData: { params, result, relicsCount } }: Ro
 				<ImportDialog relicsCount={relicsCount} />
 			</header>
 			<SearchForm defaultValues={params} />
-			<BuildList result={result} />
+			<BuildList resultKey={JSON.stringify(params)} result={result} />
 		</div>
 	)
 }

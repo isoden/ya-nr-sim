@@ -1,11 +1,14 @@
-import React from 'react'
+import React, { Suspense } from 'react'
+import { Await } from 'react-router'
 import { relicEffectMap } from '~/data/relics'
 import { SlotColor } from '~/data/vessels'
-import type { Build, Result } from '../services/simulator/simulator'
+import type { Build, Result } from '../services/simulator/types'
 
 type Props = {
+	resultKey: string
+
 	/** 検索結果 */
-	result: Result | undefined
+	result: Promise<Result> | undefined
 }
 
 /**
@@ -13,19 +16,25 @@ type Props = {
  *
  * @param props - {@link Props}
  */
-export const BuildList: React.FC<Props> = ({ result }) => {
+export const BuildList: React.FC<Props> = ({ resultKey, result }) => {
 	return (
 		<section className="row-span-full bg-zinc-950/20 p-6 border border-gray-400/10 rounded-lg overflow-y-scroll">
 			<h2 className="text-lg font-semibold">検索結果</h2>
 
 			<div className="flex flex-col gap-6 mt-6">
-				{!result ? (
-					<Idle />
-				) : result.success ? (
-					<Success builds={result.data} />
-				) : (
-					<Failure>{result.error.message}</Failure>
-				)}
+				<Suspense key={resultKey} fallback={<p>検索中...</p>}>
+					<Await resolve={result} errorElement={<Failure>検索中にエラーが発生しました</Failure>}>
+						{(result) =>
+							!result ? (
+								<Idle />
+							) : result.success ? (
+								<Success builds={result.data} />
+							) : (
+								<Failure>{result.error.message}</Failure>
+							)
+						}
+					</Await>
+				</Suspense>
 			</div>
 		</section>
 	)

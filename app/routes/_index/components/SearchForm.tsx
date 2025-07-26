@@ -19,7 +19,7 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 
 	return (
 		<section className="overflow-y-auto row-start-2 col-start-1">
-			<Form method="GET">
+			<Form method="GET" replace={true}>
 				<h2 className="text-lg font-semibold">条件選択</h2>
 
 				<div className="flex flex-col gap-4 mt-4">
