@@ -1,12 +1,11 @@
 import type { Route } from './+types/route'
-import { Relic } from '~/data/relics'
 import { vesselsByCharacterMap } from '~/data/vessels'
 import { ImportDialog } from './components/ImportDialog'
 import { BuildList } from './components/BuildList'
 import { SearchForm } from './components/SearchForm'
 import { parseStringifiedRelicsSchema } from './schema/StringifiedRelicsSchema'
 import { parseQuerySchema } from './schema/QuerySchema'
-import { simulate, type RequiredEffects } from './services/simulator'
+import { simulate } from './services/simulator'
 
 export function meta({}: Route.MetaArgs) {
 	return [{ title: 'YA-NR SIM' }]
@@ -16,21 +15,21 @@ export const clientLoader = async ({ request }: Route.ClientLoaderArgs) => {
 	const url = new URL(request.url)
 	const params = parseQuerySchema(url.search.slice(1))
 
-	const relics = parseStringifiedRelicsSchema(localStorage.getItem('relics')).map((item) => Relic.new(item))
+	const relics = parseStringifiedRelicsSchema(localStorage.getItem('relics'))
 
 	if (!params) return { params: undefined, result: undefined, relicsCount: relics.length }
 
 	const vessels = vesselsByCharacterMap[params.charId]
-	const requiredEffects = params.effects.reduce<RequiredEffects>((acc, effect) => {
-		acc[effect.id] = effect.amount
-		return acc
-	}, {})
+	const requiredEffects = Object.fromEntries(params.effects.map((effect) => [effect.id, effect.amount]))
+
+	console.time('simulate')
 	const result = await simulate({
 		vessels,
 		relics,
 		requiredEffects,
+		volume: 50,
 	})
-
+	console.timeEnd('simulate')
 	console.log({ result })
 
 	return { params, result, relicsCount: relics.length }

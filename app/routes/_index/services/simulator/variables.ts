@@ -1,5 +1,5 @@
 import type { Coefficients } from "yalps"
-import { type Relic, RelicColor } from "~/data/relics"
+import { type Relic, type RelicJSON, RelicColor } from "~/data/relics"
 import { type Vessel, SlotColor } from "~/data/vessels"
 
 /**
@@ -112,19 +112,19 @@ export function createVariables(vessels: Vessel[], relics: Relic[]): Map<string,
  * 重複排除のため、既に選択された遺物の組み合わせを除外する制約を追加
  *
  * @param variables - 既存の変数Map
- * @param relics - 選択された遺物
+ * @param buildRelics - ビルドに選択された遺物
  * @param buildId - ビルドID（重複排除の識別子）
  */
 export function createExclusionVariables(
   variables: Map<string, Coefficients>,
-  relics: Relic[],
+  buildRelics: RelicJSON[],
   buildId: number,
 ): Map<string, Coefficients> {
   const nextVariables = new Map(variables)
 
   // 選択された遺物にbuildIdを追加
   // 色スロット用とFreeスロット用の両方の変数に適用
-  for (const relic of relics) {
+  for (const relic of buildRelics) {
     const colorVar = nextVariables.get(`relic.${relic.id}.color`)
     const freeVar = nextVariables.get(`relic.${relic.id}.free`)
 

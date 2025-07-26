@@ -1,5 +1,5 @@
 import { type Constraint, equalTo, lessEq, greaterEq } from "yalps"
-import { type Relic, RelicColor } from "~/data/relics"
+import { type Relic, type RelicJSON, RelicColor } from "~/data/relics"
 import { type Vessel, SlotColor } from "~/data/vessels"
 import type { RequiredEffects } from "./simulator"
 
@@ -64,19 +64,19 @@ export function createConstraints(
  * 重複排除のため、既に選択された遺物の組み合わせ全体を除外する制約を追加
  *
  * @param constraints - 既存の制約Map
- * @param relics - 選択された遺物
+ * @param buildRelics - ビルドに選択された遺物
  * @param buildId - ビルドID（重複排除の識別子）
  */
 export function createExclusionConstraints(
   constraints: Map<string, Constraint>,
-  relics: Relic[],
+  buildRelics: RelicJSON[],
   buildId: number,
 ): Map<string, Constraint> {
   const nextConstraints = new Map(constraints)
 
   // このビルドで使用した遺物の組み合わせを除外
   // buildId制約の合計 ≤ 遺物数 - 1 により、全ての遺物が同時に選択されることを防ぐ
-  nextConstraints.set(`buildId.${buildId}`, lessEq(relics.length - 1))
+  nextConstraints.set(`buildId.${buildId}`, lessEq(buildRelics.length - 1))
 
   return nextConstraints
 }

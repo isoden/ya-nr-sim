@@ -1,5 +1,5 @@
 import { solve, type Coefficients, type Constraint } from 'yalps'
-import { type Relic } from '~/data/relics'
+import { Relic, type RelicJSON } from '~/data/relics'
 import { type Vessel } from '~/data/vessels'
 import { createExclusionConstraints, createConstraints } from './constraints'
 import { createExclusionVariables, createVariables } from './variables'
@@ -7,7 +7,18 @@ import { createExclusionVariables, createVariables } from './variables'
 
 export type Build = {
 	vessel: Vessel
-	relics: Relic[]
+	relics: RelicJSON[]
+}
+
+export type Args = {
+	/** 所持献器一覧 */
+	vessels: Vessel[]
+	/** 所持遺物一覧 */
+	relics: RelicJSON[]
+	/** 必要効果 */
+	requiredEffects: RequiredEffects
+	/** ビルド数 */
+	volume?: number
 }
 
 export type Result =
@@ -25,8 +36,6 @@ export type RequiredEffects = Record<number, number>
 /**
  * 検索パラメーターに合致する器と遺物の組み合わせを検索する
  *
- * TODO: Worker で実行する
- *
  * 整数線形計画法を使用して、以下の制約を満たすビルドを見つける：
  * - 器は1つだけ選択
  * - 遺物は最大3つまで装備
@@ -38,18 +47,9 @@ export type RequiredEffects = Record<number, number>
  * @param params - 検索パラメーター
  * @param relics - 所持遺物一覧
  */
-export async function simulate({
-	vessels,
-	relics,
-	requiredEffects,
-	volume = 5,
-}: {
-	vessels: Vessel[]
-	relics: Relic[]
-	requiredEffects: RequiredEffects
-	volume?: number
-}): Promise<Result> {
+export async function simulate({ vessels, relics: relicsJSON, requiredEffects, volume = 5 }: Args): Promise<Result> {
 	try {
+		const relics = relicsJSON.map(relic => Relic.new(relic))
 		const variables = createVariables(vessels, relics)
 		const constraints = createConstraints(vessels, relics, requiredEffects)
 		const builds = solveRecursively({

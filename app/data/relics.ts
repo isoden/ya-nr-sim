@@ -1,5 +1,7 @@
+export type RelicJSON = Pick<Relic, 'id' | 'color' | 'effects' | 'itemId'>
+
 export class Relic {
-	static new(options: { id: string; color: RelicColor; effects: number[]; itemId: number }): Relic {
+	static new(options: RelicJSON): Relic {
 		return new Relic(options.id, options.color, options.effects, options.itemId)
 	}
 
@@ -55,7 +57,7 @@ export class Relic {
 
 		/** 遺物のアイテムID */
 		public itemId: number,
-	) {}
+	) { }
 }
 
 export type RelicColor = (typeof RelicColor)[keyof typeof RelicColor]
