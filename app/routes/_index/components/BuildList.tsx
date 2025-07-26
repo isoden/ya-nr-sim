@@ -1,7 +1,7 @@
 import React from 'react'
 import { relicEffectMap } from '~/data/relics'
 import { SlotColor } from '~/data/vessels'
-import type { Build, Result } from '../services/simulator'
+import type { Build, Result } from '../services/simulator/simulator'
 
 type Props = {
 	/** 検索結果 */

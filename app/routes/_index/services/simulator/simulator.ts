@@ -1,37 +1,10 @@
 import { solve, type Coefficients, type Constraint } from 'yalps'
-import { Relic, type RelicJSON } from '~/data/relics'
+import { Relic } from '~/data/relics'
 import { type Vessel } from '~/data/vessels'
 import { createExclusionConstraints, createConstraints } from './constraints'
 import { createExclusionVariables, createVariables } from './variables'
-
-
-export type Build = {
-	vessel: Vessel
-	relics: RelicJSON[]
-}
-
-export type Args = {
-	/** 所持献器一覧 */
-	vessels: Vessel[]
-	/** 所持遺物一覧 */
-	relics: RelicJSON[]
-	/** 必要効果 */
-	requiredEffects: RequiredEffects
-	/** ビルド数 */
-	volume?: number
-}
-
-export type Result =
-	| {
-		success: true
-		data: Build[]
-	}
-	| {
-		success: false
-		error: Error
-	}
-
-export type RequiredEffects = Record<number, number>
+import { createBuild } from './createBuild'
+import type { Args, Result, Build } from './types'
 
 /**
  * 検索パラメーターに合致する器と遺物の組み合わせを検索する
@@ -44,12 +17,14 @@ export type RequiredEffects = Record<number, number>
  * - 同じ遺物は1つしか装備できない
  * - 重複するビルドは除外
  *
- * @param params - 検索パラメーター
- * @param relics - 所持遺物一覧
+ * @param vessels - 器の一覧
+ * @param relics - 所持遺物一覧（JSON形式）
+ * @param requiredEffects - 必要な効果とその数
+ * @param [volume=5] - 検索するビルド数
  */
 export async function simulate({ vessels, relics: relicsJSON, requiredEffects, volume = 5 }: Args): Promise<Result> {
 	try {
-		const relics = relicsJSON.map(relic => Relic.new(relic))
+		const relics = relicsJSON.map((relic) => Relic.new(relic))
 		const variables = createVariables(vessels, relics)
 		const constraints = createConstraints(vessels, relics, requiredEffects)
 		const builds = solveRecursively({
@@ -120,51 +95,4 @@ function solveRecursively({
 	}
 
 	throw new Error('No solution found')
-}
-
-/**
- * solverの結果の変数を実際のデータにマッピングしてビルドを作成する
- *
- * solverが返す変数の値（0 or 1）から、実際の器と遺物の組み合わせを作成
- */
-function createBuild(variables: [string, number][], vessels: Vessel[], relics: Relic[]): Build {
-	const build: Build = { vessel: null!, relics: [] }
-
-	for (const [key, value] of variables) {
-		if (value === 0) continue
-
-		const [type, id] = key.split('.')
-
-		switch (type) {
-			case 'vessel':
-				if (value === 1) {
-					build.vessel = vessels.find((vessel) => vessel.id === id)!
-				}
-				break
-			case 'relic':
-				if (value === 1) {
-					build.relics.push(relics.find((relic) => relic.id === id)!)
-				}
-				break
-		}
-	}
-
-	// 遺物を色スロットの順番に並べ替える
-	build.relics.sort((a, b) => {
-		const aIndex = build.vessel.slots.indexOf(a.color)
-		const bIndex = build.vessel.slots.indexOf(b.color)
-
-		// 色スロットがない場合はFreeスロットの順番に並べ替える
-		if (aIndex === -1) return 1
-		if (bIndex === -1) return -1
-
-		// 色スロットの順番に並べ替える
-		const diff = aIndex - bIndex
-		if (diff !== 0) return diff
-
-		// 色スロットが同じ場合は遺物のID順に並べ替える
-		return a.id.localeCompare(b.id)
-	})
-
-	return build
 }

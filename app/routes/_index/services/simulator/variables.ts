@@ -7,7 +7,9 @@ import { type Vessel, SlotColor } from "~/data/vessels"
  *
  * 整数線形計画の変数を定義：
  * - 器の変数: どの器を選択するか（0 or 1）
- * - 遺物の変数: どの遺物を装備するか（0 or 1）
+ * - 遺物の変数: 色スロット用とFreeスロット用に分けて作成（0 or 1）
+ *   - relic.{id}.color: 色スロットに装備する場合
+ *   - relic.{id}.free: Freeスロットに装備する場合
  *
  * 各変数は制約を表現する係数を持つ：
  * - 器の変数: スロット制約の係数（負の値）
@@ -110,6 +112,7 @@ export function createVariables(vessels: Vessel[], relics: Relic[]): Map<string,
  * 現在のビルドに含まれる遺物を除外するための変数を作成する
  *
  * 重複排除のため、既に選択された遺物の組み合わせを除外する制約を追加
+ * 色スロット用とFreeスロット用の両方の変数に適用される
  *
  * @param variables - 既存の変数Map
  * @param buildRelics - ビルドに選択された遺物

@@ -1,0 +1,88 @@
+import { expect, test } from 'vitest'
+import { Vessel, vesselsByCharacterMap } from '~/data/vessels'
+import { Relic, RelicColor } from '~/data/relics'
+import { createBuild } from './createBuild'
+
+test('ビルドの遺物を器の色順に並べる', () => {
+	// arrange
+	const vessels = vesselsByCharacterMap['revenant']
+	const green = Relic.new({
+		id: 'relic-green',
+		color: RelicColor.Green,
+		effects: [7082600],
+		itemId: 1,
+	})
+	const blue = Relic.new({
+		id: 'relic-blue',
+		color: RelicColor.Blue,
+		effects: [7126000, 7126001, 7126002],
+		itemId: 2,
+	})
+	const relics = [green, blue]
+	const vesselToUse = getVesselByName('復讐者の高杯')
+
+	// act
+	const build = createBuild(
+		[
+			[`vessel.${vesselToUse.id}`, 1],
+			['relic.relic-green.color', 1],
+			['relic.relic-blue.color', 1],
+		],
+		vessels,
+		relics,
+	)
+
+	// assert
+	expect(build).toEqual({
+		vessel: vesselToUse,
+		relics: [blue, green],
+	})
+})
+
+test('色が同じ場合はID順に並べる', async () => {
+	// arrange
+	const vesselToUse = getVesselByName('復讐者の盃')
+	const vessels = [vesselToUse]
+	const red1 = Relic.new({
+		id: 'relic-red-1',
+		color: RelicColor.Red,
+		effects: [7126000],
+		itemId: 1,
+	})
+	const red2 = Relic.new({
+		id: 'relic-red-2',
+		color: RelicColor.Red,
+		effects: [7082600],
+		itemId: 2,
+	})
+	const relics = [red2, red1]
+
+	// act
+	const build = createBuild(
+		[
+			[`vessel.${vesselToUse.id}`, 1],
+			['relic.relic-red-1.color', 1],
+			['relic.relic-red-2.color', 1],
+		],
+		vessels,
+		relics,
+	)
+
+	// assert
+	expect(build).toEqual({
+		vessel: vesselToUse,
+		relics: [red1, red2],
+	})
+})
+
+function getVesselByName(name: string): Vessel {
+	const vessel = Object.values(vesselsByCharacterMap)
+		.flat()
+		.find((vessel) => vessel.name === name)
+
+	if (!vessel) {
+		throw new Error(`Vessel with name "${name}" not found`)
+	}
+
+	return vessel
+}
