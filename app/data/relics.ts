@@ -57,7 +57,7 @@ export class Relic {
 
 		/** 遺物のアイテムID */
 		public itemId: number,
-	) { }
+	) {}
 }
 
 export type RelicColor = (typeof RelicColor)[keyof typeof RelicColor]
@@ -153,6 +153,7 @@ export const relicEffectMap: Record<number, { name: string; stackable: boolean }
 	7011700: { name: '[執行者] アーツ発動中、咆哮でHP回復', stackable: true },
 	7012000: { name: '[守護者] アーツ発動時、周囲の味方HPを徐々に回復', stackable: true },
 	7012200: { name: 'HP低下時、周囲の味方を含めHPをゆっくりと回復', stackable: false },
+	7012300: { name: 'HP低下時、カット率上昇', stackable: true },
 	7020000: { name: '[追跡者] スキル使用時、追加攻撃できる(大剣のみ)', stackable: true },
 	7030000: { name: 'トーテム・ステラの周囲で、強靭度上昇', stackable: true },
 	7030200: { name: '苔薬、干し肉などのアイテム使用でHP回復', stackable: false },
@@ -384,7 +385,6 @@ export const relicEffectMap: Record<number, { name: string; stackable: boolean }
 	7352200: { name: '鞭の攻撃でFP回復', stackable: false },
 	7352300: { name: '特大武器の攻撃でFP回復', stackable: false },
 	7352400: { name: '弓の攻撃でFP回復', stackable: false },
-	8660101: { name: 'HP低下時、カット率上昇', stackable: true },
 }
 
 /**
