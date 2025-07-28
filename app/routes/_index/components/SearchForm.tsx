@@ -8,13 +8,13 @@ import { relicEffectMap } from '~/data/relics'
 type Props = {
 	defaultValues?: {
 		charId: string
-		effects: { id: number; amount: number }[]
+		effects: { id: number; count: number }[]
 	}
 }
 
 export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
-	const [listState, setListState] = useState<{ id: number | null; amount: number }[]>(
-		() => defaultValues?.effects ?? [{ id: null, amount: 1 }],
+	const [listState, setListState] = useState<{ id: number | null; count: number }[]>(
+		() => defaultValues?.effects ?? [{ id: null, count: 1 }],
 	)
 
 	return (
@@ -42,7 +42,7 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 										aria-label={i === 0 ? undefined : '遺物効果'}
 										selectedKey={item.id}
 										onSelectionChange={(id) => {
-											setListState(listState.with(i, { ...item, id: id as number | null, amount: 1 }))
+											setListState(listState.with(i, { ...item, id: id as number | null, count: 1 }))
 										}}
 										formValue="key"
 										defaultItems={effectItems}
@@ -51,12 +51,12 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 										{(item) => <Item>{item.name}</Item>}
 									</ComboBox>
 									<NumberField
-										name={`effects[${i}][amount]`}
+										name={`effects[${i}][count]`}
 										label={i === 0 ? '個数' : undefined}
 										aria-label={i === 0 ? undefined : '個数'}
-										value={item.amount}
+										value={item.count}
 										onChange={(value) => {
-											setListState(listState.with(i, { ...item, amount: value }))
+											setListState(listState.with(i, { ...item, count: value }))
 										}}
 										minValue={1}
 										maxValue={3}
@@ -83,7 +83,7 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 						type="button"
 						variant="primary"
 						onPress={() => {
-							setListState(listState.concat({ id: null, amount: 1 }))
+							setListState(listState.concat({ id: null, count: 1 }))
 						}}
 					>
 						<Text>遺物効果を追加</Text>

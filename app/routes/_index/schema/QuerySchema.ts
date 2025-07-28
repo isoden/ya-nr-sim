@@ -17,7 +17,7 @@ const QuerySchema = v.object({
 		v.array(
 			v.object({
 				id: v.pipe(v.string(), v.transform(Number), v.number(), v.integer()),
-				amount: v.pipe(v.string(), v.transform(Number), v.number(), v.integer(), v.minValue(1), v.maxValue(3)),
+				count: v.pipe(v.string(), v.transform(Number), v.number(), v.integer(), v.minValue(1), v.maxValue(3)),
 			}),
 		),
 		v.transform((effects) => effects.filter((effect) => effect.id !== 0)),
