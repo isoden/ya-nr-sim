@@ -4,6 +4,11 @@ import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration }
 import { defaultTheme, Provider } from '@adobe/react-spectrum'
 import type { Route } from './+types/root'
 
+export function HydrateFallback() {
+	// TODO: refactor
+	return <p className="grid place-content-center min-h-screen font-bold">Launching App...</p>
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang="ja">
