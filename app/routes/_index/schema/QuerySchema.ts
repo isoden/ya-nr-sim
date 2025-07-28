@@ -1,9 +1,9 @@
 import { parse } from 'qs'
-import z from 'zod'
+import * as v from 'valibot'
 import { characterMap } from '~/data/characters'
 
-const QuerySchema = z.object({
-	charId: z.enum([
+const QuerySchema = v.object({
+	charId: v.picklist([
 		characterMap.wylder.id,
 		characterMap.guardian.id,
 		characterMap.ironeye.id,
@@ -13,19 +13,20 @@ const QuerySchema = z.object({
 		characterMap.recluse.id,
 		characterMap.executor.id,
 	]),
-	effects: z
-		.array(
-			z.object({
-				id: z.coerce.number().int(),
-				amount: z.coerce.number().int().min(1).max(3),
+	effects: v.pipe(
+		v.array(
+			v.object({
+				id: v.pipe(v.string(), v.transform(Number), v.number(), v.integer()),
+				amount: v.pipe(v.string(), v.transform(Number), v.number(), v.integer(), v.minValue(1), v.maxValue(3)),
 			}),
-		)
-		.transform((effects) => effects.filter((effect) => effect.id !== 0)),
+		),
+		v.transform((effects) => effects.filter((effect) => effect.id !== 0)),
+	),
 })
 
 export const parseQuerySchema = (search: string) => {
 	try {
-		return QuerySchema.parse(parse(search))
+		return v.parse(QuerySchema, parse(search))
 	} catch {
 		return undefined
 	}
