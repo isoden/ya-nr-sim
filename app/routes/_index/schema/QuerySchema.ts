@@ -26,8 +26,10 @@ const QuerySchema = v.object({
 
 export const parseQuerySchema = (search: string) => {
 	try {
-		const parsed = Array.from(new URLSearchParams(search))
-			.reduce((acc, [key, value]) => set(acc, key, value), {})
+		const parsed = Array.from(new URLSearchParams(search)).reduce(
+			(acc, [key, value]) => set(acc, key, value),
+			Object.create(null),
+		)
 		return v.parse(QuerySchema, parsed)
 	} catch {
 		return undefined

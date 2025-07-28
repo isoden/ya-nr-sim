@@ -140,6 +140,6 @@ function optionalNumber(input: string | undefined): number | undefined {
 
 function strictNumber(input: string | undefined): number {
 	const numbered = optionalNumber(input)
-	invariant (numbered !== undefined,'This field is required')
+	invariant(numbered !== undefined, 'This field is required')
 	return numbered
 }
