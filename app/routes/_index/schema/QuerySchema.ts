@@ -1,5 +1,5 @@
-import { parse } from 'qs'
 import * as v from 'valibot'
+import { set } from 'es-toolkit/compat'
 import { characterMap } from '~/data/characters'
 
 const QuerySchema = v.object({
@@ -26,7 +26,9 @@ const QuerySchema = v.object({
 
 export const parseQuerySchema = (search: string) => {
 	try {
-		return v.parse(QuerySchema, parse(search))
+		const parsed = Array.from(new URLSearchParams(search))
+			.reduce((acc, [key, value]) => set(acc, key, value), {})
+		return v.parse(QuerySchema, parsed)
 	} catch {
 		return undefined
 	}

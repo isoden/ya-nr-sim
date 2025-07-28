@@ -1,6 +1,8 @@
 import { expose } from 'comlink'
 import { simulate } from './simulator'
 
-expose(simulate)
+const WORKER_EXPOSED_API = simulate
 
-export type WorkerAPI = typeof simulate
+expose(WORKER_EXPOSED_API)
+
+export type WorkerAPI = typeof WORKER_EXPOSED_API
