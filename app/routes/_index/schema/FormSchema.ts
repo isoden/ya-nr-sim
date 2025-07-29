@@ -1,6 +1,7 @@
 import * as v from 'valibot'
 
-export const FormSchema = v.looseObject({
+export type FormSchema = v.InferOutput<typeof FormSchema>
+export const FormSchema = v.object({
 	charId: v.string('キャラクター(献器)は必須です'),
 	effects: v.pipe(
 		v.array(

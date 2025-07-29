@@ -9,15 +9,12 @@ import { relicEffectMap } from '~/data/relics'
 import { FormSchema } from '../schema/FormSchema'
 
 type Props = {
-	defaultValues?: {
-		charId: string
-		effects: { id: number; count: number }[]
-	}
+	defaultValues?: FormSchema
 }
 
 export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 	const [form, fields] = useForm({
-		defaultValue: { ...defaultValues, effects: defaultValues?.effects ?? [{ id: 0, count: 1 }] },
+		defaultValue: { ...defaultValues, effects: defaultValues?.effects ?? [defaultEffect()] },
 		onValidate: ({ formData }) => parseWithValibot(formData, { schema: FormSchema }),
 	})
 
@@ -41,21 +38,18 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 					</Picker>
 
 					<div className="grid grid-cols-[1fr_repeat(2,min-content)] gap-4">
-						{effects.map((effect, i) => {
+						{effects.map((effect, index) => {
 							const effectField = effect.getFieldset()
 
 							return (
 								<div key={effect.id} className="grid grid-cols-subgrid col-span-full items-end">
 									<ComboBox
 										name={effectField.id.name}
-										label={i === 0 ? '遺物効果' : undefined}
-										aria-label={i === 0 ? undefined : '遺物効果'}
+										label={index === 0 ? '遺物効果' : undefined}
+										aria-label={index === 0 ? undefined : '遺物効果'}
 										selectedKey={optionalNumber(effectField.id.value) ?? null}
 										onSelectionChange={(key) => {
-											form.update({
-												name: effectField.id.name,
-												value: key as number,
-											})
+											form.update({ name: effectField.id.name, value: key as number })
 										}}
 										formValue="key"
 										defaultItems={effectItems}
@@ -66,14 +60,11 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 									</ComboBox>
 									<NumberField
 										name={effectField.count.name}
-										label={i === 0 ? '個数' : undefined}
-										aria-label={i === 0 ? undefined : '個数'}
+										label={index === 0 ? '個数' : undefined}
+										aria-label={index === 0 ? undefined : '個数'}
 										value={strictNumber(effectField.count.value)}
 										onChange={(value) => {
-											form.update({
-												name: effectField.count.name,
-												value,
-											})
+											form.update({ name: effectField.count.name, value })
 										}}
 										minValue={1}
 										maxValue={3}
@@ -81,14 +72,11 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 										width="size-1600"
 									/>
 									<Button
-										aria-label={`${i + 1}番目の遺物効果を削除する`}
+										aria-label={`${index + 1}番目の遺物効果を削除する`}
 										type="submit"
 										variant="negative"
 										formMethod="POST"
-										{...form.remove.getButtonProps({
-											name: fields.effects.name,
-											index: i,
-										})}
+										{...form.remove.getButtonProps({ name: fields.effects.name, index })}
 										isDisabled={effects.length === 1}
 									>
 										<DeleteIcon />
@@ -102,14 +90,12 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 						type="submit"
 						variant="primary"
 						formMethod="POST"
-						{...form.insert.getButtonProps({
-							name: fields.effects.name,
-							defaultValue: { id: 0, count: 1 },
-						})}
+						{...form.insert.getButtonProps({ name: fields.effects.name, defaultValue: defaultEffect() })}
+						isDisabled={effects.length >= 9}
 					>
 						<Text>遺物効果を追加</Text>
 					</Button>
-					{fields.effects.errors?.length ? <p className="text-red-500">{fields.effects.errors[0]}</p> : null}
+					{fields.effects.errors?.length ? <p className="text-orange-700">{fields.effects.errors[0]}</p> : null}
 				</div>
 
 				<div className="mt-8">
@@ -142,4 +128,8 @@ function strictNumber(input: string | undefined): number {
 	const numbered = optionalNumber(input)
 	invariant(numbered !== undefined, 'This field is required')
 	return numbered
+}
+
+function defaultEffect(): FormSchema['effects'][number] {
+	return { id: 0, count: 1 }
 }
