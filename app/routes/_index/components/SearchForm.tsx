@@ -1,10 +1,11 @@
-import { Button, ComboBox, Item, NumberField, Picker, Text } from '@adobe/react-spectrum'
+import { Button, Item, NumberField, Picker, Text } from '@adobe/react-spectrum'
 import DeleteIcon from '@spectrum-icons/workflow/Delete'
 import { getFormProps, useForm } from '@conform-to/react'
 import { parseWithValibot } from '@conform-to/valibot'
 import { Form } from 'react-router'
 import { invariant } from 'es-toolkit'
-import { characterMap } from '~/data/characters'
+import { RelicEffectSelector } from '~/components/RelicEffectSelector'
+import { characterList, characterMap, type CharId } from '~/data/characters'
 import { relicEffectMap } from '~/data/relics'
 import { FormSchema } from '../schema/FormSchema'
 
@@ -19,6 +20,11 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 	})
 
 	const effects = fields.effects.getFieldList()
+
+	// 選択したキャラクター以外の固有遺物効果を非表示にするための配列
+	const excludeIds = fields.charId.value
+		? uniqueEffectIds.flatMap(([charId, effectIds]) => (charId === fields.charId.value ? [] : effectIds))
+		: []
 
 	return (
 		<section className="overflow-y-auto row-start-2 col-start-1">
@@ -43,7 +49,7 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 
 							return (
 								<div key={effect.id} className="grid grid-cols-subgrid col-span-full items-end">
-									<ComboBox
+									<RelicEffectSelector
 										name={effectField.id.name}
 										label={index === 0 ? '遺物効果' : undefined}
 										aria-label={index === 0 ? undefined : '遺物効果'}
@@ -51,13 +57,9 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 										onSelectionChange={(key) => {
 											form.update({ name: effectField.id.name, value: key as number })
 										}}
-										formValue="key"
-										defaultItems={effectItems}
-										width="100%"
 										validationState={!!fields.effects.errors?.length ? 'invalid' : undefined}
-									>
-										{(item) => <Item>{item.name}</Item>}
-									</ComboBox>
+										excludeIds={excludeIds}
+									/>
 									<NumberField
 										name={effectField.count.name}
 										label={index === 0 ? '個数' : undefined}
@@ -108,11 +110,6 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 	)
 }
 
-const effectItems = Object.entries(relicEffectMap).map(([id, { name }]) => ({
-	id: Number(id),
-	name,
-}))
-
 const characterItems = Object.entries(characterMap).map(([id, { name }]) => ({
 	id,
 	name,
@@ -133,3 +130,17 @@ function strictNumber(input: string | undefined): number {
 function defaultEffect(): FormSchema['effects'][number] {
 	return { id: 0, count: 1 }
 }
+
+const uniqueEffectIds = Object.entries(
+	Object.entries(relicEffectMap).reduce<Record<CharId, number[]>>((acc, [id, effect]) => {
+		characterList.some((character) => {
+			if (effect.name.startsWith(`[${character.name}]`)) {
+				acc[character.id] ??= []
+				acc[character.id].push(Number(id))
+				return true
+			}
+		})
+
+		return acc
+	}, Object.create(null)),
+)

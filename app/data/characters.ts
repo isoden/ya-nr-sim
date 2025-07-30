@@ -8,3 +8,7 @@ export const characterMap = {
 	recluse: { id: 'recluse', name: '隠者' },
 	executor: { id: 'executor', name: '執行者' },
 } as const satisfies Record<string, { id: string; name: string }>
+
+export const characterList = Object.values(characterMap)
+
+export type CharId = keyof typeof characterMap
