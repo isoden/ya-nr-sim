@@ -406,7 +406,7 @@ export function normalizeEffectId(id: number): number {
 	)
 }
 
-const uniqItemNameMap: Record<number, string> = {
+export const uniqItemNameMap: Record<number, string> = {
 	10001: '薄汚れたフレーム',
 	15002: '黒爪の首飾り',
 	18000: '祝福された花',
