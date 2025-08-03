@@ -45,9 +45,10 @@ export function createConstraints(
 	}
 
 	// 効果制約（指定された数以上）
-	// 各効果について、その効果を持つ遺物の合計 ≥ 指定された数
-	for (const [effectId, count] of Object.entries(requiredEffects)) {
-		constraints.set(`effect.${effectId}`, greaterEq(count))
+	// 各効果グループについて、そのグループ内の効果を持つ遺物の合計 ≥ 指定された数
+	for (let i = 0; i < requiredEffects.length; i++) {
+		const group = requiredEffects[i]
+		constraints.set(`effectGroup.${i}`, greaterEq(group.count))
 	}
 
 	// 同じ遺物は1つしか装備できない（色スロット用とFreeスロット用の合計で1つまで）

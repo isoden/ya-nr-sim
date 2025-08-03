@@ -20,7 +20,7 @@ export const clientLoader = async ({ request }: Route.ClientLoaderArgs) => {
 	if (!params) return { params: undefined, result: undefined, relicsCount: relics.length }
 
 	const vessels = vesselsByCharacterMap[params.charId]
-	const requiredEffects = Object.fromEntries(params.effects.map((effect) => [effect.id, effect.count]))
+	const requiredEffects = params.effects.map(({ id, count }) => ({ effectIds: [id], count }))
 
 	const resultPromise = simulate({
 		vessels,

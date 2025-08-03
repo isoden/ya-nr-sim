@@ -1,6 +1,7 @@
 import type { Coefficients } from "yalps"
 import { type Relic, type RelicJSON, RelicColor } from "~/data/relics"
 import { type Vessel, SlotColor } from "~/data/vessels"
+import type { RequiredEffects } from "./types"
 
 /**
  * 変数を作成する
@@ -15,7 +16,7 @@ import { type Vessel, SlotColor } from "~/data/vessels"
  * - 器の変数: スロット制約の係数（負の値）
  * - 遺物の変数: スロット制約の係数（正の値）、効果制約の係数
  */
-export function createVariables(vessels: Vessel[], relics: Relic[]): Map<string, Coefficients> {
+export function createVariables(vessels: Vessel[], relics: Relic[], requiredEffects: RequiredEffects): Map<string, Coefficients> {
   const variables = new Map<string, Coefficients>()
 
   // 器の変数を作成
@@ -71,10 +72,15 @@ export function createVariables(vessels: Vessel[], relics: Relic[]): Map<string,
         [`slot.${relic.color}`]: 1, // 色スロット制約
       }
 
-      // 効果制約
-      for (const effectId of relic.normalizedEffectIds) {
-        colorSlotVars[`effect.${effectId}`] ??= 0
-        colorSlotVars[`effect.${effectId}`] += 1
+      // 効果制約（グループ別）
+      for (let groupIndex = 0; groupIndex < requiredEffects.length; groupIndex++) {
+        const group = requiredEffects[groupIndex]
+        for (const effectId of relic.normalizedEffectIds) {
+          if (group.effectIds.includes(effectId)) {
+            colorSlotVars[`effectGroup.${groupIndex}`] ??= 0
+            colorSlotVars[`effectGroup.${groupIndex}`] += 1
+          }
+        }
       }
 
       variables.set(`relic.${relic.id}.color`, colorSlotVars)
@@ -95,10 +101,15 @@ export function createVariables(vessels: Vessel[], relics: Relic[]): Map<string,
         }
       }
 
-      // 効果制約
-      for (const effectId of relic.normalizedEffectIds) {
-        freeSlotVars[`effect.${effectId}`] ??= 0
-        freeSlotVars[`effect.${effectId}`] += 1
+      // 効果制約（グループ別）
+      for (let groupIndex = 0; groupIndex < requiredEffects.length; groupIndex++) {
+        const group = requiredEffects[groupIndex]
+        for (const effectId of relic.normalizedEffectIds) {
+          if (group.effectIds.includes(effectId)) {
+            freeSlotVars[`effectGroup.${groupIndex}`] ??= 0
+            freeSlotVars[`effectGroup.${groupIndex}`] += 1
+          }
+        }
       }
 
       variables.set(`relic.${relic.id}.free`, freeSlotVars)

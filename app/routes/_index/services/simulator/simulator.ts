@@ -25,7 +25,7 @@ import type { Args, Result, Build } from './types'
 export async function simulate({ vessels, relics: relicsJSON, requiredEffects, volume = 5 }: Args): Promise<Result> {
 	try {
 		const relics = relicsJSON.map((relic) => Relic.new(relic))
-		const variables = createVariables(vessels, relics)
+		const variables = createVariables(vessels, relics, requiredEffects)
 		const constraints = createConstraints(vessels, relics, requiredEffects)
 		const builds = solveRecursively({
 			remaining: volume,

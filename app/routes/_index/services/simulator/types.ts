@@ -27,4 +27,7 @@ export type Result =
 			error: Error
 	  }
 
-export type RequiredEffects = Record<number, number>
+export type RequiredEffects = {
+	effectIds: number[]
+	count: number
+}[]
