@@ -9,7 +9,7 @@ import {
 	Text,
 	TextArea,
 } from '@adobe/react-spectrum'
-import ImportIcon from '@spectrum-icons/workflow/Import'
+import { ImportIcon } from 'lucide-react'
 import { useId, useState } from 'react'
 
 type Props = {
