@@ -62,22 +62,23 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 
 			<div className="flex flex-col gap-4 mt-4">
 				{relicCategoryEntries.map(({ name, children = [] }) => {
-					const filteredChildren = children.filter((relic) => {
-						if (showSelectedOnly) {
-							if (effectCountMap[relic.id] == null) return false
-						}
-						if (filteredText === '') return true
-						return relic.name.includes(filteredText)
-					})
+					const invisibleEffectIds = children.reduce<string[]>((acc, effect) => {
+						const isUnselectedInShowMode = showSelectedOnly && effectCountMap[effect.id] == null
+						const isFilteredOut = filteredText !== '' && !effect.name.includes(filteredText)
+
+						return isUnselectedInShowMode || isFilteredOut ? acc.concat(effect.id) : acc
+					}, [])
+
+					const invisible = invisibleEffectIds.length === children.length
 
 					return (
 						<Toggle.Root key={name} storage={name}>
 							<div
 								className={twMerge(
 									'group border bg-zinc-800 border-gray-700 rounded-lg',
-									filteredChildren.length === 0 && 'sr-only',
+									invisible && 'collapse-fallback',
 								)}
-								aria-hidden={filteredChildren.length === 0}
+								aria-hidden={invisible}
 							>
 								<Toggle.Button className="w-full p-3 leading-0 flex items-center rounded-tr-lg rounded-tl-lg not-[:open]:rounded-br-lg not-[:open]:rounded-bl-lg">
 									{({ open }) => (
@@ -90,25 +91,21 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 									)}
 								</Toggle.Button>
 								<Toggle.Content className="p-3 max-h-80 overflow-y-scroll bg-zinc-900 rounded-br-lg rounded-bl-lg">
-									{filteredChildren.map((effect) => (
+									{children.map((effect) => (
 										<Toggle.Root key={effect.id} storage={effect.id}>
-											<div key={effect.id} className="grid grid-cols-[1fr_auto_theme(spacing.6)] gap-4">
+											<div
+												key={effect.id}
+												className={twMerge(
+													'grid grid-cols-[1fr_auto_theme(spacing.6)] gap-4',
+													invisibleEffectIds.includes(effect.id) && 'collapse-fallback',
+												)}
+											>
 												<Checkbox
 													value={effect.id}
 													label={effect.name}
 													checked={effectCountMap[effect.id] != null}
-													onChange={(event) => {
-														const toBeChecked = event.target.checked
-
-														setEffectCountMap((prev) => {
-															if (toBeChecked) {
-																return { ...prev, [effect.id]: { count: 1 } }
-															}
-
-															const { [effect.id]: _, ...rest } = prev
-
-															return { ...rest }
-														})
+													onChange={() => {
+														setEffectCountMap((prev) => toggleRecord(prev, effect.id, { count: 1 }))
 													}}
 												/>
 
@@ -143,21 +140,23 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 											</div>
 
 											<Toggle.Content>
-												<ul className="pl-4">
-													{effect.children?.map((item) => (
-														<li key={item.id} className="flex justify-between">
-															<Checkbox label={item.name} disabled={true} />
-															<input
-																type="number"
-																className="disabled:text-gray-500/50"
-																disabled={true}
-																min={1}
-																max={3}
-																defaultValue={1}
-															/>
-														</li>
-													))}
-												</ul>
+												{!invisibleEffectIds.includes(effect.id) && (
+													<ul className="pl-4">
+														{effect.children?.map((item) => (
+															<li key={item.id} className="flex justify-between">
+																<Checkbox label={item.name} disabled={true} />
+																<input
+																	type="number"
+																	className="disabled:text-gray-500/50"
+																	disabled={true}
+																	min={1}
+																	max={3}
+																	defaultValue={1}
+																/>
+															</li>
+														))}
+													</ul>
+												)}
 											</Toggle.Content>
 										</Toggle.Root>
 									))}
@@ -169,4 +168,17 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 			</div>
 		</fieldset>
 	)
+}
+
+function toggleRecord<Key extends keyof any, Value>(
+	obj: Record<Key, Value>,
+	key: Key,
+	value: Value,
+): Record<Key, Value> {
+	if (!!obj[key]) {
+		const { [key]: _, ...rest } = obj
+		return rest as Record<Key, Value>
+	} else {
+		return { ...obj, [key]: value }
+	}
 }

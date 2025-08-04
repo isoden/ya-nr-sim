@@ -1,5 +1,6 @@
-import React, { createContext, useCallback, useContext, useId, useState } from 'react'
+import React, { createContext, useContext, useId } from 'react'
 import { twMerge } from 'tailwind-merge'
+import { usePersistedState } from '~/hooks/usePersistedState'
 
 const ToggleContext = createContext<
 	{ id: string; open: boolean; setOpen: React.Dispatch<React.SetStateAction<boolean>> } | undefined
@@ -9,36 +10,11 @@ type RootProps = React.PropsWithChildren<{
 	storage?: string
 }>
 
-const ToggleRoot: React.FC<RootProps> = ({ children, storage }) => {
+const ToggleRoot: React.FC<RootProps> = ({ children, storage = genId() }) => {
 	const id = useId()
-	const [open, setOpen] = useState(() => {
-		const defaultValue = false
+	const [open, setOpen] = usePersistedState(storage, true)
 
-		if (storage) {
-			try {
-				const storedValue = localStorage.getItem(`toggle.storage.${storage}`)
-				return storedValue ? (JSON.parse(storedValue) as boolean) : defaultValue
-			} catch {
-				return defaultValue
-			}
-		}
-
-		return defaultValue
-	})
-
-	const setOpenWithStorage = useCallback(
-		(value: React.SetStateAction<boolean>) => {
-			setOpen(value)
-			if (storage) {
-				try {
-					localStorage.setItem(`toggle.storage.${storage}`, JSON.stringify(value))
-				} catch {}
-			}
-		},
-		[storage],
-	)
-
-	return <ToggleContext.Provider value={{ id, open, setOpen: setOpenWithStorage }}>{children}</ToggleContext.Provider>
+	return <ToggleContext.Provider value={{ id, open, setOpen }}>{children}</ToggleContext.Provider>
 }
 
 type ButtonProps = {
@@ -70,7 +46,7 @@ const ToggleContent: React.FC<ContentProps> = ({ children, className }) => {
 	const { id, open } = useContext(ToggleContext)!
 
 	return (
-		<div aria-hidden={!open} id={`toggle-${id}`} className={twMerge(className, 'aria-[hidden=true]:hidden')}>
+		<div aria-hidden={!open} id={`toggle-${id}`} className={twMerge(className, 'aria-[hidden=true]:collapse-fallback')}>
 			{children}
 		</div>
 	)
@@ -84,3 +60,7 @@ export const Toggle = Object.assign(
 		Content: ToggleContent,
 	},
 )
+
+function genId() {
+	return `${Math.random().toString(36).slice(2, 9)}`
+}
