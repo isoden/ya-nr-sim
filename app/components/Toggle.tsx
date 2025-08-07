@@ -8,11 +8,12 @@ const ToggleContext = createContext<
 
 type RootProps = React.PropsWithChildren<{
 	storage?: string
+	defaultOpen?: boolean
 }>
 
-const ToggleRoot: React.FC<RootProps> = ({ children, storage = genId() }) => {
+const ToggleRoot: React.FC<RootProps> = ({ children, storage = genId(), defaultOpen = true }) => {
 	const id = useId()
-	const [open, setOpen] = usePersistedState(storage, true)
+	const [open, setOpen] = usePersistedState(storage, defaultOpen)
 
 	return <ToggleContext.Provider value={{ id, open, setOpen }}>{children}</ToggleContext.Provider>
 }

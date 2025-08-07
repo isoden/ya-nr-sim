@@ -3,7 +3,7 @@ import { PlusIcon, MinusIcon, ChevronRight, TextSearch } from 'lucide-react'
 import { set } from 'es-toolkit/compat'
 import { twMerge } from 'tailwind-merge'
 import { relicCategoryEntries } from '~/data/relics'
-import { Checkbox } from './Checkbox'
+import { Checkbox } from './forms/Checkbox'
 import { Toggle } from './Toggle'
 
 type Props = {
@@ -32,13 +32,14 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 		<fieldset>
 			<legend className="text-[15px] text-gray-300">遺物効果</legend>
 
-			<div className="flex items-end justify-between">
+			<div className="flex items-end justify-between sticky top-0 z-10 bg-zinc-900 pb-4">
 				<Checkbox
 					disabled={!Object.keys(effectCountMap).length}
-					label="選択した効果のみ表示"
 					checked={showSelectedOnly}
-					onChange={(event) => setShowSelectedOnly(event.target.checked)}
-				/>
+					onChange={setShowSelectedOnly}
+				>
+					選択した効果のみ表示
+				</Checkbox>
 
 				<label className="flex items-center gap-2">
 					<TextSearch aria-label="効果名で絞り込む" />
@@ -60,7 +61,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 				</label>
 			</div>
 
-			<div className="flex flex-col gap-4 mt-4">
+			<div className="flex flex-col gap-4">
 				{relicCategoryEntries.map(({ name, children = [] }) => {
 					const invisibleEffectIds = children.reduce<string[]>((acc, effect) => {
 						const isUnselectedInShowMode = showSelectedOnly && effectCountMap[effect.id] == null
@@ -75,7 +76,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 						<Toggle.Root key={name} storage={name}>
 							<div
 								className={twMerge(
-									'group border bg-zinc-800 border-gray-700 rounded-lg',
+									'group border bg-zinc-800 border-gray-700 rounded-lg relative',
 									invisible && 'collapse-fallback',
 								)}
 								aria-hidden={invisible}
@@ -92,7 +93,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 								</Toggle.Button>
 								<Toggle.Content className="p-3 max-h-80 overflow-y-scroll bg-zinc-900 rounded-br-lg rounded-bl-lg">
 									{children.map((effect) => (
-										<Toggle.Root key={effect.id} storage={effect.id}>
+										<Toggle.Root key={effect.id} storage={effect.id} defaultOpen={false}>
 											<div
 												key={effect.id}
 												className={twMerge(
@@ -102,12 +103,13 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 											>
 												<Checkbox
 													value={effect.id}
-													label={effect.name}
 													checked={effectCountMap[effect.id] != null}
 													onChange={() => {
 														setEffectCountMap((prev) => toggleRecord(prev, effect.id, { count: 1 }))
 													}}
-												/>
+												>
+													{effect.name}
+												</Checkbox>
 
 												<input
 													type="number"
@@ -144,11 +146,11 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 													<ul className="pl-4">
 														{effect.children?.map((item) => (
 															<li key={item.id} className="flex justify-between">
-																<Checkbox label={item.name} disabled={true} />
+																<Checkbox disabled>{item.name}</Checkbox>
 																<input
 																	type="number"
 																	className="disabled:text-gray-500/50"
-																	disabled={true}
+																	disabled
 																	min={1}
 																	max={3}
 																	defaultValue={1}
