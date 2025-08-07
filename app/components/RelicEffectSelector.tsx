@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import { PlusIcon, MinusIcon, ChevronRight, TextSearch } from 'lucide-react'
+import { PlusIcon, MinusIcon, ChevronRight, TextSearch, CircleXIcon } from 'lucide-react'
 import { set } from 'es-toolkit/compat'
 import { twMerge } from 'tailwind-merge'
 import { relicCategoryEntries } from '~/data/relics'
@@ -41,7 +41,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 					選択した効果のみ表示
 				</Checkbox>
 
-				<label className="flex items-center gap-2">
+				<label className="flex items-center gap-2 relative">
 					<TextSearch aria-label="効果名で絞り込む" />
 
 					<input
@@ -57,12 +57,24 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 							isComposingRef.current = false
 							setFilteredText(event.currentTarget.value.trim())
 						}}
+						data-1p-ignore
 					/>
+
+					{filteredText.length > 0 && (
+						<button
+							aria-label="入力をクリア"
+							type="button"
+							onClick={() => setFilteredText('')}
+							className="absolute top-1/2 transform -translate-y-1/2 right-2 text-white/60"
+						>
+							<CircleXIcon className="size-4" />
+						</button>
+					)}
 				</label>
 			</div>
 
 			<div className="flex flex-col gap-4">
-				{relicCategoryEntries.map(({ name, children = [] }) => {
+				{relicCategoryEntries.map(({ name, unselectable, children = [] }) => {
 					const invisibleEffectIds = children.reduce<string[]>((acc, effect) => {
 						const isUnselectedInShowMode = showSelectedOnly && effectCountMap[effect.id] == null
 						const isFilteredOut = filteredText !== '' && !effect.name.includes(filteredText)
@@ -71,6 +83,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 					}, [])
 
 					const invisible = invisibleEffectIds.length === children.length
+					const rootReadOnly = unselectable
 
 					return (
 						<Toggle.Root key={name} storage={name}>
@@ -91,70 +104,124 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 										</>
 									)}
 								</Toggle.Button>
-								<Toggle.Content className="p-3 max-h-80 overflow-y-scroll bg-zinc-900 rounded-br-lg rounded-bl-lg">
-									{children.map((effect) => (
+								<Toggle.Content
+									className={twMerge(
+										'max-h-80 overflow-y-scroll bg-zinc-900 rounded-br-lg flex flex-col rounded-bl-lg',
+										!unselectable && 'p-3 gap-1',
+									)}
+								>
+									{children.map((effect, index) => (
 										<Toggle.Root key={effect.id} storage={effect.id} defaultOpen={false}>
 											<div
 												key={effect.id}
 												className={twMerge(
 													'grid grid-cols-[1fr_auto_theme(spacing.6)] gap-4',
 													invisibleEffectIds.includes(effect.id) && 'collapse-fallback',
+													rootReadOnly && 'px-3 py-2',
+													rootReadOnly && index % 2 === 0 && 'bg-zinc-800/80',
+													rootReadOnly && index % 2 === 1 && 'bg-zinc-800/50',
 												)}
 											>
-												<Checkbox
-													value={effect.id}
-													checked={effectCountMap[effect.id] != null}
-													onChange={() => {
-														setEffectCountMap((prev) => toggleRecord(prev, effect.id, { count: 1 }))
-													}}
-												>
-													{effect.name}
-												</Checkbox>
-
-												<input
-													type="number"
-													name={`effects.${effect.id}.count`}
-													className="disabled:text-gray-500/50"
-													disabled={effectCountMap[effect.id] == null}
-													min={1}
-													max={effect.stackable ? 3 : 1}
-													value={effectCountMap[effect.id]?.count ?? 1}
-													onChange={(event) => {
-														const value = event.target.valueAsNumber
-
-														setEffectCountMap((prev) =>
-															prev[effect.id] == null ? prev : { ...prev, [effect.id]: { count: value } },
-														)
-													}}
-												/>
-
-												{!!effect.children && (
-													<Toggle.Button>
+												{rootReadOnly ? (
+													<Toggle.Button className="grid grid-cols-subgrid col-span-full">
 														{({ open }) => (
-															<ChevronRight
-																role="img"
-																aria-label={`${effect.name}の詳細指定を${open ? '閉じる' : '開く'}`}
-																className={twMerge('transition-transform duration-200', open && 'rotate-90')}
-															/>
+															<>
+																<span className="text-sm text-left col-span-2">{effect.name}</span>
+																<ChevronRight
+																	role="img"
+																	aria-label={`${effect.name}の詳細指定を${open ? '閉じる' : '開く'}`}
+																	className={twMerge('transition-transform duration-200', open && 'rotate-90')}
+																/>
+															</>
 														)}
 													</Toggle.Button>
+												) : (
+													<>
+														<Checkbox
+															value={effect.id}
+															checked={effectCountMap[effect.id] != null}
+															onChange={() => {
+																setEffectCountMap((prev) => toggleRecord(prev, effect.id, { count: 1 }))
+															}}
+														>
+															{effect.name}
+														</Checkbox>
+														<input
+															type="number"
+															name={`effects.${effect.id}.count`}
+															className="disabled:text-gray-500/50 border border-zinc-600 rounded text-right disabled:border-zinc-800"
+															disabled={effectCountMap[effect.id] == null}
+															min={1}
+															max={effect.stackable ? 3 : 1}
+															value={effectCountMap[effect.id]?.count ?? 1}
+															onChange={(event) => {
+																const value = event.target.valueAsNumber
+
+																setEffectCountMap((prev) =>
+																	prev[effect.id] == null ? prev : { ...prev, [effect.id]: { count: value } },
+																)
+															}}
+														/>
+														{!!effect.children && (
+															<Toggle.Button>
+																{({ open }) => (
+																	<ChevronRight
+																		role="img"
+																		aria-label={`${effect.name}の詳細指定を${open ? '閉じる' : '開く'}`}
+																		className={twMerge('transition-transform duration-200', open && 'rotate-90')}
+																	/>
+																)}
+															</Toggle.Button>
+														)}
+													</>
 												)}
 											</div>
 
 											<Toggle.Content>
 												{!invisibleEffectIds.includes(effect.id) && (
-													<ul className="pl-4">
+													<ul className={twMerge('pl-4 flex flex-col gap-1', rootReadOnly && 'py-3')}>
 														{effect.children?.map((item) => (
 															<li key={item.id} className="flex justify-between">
-																<Checkbox disabled>{item.name}</Checkbox>
-																<input
-																	type="number"
-																	className="disabled:text-gray-500/50"
-																	disabled
-																	min={1}
-																	max={3}
-																	defaultValue={1}
-																/>
+																{rootReadOnly ? (
+																	<Checkbox
+																		value={item.id}
+																		checked={effectCountMap[item.id] != null}
+																		onChange={() => {
+																			setEffectCountMap((prev) => toggleRecord(prev, item.id, { count: 1 }))
+																		}}
+																	>
+																		{item.name}
+																	</Checkbox>
+																) : (
+																	<Checkbox disabled>{item.name}</Checkbox>
+																)}
+																{rootReadOnly ? (
+																	<input
+																		type="number"
+																		name={`effects.${item.id}.count`}
+																		className="disabled:text-gray-500/50 border border-zinc-600 rounded text-right disabled:border-zinc-800"
+																		disabled={effectCountMap[item.id] == null}
+																		min={1}
+																		max={item.stackable ? 3 : 1}
+																		value={effectCountMap[item.id]?.count ?? 1}
+																		onChange={(event) => {
+																			const value = event.target.valueAsNumber
+
+																			setEffectCountMap((prev) =>
+																				prev[item.id] == null ? prev : { ...prev, [item.id]: { count: value } },
+																			)
+																		}}
+																	/>
+																) : (
+																	<input
+																		type="number"
+																		className="disabled:text-gray-500/50"
+																		disabled
+																		min={1}
+																		max={3}
+																		defaultValue={1}
+																	/>
+																)}
 															</li>
 														))}
 													</ul>

@@ -23,7 +23,7 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 	const [isAutoSearchEnabled, setIsAutoSearchEnabled] = usePersistedState('SearchForm.isAutoSearchEnabled', false)
 
 	return (
-		<section className="overflow-y-auto row-start-2 col-start-1 pr-4">
+		<section className="overflow-y-auto row-start-2 col-start-1">
 			<Form
 				method="GET"
 				replace={true}
@@ -60,9 +60,24 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 					<Button variant="accent" type="submit" isDisabled={isAutoSearchEnabled}>
 						検索
 					</Button>
-					<Checkbox className="text-sm" checked={isAutoSearchEnabled} onChange={setIsAutoSearchEnabled}>
+					<Checkbox className="text-sm mr-auto" checked={isAutoSearchEnabled} onChange={setIsAutoSearchEnabled}>
 						自動検索をON
 					</Checkbox>
+
+					<Button
+						variant="secondary"
+						// TODO: フォームのリセットボタンを押したときの処理を実装する
+						// type="submit"
+						// formMethod="POST"
+						// {...form.reset.getButtonProps()}
+						// onPress={() => {
+						// 	// フォームのリセットボタンを押したときの処理
+						// 	submit(new FormData(), { replace: true, method: 'GET' })
+						// }}
+						onPress={() => location.assign('/')}
+					>
+						リセット
+					</Button>
 				</div>
 			</Form>
 		</section>

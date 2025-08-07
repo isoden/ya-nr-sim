@@ -407,10 +407,11 @@ export function normalizeEffectId(id: number): number {
 	)
 }
 
-function mapper(item: number | { name: string; children: number[] }): {
+function mapper(item: number | { name: string; unselectable?: boolean; children: number[] }): {
 	id: string
 	name: string
 	stackable: boolean
+	unselectable?: boolean
 	children?: ReturnType<typeof mapper>[]
 } {
 	if (typeof item === 'object') {
@@ -420,6 +421,7 @@ function mapper(item: number | { name: string; children: number[] }): {
 			id: item.children.join(','),
 			name: item.name,
 			stackable: children.some((c) => c.stackable),
+			unselectable: item.unselectable,
 			children,
 		}
 	}
@@ -429,7 +431,7 @@ function mapper(item: number | { name: string; children: number[] }): {
 
 export const relicCategoryEntries: ReturnType<typeof mapper>[] = [
 	{
-		id: '',
+		id: '1',
 		stackable: true,
 		name: '能力値',
 		children: [
@@ -476,7 +478,7 @@ export const relicCategoryEntries: ReturnType<typeof mapper>[] = [
 		].map(mapper),
 	},
 	{
-		id: '',
+		id: '2',
 		stackable: true,
 		name: '攻撃力',
 		children: [
@@ -526,7 +528,7 @@ export const relicCategoryEntries: ReturnType<typeof mapper>[] = [
 		].map(mapper),
 	},
 	{
-		id: '',
+		id: '3',
 		stackable: true,
 		name: 'スキル／アーツ',
 		children: [
@@ -544,7 +546,7 @@ export const relicCategoryEntries: ReturnType<typeof mapper>[] = [
 		].map(mapper),
 	},
 	{
-		id: '',
+		id: '4',
 		stackable: true,
 		name: '魔術／祈祷',
 		children: [
@@ -553,19 +555,19 @@ export const relicCategoryEntries: ReturnType<typeof mapper>[] = [
 		].map(mapper),
 	},
 	{
-		id: '',
+		id: '5',
 		stackable: true,
 		name: 'カット率',
 		children: [7006200, 7002600, 7002700, 7002800, 7002900, 7012300, 7240000].map(mapper),
 	},
 	{
-		id: '',
+		id: '6',
 		stackable: true,
 		name: '状態異常耐性',
 		children: [7003000, 7003400, 7003100, 7003500, 7003200, 7003600, 7003300].map(mapper),
 	},
 	{
-		id: '',
+		id: '7',
 		stackable: true,
 		name: '回復',
 		children: [
@@ -585,13 +587,13 @@ export const relicCategoryEntries: ReturnType<typeof mapper>[] = [
 		].map(mapper),
 	},
 	{
-		id: '',
+		id: '8',
 		stackable: true,
 		name: 'アクション',
 		children: [7031900, 7035700, 7030700, 7035400, 7260000, 7260300, 7260400, 7260710, 7260700].map(mapper),
 	},
 	{
-		id: '',
+		id: '9',
 		stackable: true,
 		name: '出撃時の武器（戦技）',
 		children: [
@@ -600,13 +602,13 @@ export const relicCategoryEntries: ReturnType<typeof mapper>[] = [
 		].map(mapper),
 	},
 	{
-		id: '',
+		id: '10',
 		stackable: true,
 		name: '出撃時の武器（付加）',
 		children: [7120000, 7120100, 7120200, 7120300, 7120500, 7120600, 7120400].map(mapper),
 	},
 	{
-		id: '',
+		id: '11',
 		stackable: true,
 		name: '出撃時のアイテム',
 		children: [
@@ -615,232 +617,248 @@ export const relicCategoryEntries: ReturnType<typeof mapper>[] = [
 		].map(mapper),
 	},
 	{
-		id: '',
+		id: '12',
 		stackable: true,
 		name: 'マップ環境',
 		children: [7070000, 7230000, 7230001].map(mapper),
 	},
 	{
-		id: '',
+		id: '13',
 		stackable: true,
 		name: 'チームメンバー',
 		children: [7110000, 7050000, 7010200, 7090100, 7050100].map(mapper),
 	},
 	{
-		id: '',
+		id: '14',
+		name: '特定キャラクターのみ',
+		unselectable: true,
 		stackable: true,
-		name: '追跡者',
-		children: [7032400, 7020000, 7033200, 7010500].map(mapper),
+		children: [
+			{
+				id: '14.1',
+				stackable: true,
+				name: '追跡者',
+				children: [7032400, 7020000, 7033200, 7010500].map(mapper),
+			},
+			{
+				id: '14.2',
+				stackable: true,
+				name: '守護者',
+				children: [7033400, 7011000, 7012000, 7011600].map(mapper),
+			},
+			{
+				id: '14.3',
+				stackable: true,
+				name: '鉄の目',
+				children: [7270100, 7034600, 7034700, 7280000].map(mapper),
+			},
+			{
+				id: '14.4',
+				stackable: true,
+				name: 'レディ',
+				children: [7290000, 7032700, 7010700, 7031800].map(mapper),
+			},
+			{
+				id: '14.5',
+				stackable: true,
+				name: '無頼漢',
+				children: [7031300, 7310000, 7090300, 7030000].map(mapper),
+			},
+			{
+				id: '14.6',
+				stackable: true,
+				name: '復讐者',
+				children: [7011200, 7010900, 7031200, 7220000].map(mapper),
+			},
+			{
+				id: '14.7',
+				stackable: true,
+				name: '隠者',
+				children: [7032900, 7034100, 7032800].map(mapper),
+			},
+			{
+				id: '14.8',
+				stackable: true,
+				name: '執行者',
+				children: [7034400, 7034500, 7011700].map(mapper),
+			},
+		],
 	},
 	{
-		id: '',
+		id: '15',
+		unselectable: true,
 		stackable: true,
-		name: '守護者',
-		children: [7033400, 7011000, 7012000, 7011600].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '鉄の目',
-		children: [7270100, 7034600, 7034700, 7280000].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: 'レディ',
-		children: [7290000, 7032700, 7010700, 7031800].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '無頼漢',
-		children: [7031300, 7310000, 7090300, 7030000].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '復讐者',
-		children: [7011200, 7010900, 7031200, 7220000].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '隠者',
-		children: [7032900, 7034100, 7032800].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '執行者',
-		children: [7034400, 7034500, 7011700].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '短剣',
-		children: [7330000, 7340000, 7350000, 7080000].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '直剣',
-		children: [7330100, 7340100, 7350100, 7080100].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '大剣',
-		children: [7330200, 7340200, 7350200, 7080200].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '特大剣',
-		children: [7330300, 7340300, 7350300, 7080300].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '刺剣',
-		children: [7330800, 7340800, 7350800, 7080800].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '重刺剣',
-		children: [7330900, 7340900, 7350900, 7080900].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '曲剣',
-		children: [7330400, 7340400, 7350400, 7080400].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '大曲剣',
-		children: [7330500, 7340500, 7350500, 7080500].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '刀',
-		children: [7330600, 7340600, 7350600, 7080600].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '両刃剣',
-		children: [7330700, 7340700, 7350700, 7080700].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '斧',
-		children: [7331000, 7341000, 7351000, 7081000].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '大斧',
-		children: [7331100, 7341100, 7351100, 7081100].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '槌',
-		children: [7331200, 7341200, 7351200, 7081200].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: 'フレイル',
-		children: [7331400, 7341400, 7351400, 7081400].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '大槌',
-		children: [7331300, 7341300, 7351300, 7081300].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '特大武器',
-		children: [7332300, 7342300, 7352300, 7082300].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '槍',
-		children: [7331500, 7341500, 7351500, 7081500].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '大槍',
-		children: [7331700, 7341700, 7351700, 7081700].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '鎌',
-		children: [7331900, 7341900, 7351900, 7081900].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '鞭',
-		children: [7332200, 7342200, 7352200, 7082200].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '拳',
-		children: [7332000, 7342000, 7352000, 7082000].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '爪',
-		children: [7332100, 7342100, 7352100, 7082100].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '弓',
-		children: [7332400, 7342400, 7352400, 7082400].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '小盾',
-		children: [7082700].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '中盾',
-		children: [7082800].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '大盾',
-		children: [7082900].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '杖',
-		children: [7082500].map(mapper),
-	},
-	{
-		id: '',
-		stackable: true,
-		name: '聖印',
-		children: [7082600].map(mapper),
+		name: '特定武器のみ',
+		children: [
+			{
+				id: '15.1',
+				stackable: true,
+				name: '短剣',
+				children: [7330000, 7340000, 7350000, 7080000].map(mapper),
+			},
+			{
+				id: '15.2',
+				stackable: true,
+				name: '直剣',
+				children: [7330100, 7340100, 7350100, 7080100].map(mapper),
+			},
+			{
+				id: '15.3',
+				stackable: true,
+				name: '大剣',
+				children: [7330200, 7340200, 7350200, 7080200].map(mapper),
+			},
+			{
+				id: '15.4',
+				stackable: true,
+				name: '特大剣',
+				children: [7330300, 7340300, 7350300, 7080300].map(mapper),
+			},
+			{
+				id: '15.5',
+				stackable: true,
+				name: '刺剣',
+				children: [7330800, 7340800, 7350800, 7080800].map(mapper),
+			},
+			{
+				id: '15.6',
+				stackable: true,
+				name: '重刺剣',
+				children: [7330900, 7340900, 7350900, 7080900].map(mapper),
+			},
+			{
+				id: '15.7',
+				stackable: true,
+				name: '曲剣',
+				children: [7330400, 7340400, 7350400, 7080400].map(mapper),
+			},
+			{
+				id: '15.8',
+				stackable: true,
+				name: '大曲剣',
+				children: [7330500, 7340500, 7350500, 7080500].map(mapper),
+			},
+			{
+				id: '15.9',
+				stackable: true,
+				name: '刀',
+				children: [7330600, 7340600, 7350600, 7080600].map(mapper),
+			},
+			{
+				id: '15.10',
+				stackable: true,
+				name: '両刃剣',
+				children: [7330700, 7340700, 7350700, 7080700].map(mapper),
+			},
+			{
+				id: '15.11',
+				stackable: true,
+				name: '斧',
+				children: [7331000, 7341000, 7351000, 7081000].map(mapper),
+			},
+			{
+				id: '15.12',
+				stackable: true,
+				name: '大斧',
+				children: [7331100, 7341100, 7351100, 7081100].map(mapper),
+			},
+			{
+				id: '15.13',
+				stackable: true,
+				name: '槌',
+				children: [7331200, 7341200, 7351200, 7081200].map(mapper),
+			},
+			{
+				id: '15.14',
+				stackable: true,
+				name: 'フレイル',
+				children: [7331400, 7341400, 7351400, 7081400].map(mapper),
+			},
+			{
+				id: '15.15',
+				stackable: true,
+				name: '大槌',
+				children: [7331300, 7341300, 7351300, 7081300].map(mapper),
+			},
+			{
+				id: '15.16',
+				stackable: true,
+				name: '特大武器',
+				children: [7332300, 7342300, 7352300, 7082300].map(mapper),
+			},
+			{
+				id: '15.17',
+				stackable: true,
+				name: '槍',
+				children: [7331500, 7341500, 7351500, 7081500].map(mapper),
+			},
+			{
+				id: '15.18',
+				stackable: true,
+				name: '大槍',
+				children: [7331700, 7341700, 7351700, 7081700].map(mapper),
+			},
+			{
+				id: '15.19',
+				stackable: true,
+				name: '鎌',
+				children: [7331900, 7341900, 7351900, 7081900].map(mapper),
+			},
+			{
+				id: '15.20',
+				stackable: true,
+				name: '鞭',
+				children: [7332200, 7342200, 7352200, 7082200].map(mapper),
+			},
+			{
+				id: '15.21',
+				stackable: true,
+				name: '拳',
+				children: [7332000, 7342000, 7352000, 7082000].map(mapper),
+			},
+			{
+				id: '15.22',
+				stackable: true,
+				name: '爪',
+				children: [7332100, 7342100, 7352100, 7082100].map(mapper),
+			},
+			{
+				id: '15.23',
+				stackable: true,
+				name: '弓',
+				children: [7332400, 7342400, 7352400, 7082400].map(mapper),
+			},
+			{
+				id: '15.24',
+				stackable: true,
+				name: '小盾',
+				children: [7082700].map(mapper),
+			},
+			{
+				id: '15.25',
+				stackable: true,
+				name: '中盾',
+				children: [7082800].map(mapper),
+			},
+			{
+				id: '15.26',
+				stackable: true,
+				name: '大盾',
+				children: [7082900].map(mapper),
+			},
+			{
+				id: '15.27',
+				stackable: true,
+				name: '杖',
+				children: [7082500].map(mapper),
+			},
+			{
+				id: '15.28',
+				stackable: true,
+				name: '聖印',
+				children: [7082600].map(mapper),
+			},
+		],
 	},
 ]
 
