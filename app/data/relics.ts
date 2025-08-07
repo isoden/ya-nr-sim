@@ -143,6 +143,7 @@ export const relicEffectMap: Record<number, { name: string; stackable: boolean }
 	// 7006001: { name: '両手持ちの、体勢を崩す力上昇', stackable: true },
 	7006100: { name: '二刀持ちの、体勢を崩す力上昇', stackable: true },
 	7006101: { name: '二刀持ちの、体勢を崩す力上昇+1', stackable: true },
+	7006200: { name: '物理カット率上昇', stackable: true },
 	7010200: { name: '聖杯瓶の回復を、周囲の味方に分配', stackable: false },
 	7010500: { name: '【追跡者】 アーツ発動時、周囲を延焼', stackable: true },
 	7010700: { name: '【レディ】 短剣による連続攻撃時、周囲の敵に直近の出来事を再演', stackable: true },
@@ -555,7 +556,7 @@ export const relicCategoryEntries: ReturnType<typeof mapper>[] = [
 		id: '',
 		stackable: true,
 		name: 'カット率',
-		children: [7002600, 7002700, 7002800, 7002900, 7012300, 7240000].map(mapper),
+		children: [7006200, 7002600, 7002700, 7002800, 7002900, 7012300, 7240000].map(mapper),
 	},
 	{
 		id: '',
@@ -878,5 +879,6 @@ const uniqItemNameMap: Record<number, string> = {
 	2050: '狩人の夜',
 	2051: '狩人の暗き夜',
 	2060: '霞の夜',
+	2061: '霞の暗き夜',
 	2100: '王の夜',
 }
