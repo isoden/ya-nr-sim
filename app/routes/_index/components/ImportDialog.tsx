@@ -18,7 +18,14 @@ type Props = {
 
 export const ImportDialog: React.FC<Props> = ({ relicsCount }) => {
 	const id = useId()
-	const [jsonAsText, setJsonAsText] = useState('')
+	const [jsonAsText, setJsonAsText] = useState(() => {
+		try {
+			const relics = localStorage.getItem('relics')
+			return relics ? JSON.stringify(JSON.parse(relics), null, 4) : ''
+		} catch {
+			return ''
+		}
+	})
 
 	const importRelics = () => {
 		localStorage.setItem('relics', jsonAsText)
