@@ -37,13 +37,13 @@ export const clientLoader = async ({ request }: Route.ClientLoaderArgs) => {
 
 export default function Home({ loaderData: { params, result, relicsCount } }: Route.ComponentProps) {
 	return (
-		<div className="bg-zinc-900 h-screen gap-6 p-8 grid grid-cols-2 grid-rows-[auto_1fr]">
+		<search className="bg-zinc-900 h-screen gap-6 p-8 grid grid-cols-2 grid-rows-[auto_1fr]">
 			<header className="col-start-1 row-start-1 flex justify-between items-center">
 				<h1 className="text-xl font-bold">ナイトレインビルドシミュレーター</h1>
 				<ImportDialog relicsCount={relicsCount} />
 			</header>
 			<SearchForm defaultValues={params} />
 			<BuildList resultKey={JSON.stringify(params)} result={result} />
-		</div>
+		</search>
 	)
 }

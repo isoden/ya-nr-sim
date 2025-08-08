@@ -16,7 +16,7 @@ type Props = {
  * @param props - {@link Props}
  */
 export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
-	const [filteredText, setFilteredText] = useState('')
+	const [filterText, setFilterText] = useState('')
 	const [showSelectedOnly, setShowSelectedOnly] = useState(false)
 	const [effectCountMap, setEffectCountMap] = useState(() => {
 		if (!defaultValue) return {}
@@ -25,8 +25,6 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 			{},
 		)
 	})
-
-	const isComposingRef = useRef(false)
 
 	return (
 		<fieldset>
@@ -37,47 +35,19 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 					disabled={!Object.keys(effectCountMap).length}
 					checked={showSelectedOnly}
 					onChange={setShowSelectedOnly}
+					className="has-[:disabled]:opacity-60"
 				>
 					選択した効果のみ表示
 				</Checkbox>
 
-				<label className="flex items-center gap-2 relative">
-					<TextSearch aria-label="効果名で絞り込む" />
-
-					<input
-						type="text"
-						className="border border-white/50 py-1 px-2 rounded"
-						placeholder="効果名で絞り込む"
-						onChange={(event) => {
-							if (isComposingRef.current) return
-							setFilteredText(event.target.value.trim())
-						}}
-						onCompositionStart={() => (isComposingRef.current = true)}
-						onCompositionEnd={(event) => {
-							isComposingRef.current = false
-							setFilteredText(event.currentTarget.value.trim())
-						}}
-						data-1p-ignore
-					/>
-
-					{filteredText.length > 0 && (
-						<button
-							aria-label="入力をクリア"
-							type="button"
-							onClick={() => setFilteredText('')}
-							className="absolute top-1/2 transform -translate-y-1/2 right-2 text-white/60"
-						>
-							<CircleXIcon className="size-4" />
-						</button>
-					)}
-				</label>
+				<SearchInput value={filterText} setValue={setFilterText} />
 			</div>
 
 			<div className="flex flex-col gap-4">
 				{relicCategoryEntries.map(({ name, unselectable, children = [] }) => {
 					const invisibleEffectIds = children.reduce<string[]>((acc, effect) => {
 						const isUnselectedInShowMode = showSelectedOnly && effectCountMap[effect.id] == null
-						const isFilteredOut = filteredText !== '' && !effect.name.includes(filteredText)
+						const isFilteredOut = filterText !== '' && !effect.name.includes(filterText)
 
 						return isUnselectedInShowMode || isFilteredOut ? acc.concat(effect.id) : acc
 					}, [])
@@ -193,7 +163,9 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 																		{item.name}
 																	</Checkbox>
 																) : (
-																	<Checkbox disabled>{item.name}</Checkbox>
+																	<Checkbox disabled className="has-[:disabled]:opacity-60">
+																		{item.name}
+																	</Checkbox>
 																)}
 																{rootReadOnly ? (
 																	<input
@@ -250,4 +222,60 @@ function toggleRecord<Key extends keyof any, Value>(
 	} else {
 		return { ...obj, [key]: value }
 	}
+}
+
+type SearchInputProps = {
+	value: string
+	setValue: (value: string) => void
+}
+
+/**
+ * 効果名で絞り込むための入力コンポーネント
+ *
+ * - IME 入力中は入力値を更新しない
+ *
+ * @param props - {@link SearchInputProps}
+ */
+const SearchInput: React.FC<SearchInputProps> = (props) => {
+	const [value, setValue] = useState('')
+	const isComposingRef = useRef(false)
+
+	return (
+		<label className="flex items-center gap-2 relative">
+			<TextSearch aria-label="効果名で絞り込む" />
+
+			<input
+				type="text"
+				className="border border-white/50 py-1 px-2 rounded"
+				placeholder="効果名で絞り込む"
+				value={value}
+				onChange={(event) => {
+					const value = event.target.value
+					setValue(value)
+					if (isComposingRef.current) return
+					props.setValue(value.trim())
+				}}
+				onCompositionStart={() => (isComposingRef.current = true)}
+				onCompositionEnd={(event) => {
+					isComposingRef.current = false
+					props.setValue(event.currentTarget.value.trim())
+				}}
+				data-1p-ignore
+			/>
+
+			{props.value.length > 0 && (
+				<button
+					aria-label="入力をクリア"
+					type="button"
+					onClick={() => {
+						setValue('')
+						props.setValue('')
+					}}
+					className="absolute top-1/2 transform -translate-y-1/2 right-2 text-white/60"
+				>
+					<CircleXIcon className="size-4" />
+				</button>
+			)}
+		</label>
+	)
 }
