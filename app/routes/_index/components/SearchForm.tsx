@@ -1,5 +1,4 @@
-import { Button, Item, Picker } from '@adobe/react-spectrum'
-import { getFormProps, useForm } from '@conform-to/react'
+import { getFormProps, getSelectProps, useForm } from '@conform-to/react'
 import { parseWithValibot } from '@conform-to/valibot'
 import { Form, useSubmit } from 'react-router'
 import { RelicEffectSelector } from '~/components/RelicEffectSelector'
@@ -40,16 +39,19 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 				<h2 className="text-lg font-semibold">条件選択</h2>
 
 				<div className="flex flex-col gap-8 mt-4">
-					<Picker
-						isInvalid={!!fields.charId.errors?.length}
-						name={fields.charId.name}
-						label="キャラクター(献器)"
-						defaultSelectedKey={fields.charId.defaultValue}
-						items={characterItems}
-						errorMessage={fields.charId.errors?.[0]}
-					>
-						{(item) => <Item>{item.name}</Item>}
-					</Picker>
+					<div className="flex gap-4 flex-wrap">
+						<label htmlFor={fields.charId.id} className="text-[15px] text-gray-300">
+							キャラクター(献器)
+						</label>
+						<select {...getSelectProps(fields.charId)} className="border border-zinc-600 p-1 rounded">
+							{characterItems.map((item) => (
+								<option key={item.id} value={item.id}>
+									{item.name}
+								</option>
+							))}
+						</select>
+						{fields.charId.errors && <p className="text-orange-700 w-full">{fields.charId.errors[0]}</p>}
+					</div>
 
 					<RelicEffectSelector defaultValue={fields.effects.value as unknown as RelicEffectSelectorDefaultValue} />
 
@@ -57,15 +59,15 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 				</div>
 
 				<div className="pt-4 bg-zinc-900 sticky bottom-0 flex items-center gap-4">
-					<Button variant="accent" type="submit" isDisabled={isAutoSearchEnabled}>
+					<button type="submit" className="bg-blue-500 text-white rounded px-4 py-2" disabled={isAutoSearchEnabled}>
 						検索
-					</Button>
+					</button>
 					<Checkbox className="text-sm mr-auto" checked={isAutoSearchEnabled} onChange={setIsAutoSearchEnabled}>
 						自動検索をON
 					</Checkbox>
 
-					<Button
-						variant="secondary"
+					<button
+						type="button"
 						// TODO: フォームのリセットボタンを押したときの処理を実装する
 						// type="submit"
 						// formMethod="POST"
@@ -74,10 +76,11 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 						// 	// フォームのリセットボタンを押したときの処理
 						// 	submit(new FormData(), { replace: true, method: 'GET' })
 						// }}
-						onPress={() => location.assign('/')}
+						className="bg-gray-500 text-white rounded px-4 py-2"
+						onClick={() => location.assign('/')}
 					>
 						リセット
-					</Button>
+					</button>
 				</div>
 			</Form>
 		</section>

@@ -1,7 +1,6 @@
 import './app.css'
 
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router'
-import { defaultTheme, Provider } from '@adobe/react-spectrum'
 import type { Route } from './+types/root'
 
 export function HydrateFallback() {
@@ -28,11 +27,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-	return (
-		<Provider theme={defaultTheme} minHeight="100dvh">
-			<Outlet />
-		</Provider>
-	)
+	return <Outlet />
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

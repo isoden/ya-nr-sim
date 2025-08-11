@@ -1,25 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { expect, test, vi, beforeAll } from 'vitest'
+import { expect, test, vi } from 'vitest'
 import { RelicEffectSelector } from './RelicEffectSelector'
-import { defaultTheme, Provider } from '@adobe/react-spectrum'
-
-// https://react-spectrum.adobe.com/react-spectrum/testing.html#virtualized-components
-beforeAll(() => {
-	vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(1000)
-	vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(1000)
-	vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(40)
-	vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(40)
-
-	return () => {
-		vi.resetAllMocks()
-	}
-})
-
-// Adobe React Spectrum Provider for testing
-const TestProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-	return <Provider theme={defaultTheme}>{children}</Provider>
-}
 
 const mockEffects = vi.hoisted(() => ({
 	1: { name: 'Effect 1', stackable: true },
@@ -35,7 +17,7 @@ vi.mock('~/data/relics', () => ({
 test('デフォルトでは、全ての選択肢が表示される', async () => {
 	const user = userEvent.setup()
 
-	render(<RelicEffectSelector label="Test Effect Selector" />, { wrapper: TestProvider })
+	render(<RelicEffectSelector />)
 
 	const comboBox = screen.getByRole('combobox', { name: 'Test Effect Selector' })
 	expect(comboBox).toBeInTheDocument()
@@ -52,9 +34,7 @@ test('excludeIds を指定した場合、 除外IDを考慮してフィルタリ
 	const user = userEvent.setup()
 	const excludeIds = [1, 3]
 
-	render(<RelicEffectSelector name="test-selector" label="Test Effect Selector" excludeIds={excludeIds} />, {
-		wrapper: TestProvider,
-	})
+	render(<RelicEffectSelector />)
 
 	const trigger = screen.getByRole('button', { name: /show suggestions/i })
 	await user.click(trigger)

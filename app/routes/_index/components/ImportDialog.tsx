@@ -1,16 +1,5 @@
-import {
-	Button,
-	ButtonGroup,
-	Content,
-	Dialog,
-	DialogTrigger,
-	Divider,
-	Heading,
-	Text,
-	TextArea,
-} from '@adobe/react-spectrum'
 import { ImportIcon } from 'lucide-react'
-import { useId, useState } from 'react'
+import { useCallback, useId, useRef, useState } from 'react'
 
 type Props = {
 	relicsCount: number
@@ -18,6 +7,7 @@ type Props = {
 
 export const ImportDialog: React.FC<Props> = ({ relicsCount }) => {
 	const id = useId()
+	const ref = useRef<HTMLDialogElement>(null)
 	const [jsonAsText, setJsonAsText] = useState(() => {
 		try {
 			const relics = localStorage.getItem('relics')
@@ -31,36 +21,56 @@ export const ImportDialog: React.FC<Props> = ({ relicsCount }) => {
 		localStorage.setItem('relics', jsonAsText)
 	}
 
+	const openDialog = useCallback(() => {
+		ref.current?.showModal()
+	}, [])
+
+	const closeDialog = useCallback(() => {
+		ref.current?.close()
+	}, [])
+
 	return (
-		<DialogTrigger>
-			<Button variant="secondary">
-				<Text>遺物をインポート ({relicsCount})</Text>
+		<>
+			<button
+				type="button"
+				className="bg-gray-500 text-white rounded px-4 py-2 flex items-center gap-1"
+				onClick={openDialog}
+			>
+				遺物管理 ({relicsCount})
 				<ImportIcon />
-			</Button>
-			{(close) => (
-				<Dialog>
-					<Heading id={id}>遺物をインポート</Heading>
-					<Divider />
-					<Content>
-						<TextArea aria-labelledby={id} width="100%" value={jsonAsText} onChange={setJsonAsText} />
-					</Content>
-					<ButtonGroup>
-						<Button type="button" variant="secondary" onPress={close}>
-							キャンセル
-						</Button>
-						<Button
-							type="button"
-							variant="accent"
-							onPress={() => {
-								importRelics()
-								close()
-							}}
-						>
-							インポート
-						</Button>
-					</ButtonGroup>
-				</Dialog>
-			)}
-		</DialogTrigger>
+			</button>
+			<dialog
+				ref={ref}
+				onClose={closeDialog}
+				className="backdrop:bg-black/50 backdrop:backdrop-blur-xs min-w-xs w-full mt-8 mx-auto max-w-2xl p-4"
+			>
+				<h2 id={id} className="border-b border-zinc-600 pb-3 text-md font-bold">
+					遺物管理
+				</h2>
+				<div>
+					<textarea
+						className="w-full min-h-[theme(spacing.64)]"
+						aria-labelledby={id}
+						value={jsonAsText}
+						onChange={(event) => setJsonAsText(event.target.value)}
+					/>
+				</div>
+				<div className="flex justify-end gap-2 mt-4">
+					<button type="button" className="bg-gray-500 text-white rounded px-4 py-2" onClick={closeDialog}>
+						キャンセル
+					</button>
+					<button
+						type="button"
+						className="bg-blue-500 text-white rounded px-4 py-2"
+						onClick={() => {
+							importRelics()
+							closeDialog()
+						}}
+					>
+						インポート
+					</button>
+				</div>
+			</dialog>
+		</>
 	)
 }

@@ -1,9 +1,13 @@
 @import 'tailwindcss';
 
 @layer base {
+  body {
+    @apply text-white;
+  }
+
 	button,
 	summary {
-		cursor: pointer;
+    @apply cursor-pointer;
 	}
 }
 
