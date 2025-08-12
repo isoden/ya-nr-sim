@@ -7,7 +7,7 @@ import { parseQuerySchema } from './schema/QuerySchema'
 import { simulate } from './services/simulator'
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: 'YA-NR SIM' }]
+  return [{ title: 'YA-ナイトレインビルドシミュレーター' }]
 }
 
 export const clientLoader = async ({ request }: Route.ClientLoaderArgs) => {
