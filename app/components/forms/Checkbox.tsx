@@ -3,22 +3,22 @@ import { twMerge } from 'tailwind-merge'
 import type { Merge } from 'type-fest'
 
 type Props = Merge<
-	Omit<JSX.IntrinsicElements['input'], 'type'>,
-	{
-		onChange?: (checked: boolean) => void
-	}
+  Omit<JSX.IntrinsicElements['input'], 'type'>,
+  {
+    onChange?: (checked: boolean) => void
+  }
 >
 
 export const Checkbox: React.FC<Props> = ({ children, onChange, className, ...props }) => {
-	const handleChange = useCallback(
-		(event: React.ChangeEvent<HTMLInputElement>) => onChange?.(event.target.checked),
-		[onChange],
-	)
+  const handleChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => onChange?.(event.target.checked),
+    [onChange],
+  )
 
-	return (
-		<label className={twMerge('inline-flex gap-2 items-center', className)}>
-			<input {...props} type="checkbox" onChange={handleChange} />
-			{children}
-		</label>
-	)
+  return (
+    <label className={twMerge('inline-flex gap-2 items-center', className)}>
+      <input {...props} type="checkbox" onChange={handleChange} className="accent-pink-600 size-3.5" />
+      {children}
+    </label>
+  )
 }
