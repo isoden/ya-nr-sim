@@ -23,7 +23,7 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
   const [isAutoSearchEnabled, setIsAutoSearchEnabled] = usePersistedState('SearchForm.isAutoSearchEnabled', false)
 
   return (
-    <section className="overflow-y-auto row-start-2 col-start-1">
+    <section className="overflow-y-auto">
       <Form
         method="GET"
         replace={true}

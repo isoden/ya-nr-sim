@@ -1,8 +1,8 @@
 @import 'tailwindcss';
 
 @layer base {
-  body {
-    @apply text-white;
+  html {
+    @apply bg-zinc-900 text-white;
   }
 
 	button,
