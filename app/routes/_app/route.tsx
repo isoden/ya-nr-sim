@@ -22,11 +22,7 @@ export default function Layout({ loaderData }: Route.ComponentProps) {
         <h1 className="text-xl font-bold">ナイトレインビルドシミュレーター</h1>
         <nav className="flex gap-6 ml-auto" aria-label="メインナビゲーション">
           {navLinks.map((link) => (
-            <NavLink
-              key={link.href}
-              to={link.href}
-              className="aria-[current=page]:border-b-pink-600 aria-[current=page]:border-b-2 text-sm pb-1"
-            >
+            <NavLink key={link.href} to={link.href} className="nav-link text-sm pb-1">
               {link.label}
             </NavLink>
           ))}

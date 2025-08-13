@@ -23,7 +23,7 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
   const [isAutoSearchEnabled, setIsAutoSearchEnabled] = usePersistedState('SearchForm.isAutoSearchEnabled', false)
 
   return (
-    <section className="overflow-y-auto">
+    <section className="min-h-0">
       <Form
         method="GET"
         replace={true}
@@ -35,11 +35,12 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
             setTimeout(() => submit(form, { replace: true, method: 'GET' }), 0)
           }
         }}
+        className="flex flex-col gap-8 h-full"
         {...getFormProps(form)}
       >
         <h2 className="text-lg font-semibold">条件選択</h2>
 
-        <div className="flex flex-col gap-8 mt-4">
+        <div className="min-h-0 flex-1 flex flex-col gap-6 overflow-y-auto">
           <div className="flex gap-4 flex-wrap">
             <label htmlFor={fields.charId.id} className="text-[15px] text-gray-300">
               キャラクター(献器)
@@ -59,7 +60,7 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
           {fields.effects.errors?.length ? <p className="text-orange-700">{fields.effects.errors[0]}</p> : null}
         </div>
 
-        <div className="pt-4 bg-zinc-900 sticky bottom-0 flex items-center gap-4">
+        <div className="flex items-center gap-4">
           <Button variant="primary" type="submit" isDisabled={isAutoSearchEnabled}>
             検索
           </Button>

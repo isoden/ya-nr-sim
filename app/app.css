@@ -2,13 +2,26 @@
 
 @layer base {
   html {
-    @apply bg-zinc-900 text-white;
+    @apply bg-zinc-800 text-white;
   }
 
 	button,
 	summary {
     @apply cursor-pointer;
 	}
+}
+
+@layer components {
+  .nav-link {
+    &[aria-current=page] {
+      @apply relative;
+
+      &::before {
+        content: '';
+        @apply absolute bottom-0 w-8 left-1/2 -translate-x-1/2 bg-pink-600 h-0.5 rounded-full;
+      }
+    }
+  }
 }
 
 @layer utilities {

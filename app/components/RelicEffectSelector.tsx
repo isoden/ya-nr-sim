@@ -30,7 +30,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
     <fieldset>
       <legend className="text-[15px] text-gray-300">遺物効果</legend>
 
-      <div className="flex items-end justify-between sticky top-0 z-10 bg-zinc-900 pb-4">
+      <div className="flex items-end justify-between sticky top-0 z-10 bg-zinc-800 pb-4">
         <Checkbox
           disabled={!showSelectedOnly && !Object.keys(effectCountMap).length}
           checked={showSelectedOnly}
@@ -59,7 +59,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
             <Toggle.Root key={name} storage={name}>
               <div
                 className={twMerge(
-                  'group border bg-zinc-800 border-zinc-700 rounded-md relative',
+                  'group border bg-zinc-800 shadow border-zinc-700 rounded-md relative',
                   invisible && 'collapse-fallback',
                 )}
                 aria-hidden={invisible}
@@ -74,13 +74,13 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                     </>
                   )}
                 </Toggle.Button>
-                <Toggle.Content className="max-h-80 overflow-y-scroll bg-zinc-900 rounded-br-md flex flex-col rounded-bl-md">
+                <Toggle.Content className="max-h-80 overflow-y-scroll bg-zinc-700/20 rounded-br-md flex flex-col rounded-bl-md">
                   {children.map((effect, index) => (
                     <Toggle.Root key={effect.id} storage={effect.id} defaultOpen={false}>
                       <div
                         key={effect.id}
                         className={twMerge(
-                          'border-t border-t-zinc-800 grid grid-cols-[1fr_auto_theme(spacing.6)] items-center gap-4',
+                          'border-t border-t-zinc-700 grid grid-cols-[1fr_auto_theme(spacing.6)] items-center gap-4',
                           invisibleEffectIds.includes(effect.id) && 'collapse-fallback',
                           !rootReadOnly && 'px-4 py-2',
                           rootReadOnly && index % 2 === 0 && 'bg-zinc-800/80',
@@ -144,11 +144,11 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 
                       <Toggle.Content>
                         {!invisibleEffectIds.includes(effect.id) && (
-                          <ul className={twMerge('flex flex-col border-t border-zinc-800', !rootReadOnly && 'pl-6')}>
+                          <ul className={twMerge('flex flex-col border-t border-zinc-700', !rootReadOnly && 'pl-6')}>
                             {effect.children?.map((item) => (
                               <li
                                 key={item.id}
-                                className="not-first-of-type:border-t border-zinc-800 flex justify-between px-4 py-2"
+                                className="not-first-of-type:border-t border-zinc-700 flex justify-between px-4 py-2"
                               >
                                 {rootReadOnly ? (
                                   <Checkbox

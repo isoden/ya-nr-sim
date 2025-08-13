@@ -36,7 +36,7 @@ export const clientLoader = async ({ request }: Route.ClientLoaderArgs) => {
 
 export default function Home({ loaderData: { params, result } }: Route.ComponentProps) {
   return (
-    <main className="grid grid-cols-2 overflow-auto gap-6">
+    <main className="grid grid-cols-2 min-h-0 gap-6">
       <SearchForm defaultValues={params} />
       <BuildList resultKey={JSON.stringify(params)} result={result} />
     </main>

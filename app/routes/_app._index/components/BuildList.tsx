@@ -18,7 +18,7 @@ type Props = {
  */
 export const BuildList: React.FC<Props> = ({ resultKey, result }) => {
   return (
-    <section className="bg-zinc-950/20 p-6 border border-gray-400/10 rounded-lg overflow-y-scroll">
+    <section className="shadow bg-zinc-950/20 p-6 border border-gray-400/10 rounded-lg overflow-y-scroll">
       <h2 className="text-lg font-semibold">検索結果</h2>
 
       <div className="flex flex-col gap-6 mt-6">
