@@ -23,28 +23,28 @@ import type { Args, Result, Build } from './types'
  * @param [volume=5] - 検索するビルド数
  */
 export async function simulate({ vessels, relics: relicsJSON, requiredEffects, volume = 5 }: Args): Promise<Result> {
-	try {
-		const relics = relicsJSON.map((relic) => Relic.new(relic))
-		const variables = createVariables(vessels, relics, requiredEffects)
-		const constraints = createConstraints(vessels, relics, requiredEffects)
-		const builds = solveRecursively({
-			remaining: volume,
-			variables,
-			constraints,
-			vessels,
-			relics,
-		})
+  try {
+    const relics = relicsJSON.map((relic) => Relic.new(relic))
+    const variables = createVariables(vessels, relics, requiredEffects)
+    const constraints = createConstraints(vessels, relics, requiredEffects)
+    const builds = solveRecursively({
+      remaining: volume,
+      variables,
+      constraints,
+      vessels,
+      relics,
+    })
 
-		return {
-			success: true,
-			data: builds,
-		}
-	} catch (error) {
-		return {
-			success: false,
-			error: error as Error,
-		}
-	}
+    return {
+      success: true,
+      data: builds,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: error as Error,
+    }
+  }
 }
 
 /**
@@ -56,43 +56,43 @@ export async function simulate({ vessels, relics: relicsJSON, requiredEffects, v
  * 4. 解が見つからなくなるまで(or remainingが0になるまで)繰り返す
  */
 function solveRecursively({
-	builds = [],
-	remaining,
-	variables,
-	constraints,
-	vessels,
-	relics,
+  builds = [],
+  remaining,
+  variables,
+  constraints,
+  vessels,
+  relics,
 }: {
-	builds?: Build[]
-	remaining: number
-	variables: Map<string, Coefficients>
-	constraints: Map<string, Constraint>
-	vessels: Vessel[]
-	relics: Relic[]
+  builds?: Build[]
+  remaining: number
+  variables: Map<string, Coefficients>
+  constraints: Map<string, Constraint>
+  vessels: Vessel[]
+  relics: Relic[]
 }): Build[] {
-	if (remaining === 0) return builds
+  if (remaining === 0) return builds
 
-	const result = solve({ variables, constraints, integers: true })
+  const result = solve({ variables, constraints, integers: true })
 
-	if (result.status === 'optimal') {
-		const build = createBuild(result.variables, vessels, relics)
+  if (result.status === 'optimal') {
+    const build = createBuild(result.variables, vessels, relics)
 
-		// 重複排除の制約を追加（remainingをビルドIDとして使用）
-		// 既存の変数と制約に新しい制約を追加
-		const updatedVariables = createExclusionVariables(variables, build.relics, remaining)
-		const updatedConstraints = createExclusionConstraints(constraints, build.relics, remaining)
+    // 重複排除の制約を追加（remainingをビルドIDとして使用）
+    // 既存の変数と制約に新しい制約を追加
+    const updatedVariables = createExclusionVariables(variables, build.relics, remaining)
+    const updatedConstraints = createExclusionConstraints(constraints, build.relics, remaining)
 
-		return solveRecursively({
-			builds: [...builds, build],
-			remaining: remaining - 1,
-			variables: updatedVariables,
-			constraints: updatedConstraints,
-			vessels,
-			relics,
-		})
-	} else if (result.status === 'infeasible') {
-		if (builds.length > 0) return builds
-	}
+    return solveRecursively({
+      builds: [...builds, build],
+      remaining: remaining - 1,
+      variables: updatedVariables,
+      constraints: updatedConstraints,
+      vessels,
+      relics,
+    })
+  } else if (result.status === 'infeasible') {
+    if (builds.length > 0) return builds
+  }
 
-	throw new Error('No solution found')
+  throw new Error('No solution found')
 }

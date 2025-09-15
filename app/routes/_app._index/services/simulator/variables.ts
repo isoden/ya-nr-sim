@@ -1,7 +1,7 @@
-import type { Coefficients } from "yalps"
-import { type Relic, type RelicJSON, RelicColor } from "~/data/relics"
-import { type Vessel, SlotColor } from "~/data/vessels"
-import type { RequiredEffects } from "./types"
+import type { Coefficients } from 'yalps'
+import { type Relic, type RelicJSON, RelicColor } from '~/data/relics'
+import { type Vessel, SlotColor } from '~/data/vessels'
+import type { RequiredEffects } from './types'
 
 /**
  * 変数を作成する
@@ -16,7 +16,11 @@ import type { RequiredEffects } from "./types"
  * - 器の変数: スロット制約の係数（負の値）
  * - 遺物の変数: スロット制約の係数（正の値）、効果制約の係数
  */
-export function createVariables(vessels: Vessel[], relics: Relic[], requiredEffects: RequiredEffects): Map<string, Coefficients> {
+export function createVariables(
+  vessels: Vessel[],
+  relics: Relic[],
+  requiredEffects: RequiredEffects,
+): Map<string, Coefficients> {
   const variables = new Map<string, Coefficients>()
 
   // 器の変数を作成

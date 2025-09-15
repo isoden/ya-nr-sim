@@ -5,15 +5,15 @@
     @apply bg-zinc-800 text-white;
   }
 
-	button,
-	summary {
+  button,
+  summary {
     @apply cursor-pointer;
-	}
+  }
 }
 
 @layer components {
   .nav-link {
-    &[aria-current=page] {
+    &[aria-current='page'] {
       @apply relative;
 
       &::before {
@@ -25,18 +25,18 @@
 }
 
 @layer utilities {
-	/* visibility: collapse のブラウザ対応が十分になるまでのフォールバック */
-	.collapse-fallback,
-	.aria-\[hidden\=true\]\:collapse-fallback[aria-hidden='true'] {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px;
-		overflow: hidden;
-		clip: rect(0 0 0 0);
-		white-space: nowrap;
-		border: 0;
-		visibility: hidden;
-	}
+  /* visibility: collapse のブラウザ対応が十分になるまでのフォールバック */
+  .collapse-fallback,
+  .aria-\[hidden\=true\]\:collapse-fallback[aria-hidden='true'] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+    visibility: hidden;
+  }
 }
