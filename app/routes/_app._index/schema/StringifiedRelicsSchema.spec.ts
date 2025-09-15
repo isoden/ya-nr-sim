@@ -1,17 +1,17 @@
 import { expect, test } from 'vitest'
 import { parseStringifiedRelicsSchema } from './StringifiedRelicsSchema'
-import { Relic, RelicColor } from '~/data/relics'
+import { Relic, RelicColorBase } from '~/data/relics'
 
 const relics = [
   Relic.new({
     id: 'relic1',
-    color: RelicColor.Red,
+    color: RelicColorBase.Red,
     effects: [1, 2],
     itemId: 1001,
   }),
   Relic.new({
     id: 'relic2',
-    color: RelicColor.Blue,
+    color: RelicColorBase.Blue,
     effects: [3, 3, 3],
     itemId: 1500,
   }),

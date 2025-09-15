@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react'
 import { Await } from 'react-router'
-import { relicEffectMap } from '~/data/relics'
+import { depthsRelicEffectMap, negativeDepthsRelicEffectMap, relicEffectMap } from '~/data/relics'
 import { SlotColor } from '~/data/vessels'
 import type { Build, Result } from '../services/simulator/types'
 
@@ -55,7 +55,11 @@ function Idle() {
 function Success({ builds }: { builds: Build[] }) {
   return builds.map((item, i) => {
     return (
-      <div key={`${item.vessel.name}.${i}`}>
+      <div
+        key={`${item.vessel.name}.${i}`}
+        // TODO: use column-rule instead
+        className="before:h-px before:bg-gray-400/20 before:block before:w-full first:before:hidden before:mb-6"
+      >
         <header className="flex gap-2 items-center">
           <h3 className="font-bold">
             #{i + 1} - {item.vessel.name}
@@ -76,13 +80,19 @@ function Success({ builds }: { builds: Build[] }) {
             <li key={relic.id}>
               <div className="flex gap-2 items-center">
                 <span className="text-sm font-bold">{relic.name}</span>
-                <span className={`relative size-4 ${bgColorMap[relic.color]}`} />
+                <span className={`relative size-5 ${bgColorMap[relic.colorExtended]}`} />
               </div>
               <ul className="list-disc list-inside text-sm mt-2">
-                {relic.normalizedEffectIds.map((effectId, i) => {
+                {relic.pairedEffectIds.map(([effectId, negativeEffectId], i) => {
                   return (
                     <li key={`${effectId}.${i}`} className="mt-1">
-                      {relicEffectMap[effectId].name}
+                      {(relicEffectMap[effectId] || depthsRelicEffectMap[effectId]).name}
+
+                      {negativeEffectId && (
+                        <ul className="pl-5 text-red-400 mt-1 text-xs">
+                          <li className="text-red-400">{negativeDepthsRelicEffectMap[negativeEffectId].name}</li>
+                        </ul>
+                      )}
                     </li>
                   )
                 })}
@@ -105,9 +115,13 @@ function Failure({ children }: { children: React.ReactNode }) {
 }
 
 const bgColorMap = {
-  [SlotColor.Red]: 'bg-red-700',
-  [SlotColor.Blue]: 'bg-blue-700',
-  [SlotColor.Green]: 'bg-green-700',
-  [SlotColor.Yellow]: 'bg-yellow-700',
-  [SlotColor.Free]: 'bg-gray-700',
+  [SlotColor.Red]: 'bg-red-500',
+  [SlotColor.Blue]: 'bg-blue-500',
+  [SlotColor.Green]: 'bg-green-500',
+  [SlotColor.Yellow]: 'bg-yellow-500',
+  [SlotColor.DeepRed]: 'bg-red-800',
+  [SlotColor.DeepBlue]: 'bg-blue-800',
+  [SlotColor.DeepGreen]: 'bg-green-800',
+  [SlotColor.DeepYellow]: 'bg-yellow-800',
+  [SlotColor.Free]: 'bg-gray-500',
 }

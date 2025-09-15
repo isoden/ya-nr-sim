@@ -1,7 +1,7 @@
 {
   "include": ["**/*", "**/.server/**/*", "**/.client/**/*", ".react-router/types/**/*"],
   "compilerOptions": {
-    "lib": ["DOM", "DOM.Iterable", "ES2023"],
+    "lib": ["DOM", "DOM.Iterable", "ES2024"],
     "types": ["node", "vite/client"],
     "target": "ES2022",
     "module": "ES2022",
@@ -10,7 +10,8 @@
     "rootDirs": [".", "./.react-router/types"],
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./app/*"]
+      "~/*": ["./app/*"],
+      "~/test/*": ["./test/*"]
     },
     "esModuleInterop": true,
     "verbatimModuleSyntax": true,

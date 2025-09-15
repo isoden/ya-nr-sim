@@ -1,5 +1,5 @@
 import { type Constraint, equalTo, lessEq, greaterEq } from 'yalps'
-import { type Relic, type RelicJSON, RelicColor } from '~/data/relics'
+import { type Relic, type RelicJSON, RelicColorExtended } from '~/data/relics'
 import { type Vessel, SlotColor } from '~/data/vessels'
 import type { RequiredEffects } from './types'
 
@@ -24,15 +24,21 @@ export function createConstraints(
   // 器の選択制約（1つの器のみ選択）
   constraints.set('vessel', equalTo(1))
 
-  // 遺物数制約（最大3つまで）
-  constraints.set('relic', lessEq(3))
+  // 遺物数制約（通常・深層それぞれ3つまで）
+  constraints.set('relic.normal', lessEq(3))
+  constraints.set('relic.depths', lessEq(3))
 
   // 各色のスロット制約
   // 各色の遺物数 ≤ その色のスロット数
-  constraints.set(`slot.${RelicColor.Red}`, lessEq(0))
-  constraints.set(`slot.${RelicColor.Blue}`, lessEq(0))
-  constraints.set(`slot.${RelicColor.Green}`, lessEq(0))
-  constraints.set(`slot.${RelicColor.Yellow}`, lessEq(0))
+  constraints.set(`slot.${RelicColorExtended.Red}`, lessEq(0))
+  constraints.set(`slot.${RelicColorExtended.Blue}`, lessEq(0))
+  constraints.set(`slot.${RelicColorExtended.Green}`, lessEq(0))
+  constraints.set(`slot.${RelicColorExtended.Yellow}`, lessEq(0))
+
+  constraints.set(`slot.${RelicColorExtended.DeepRed}`, lessEq(0))
+  constraints.set(`slot.${RelicColorExtended.DeepBlue}`, lessEq(0))
+  constraints.set(`slot.${RelicColorExtended.DeepGreen}`, lessEq(0))
+  constraints.set(`slot.${RelicColorExtended.DeepYellow}`, lessEq(0))
 
   // Freeスロット制約
   // Freeスロットに装備された遺物数 ≤ Freeスロット数

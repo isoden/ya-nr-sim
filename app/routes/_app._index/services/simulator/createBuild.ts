@@ -1,5 +1,5 @@
 import type { Relic } from '~/data/relics'
-import type { Vessel } from '~/data/vessels'
+import { SlotColor, type Vessel } from '~/data/vessels'
 import type { Build } from './types'
 
 /**
@@ -32,29 +32,49 @@ export function createBuild(variables: [string, number][], vessels: Vessel[], re
           const relic = relics.find((r) => r.id === relicId)
           if (relic && !build.relics.some((r) => r.id === relicId)) {
             build.relics.push(relic)
-            relicSlotMap.set(relicId, slotType)
+            // 実際のスロットタイプを判定する
+            // 色スロットとして指定されているが、献器にその色がない場合はFreeスロットとして扱う
+            let actualSlotType = slotType
+            if (slotType === 'color' && build.vessel && !build.vessel.slots.includes(relic.colorExtended)) {
+              actualSlotType = 'free'
+            }
+            relicSlotMap.set(relicId, actualSlotType)
           }
         }
         break
     }
   }
 
+  // 色スロットの遺物の献器内でのインデックスを取得
+  const getColorSlotIndex = (relic: Relic) => build.vessel.slots.indexOf(relic.colorExtended)
+
+  // Freeスロットのインデックスを取得
+  const getFreeSlotIndex = () => build.vessel.slots.indexOf(SlotColor.Free)
+
   // 遺物を器のスロット順に並べ替える
   build.relics.sort((a, b) => {
     const aSlotType = relicSlotMap.get(a.id)
     const bSlotType = relicSlotMap.get(b.id)
 
-    // 色スロットに装備された遺物を先に配置
-    if (aSlotType === 'color' && bSlotType === 'free') return -1
-    if (aSlotType === 'free' && bSlotType === 'color') return 1
-
     if (aSlotType === 'color' && bSlotType === 'color') {
       // 両方とも色スロットの場合、器のスロット順に並べる
-      const aIndex = build.vessel.slots.indexOf(a.color)
-      const bIndex = build.vessel.slots.indexOf(b.color)
-
+      const aIndex = getColorSlotIndex(a)
+      const bIndex = getColorSlotIndex(b)
       const diff = aIndex - bIndex
+
       if (diff !== 0) return diff
+    } else if (aSlotType === 'color' && bSlotType === 'free') {
+      // 色スロットとFreeスロットを比較
+      const aIndex = getColorSlotIndex(a)
+      const bIndex = getFreeSlotIndex()
+
+      return aIndex - bIndex
+    } else if (aSlotType === 'free' && bSlotType === 'color') {
+      // Freeスロットと色スロットを比較
+      const aIndex = getFreeSlotIndex()
+      const bIndex = getColorSlotIndex(b)
+
+      return aIndex - bIndex
     }
 
     // - 同じ色スロットの場合は遺物ID順
