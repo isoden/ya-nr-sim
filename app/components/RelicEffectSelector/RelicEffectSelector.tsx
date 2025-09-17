@@ -2,9 +2,10 @@ import React, { useRef, useState } from 'react'
 import { PlusIcon, MinusIcon, ChevronRight, TextSearch, CircleXIcon } from 'lucide-react'
 import { set } from 'es-toolkit/compat'
 import { twMerge } from 'tailwind-merge'
-import { Relic, relicCategoryEntries } from '~/data/relics'
-import { Checkbox } from './forms/Checkbox'
-import { Toggle } from './Toggle'
+import { Relic } from '~/data/relics'
+import { Checkbox } from '../forms/Checkbox'
+import { Toggle } from '../Toggle'
+import { relicCategories } from './data'
 
 type Props = {
   defaultValue?: { [id: string]: { count: string } }
@@ -48,7 +49,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
       </div>
 
       <div className="flex flex-col gap-4">
-        {relicCategoryEntries.map(({ name, unselectable, children = [] }) => {
+        {relicCategories.map(({ name, unselectable, children }) => {
           const invisibleEffectIds = children.reduce<string[]>((acc, effect) => {
             const isUnselectedInShowMode = showSelectedOnly && effectCountMap[effect.id] == null
             const isFilteredOut = filterText !== '' && !effect.name.includes(filterText)
@@ -102,8 +103,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                             grid grid-cols-[1fr_auto_theme(spacing.6)]
                             items-center gap-4 border-t border-t-zinc-700
                           `,
-                          invisibleEffectIds.includes(effect.id) &&
-                            `collapse-fallback`,
+                          invisibleEffectIds.includes(effect.id) && `collapse-fallback`,
                           !rootReadOnly && 'px-4 py-2',
                           rootReadOnly && index % 2 === 0 && 'bg-zinc-800/80',
                           rootReadOnly && index % 2 === 1 && 'bg-zinc-800/50',
@@ -121,10 +121,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                                 <ChevronRight
                                   role="img"
                                   aria-label={`${effect.name}の詳細指定を${open ? '閉じる' : '開く'}`}
-                                  className={twMerge(
-                                    `transition-transform duration-200`,
-                                    open && `rotate-90`,
-                                  )}
+                                  className={twMerge(`transition-transform duration-200`, open && `rotate-90`)}
                                 />
                               </>
                             )}
@@ -166,10 +163,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                                   <ChevronRight
                                     role="img"
                                     aria-label={`${effect.name}の詳細指定を${open ? '閉じる' : '開く'}`}
-                                    className={twMerge(
-                                      `transition-transform duration-200`,
-                                      open && `rotate-90`,
-                                    )}
+                                    className={twMerge(`transition-transform duration-200`, open && `rotate-90`)}
                                   />
                                 )}
                               </Toggle.Button>
@@ -180,12 +174,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 
                       <Toggle.Content>
                         {!invisibleEffectIds.includes(effect.id) && (
-                          <ul
-                            className={twMerge(
-                              `flex flex-col border-t border-zinc-700`,
-                              !rootReadOnly && `pl-6`,
-                            )}
-                          >
+                          <ul className={twMerge(`flex flex-col border-t border-zinc-700`, !rootReadOnly && `pl-6`)}>
                             {effect.children?.map((item) => (
                               <li
                                 key={item.id}
@@ -205,10 +194,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                                     <span className="text-sm">{item.name}</span>
                                   </Checkbox>
                                 ) : (
-                                  <Checkbox
-                                    disabled
-                                    className={`has-[:disabled]:opacity-60`}
-                                  >
+                                  <Checkbox disabled className={`has-[:disabled]:opacity-60`}>
                                     <span className="text-sm">{item.name}</span>
                                   </Checkbox>
                                 )}

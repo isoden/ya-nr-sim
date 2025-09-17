@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react'
 import { Await } from 'react-router'
-import { depthsRelicEffectMap, negativeDepthsRelicEffectMap, relicEffectMap } from '~/data/relics'
+import { relicEffectMap, demeritDepthsRelicEffectMap } from '~/data/relics'
 import { SlotColor } from '~/data/vessels'
 import type { Build, Result } from '../services/simulator/types'
 
@@ -18,10 +18,12 @@ type Props = {
  */
 export const BuildList: React.FC<Props> = ({ resultKey, result }) => {
   return (
-    <section className={`
+    <section
+      className={`
       overflow-y-scroll rounded-lg border border-gray-400/10 bg-zinc-950/20 p-6
       shadow
-    `}>
+    `}
+    >
       <h2 className="text-lg font-semibold">検索結果</h2>
 
       <div className="mt-6 flex flex-col gap-6">
@@ -74,10 +76,13 @@ function Success({ builds }: { builds: Build[] }) {
           <ul className="flex gap-2">
             {item.vessel.slots.map((slot, i) => {
               return (
-                <li key={`${slot}.${i}`} className={`
+                <li
+                  key={`${slot}.${i}`}
+                  className={`
                   relative size-5
                   ${bgColorMap[slot]}
-                `}>
+                `}
+                >
                   <span className="sr-only">{slot}</span>
                 </li>
               )
@@ -90,20 +95,22 @@ function Success({ builds }: { builds: Build[] }) {
             <li key={relic.id}>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold">{relic.name}</span>
-                <span className={`
+                <span
+                  className={`
                   relative size-5
                   ${bgColorMap[relic.colorExtended]}
-                `} />
+                `}
+                />
               </div>
               <ul className="mt-2 list-inside list-disc text-sm">
-                {relic.pairedEffectIds.map(([effectId, negativeEffectId], i) => {
+                {relic.pairedEffectIds.map(([effectId, demeritEffectId], i) => {
                   return (
                     <li key={`${effectId}.${i}`} className="mt-1">
-                      {(relicEffectMap[effectId] || depthsRelicEffectMap[effectId]).name}
+                      {relicEffectMap[effectId].name}
 
-                      {negativeEffectId && (
+                      {demeritEffectId && (
                         <ul className="mt-1 pl-5 text-xs text-red-400">
-                          <li className="text-red-400">{negativeDepthsRelicEffectMap[negativeEffectId].name}</li>
+                          <li className="text-red-400">{demeritDepthsRelicEffectMap[demeritEffectId].name}</li>
                         </ul>
                       )}
                     </li>

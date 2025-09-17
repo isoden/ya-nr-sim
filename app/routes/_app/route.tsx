@@ -1,7 +1,7 @@
 import { NavLink, Outlet } from 'react-router'
 import { invariant } from 'es-toolkit'
 import type { Route } from './+types/route'
-import { depthsRelicEffectMap, negativeDepthsRelicEffectMap, normalizeEffectId, relicEffectMap } from '~/data/relics'
+import { normalizeEffectId, relicEffectMap, demeritDepthsRelicEffectMap } from '~/data/relics'
 
 // FIX: consider import path
 import { parseStringifiedRelicsSchema } from '../_app._index/schema/StringifiedRelicsSchema'
@@ -18,8 +18,7 @@ function assertRelics(relics: ReturnType<typeof parseStringifiedRelicsSchema>): 
   const invalidEffectIds = relics
     .flatMap((relic) => relic.effects.map(normalizeEffectId))
     .filter(
-      (effectId): effectId is number =>
-        (relicEffectMap[effectId] || depthsRelicEffectMap[effectId] || negativeDepthsRelicEffectMap[effectId]) == null,
+      (effectId): effectId is number => (relicEffectMap[effectId] || demeritDepthsRelicEffectMap[effectId]) == null,
     )
 
   if (invalidEffectIds.length > 0) {
@@ -39,9 +38,13 @@ export default function Layout({ loaderData }: Route.ComponentProps) {
         <h1 className="text-xl font-bold">ナイトレインビルドシミュレーター</h1>
         <nav className="ml-auto flex gap-6" aria-label="メインナビゲーション">
           {navLinks.map((link) => (
-            <NavLink key={link.href} to={link.href} className={`
+            <NavLink
+              key={link.href}
+              to={link.href}
+              className={`
               nav-link pb-1 text-sm
-            `}>
+            `}
+            >
               {link.label}
             </NavLink>
           ))}
