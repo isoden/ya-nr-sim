@@ -1,5 +1,7 @@
 import { NavLink, Outlet } from 'react-router'
+import { invariant } from 'es-toolkit'
 import type { Route } from './+types/route'
+import { depthsRelicEffectMap, negativeDepthsRelicEffectMap, normalizeEffectId, relicEffectMap } from '~/data/relics'
 
 // FIX: consider import path
 import { parseStringifiedRelicsSchema } from '../_app._index/schema/StringifiedRelicsSchema'
@@ -7,7 +9,22 @@ import { parseStringifiedRelicsSchema } from '../_app._index/schema/StringifiedR
 export function clientLoader() {
   const relics = parseStringifiedRelicsSchema(localStorage.getItem('relics'))
 
+  assertRelics(relics)
+
   return { relicsCount: relics.length }
+}
+
+function assertRelics(relics: ReturnType<typeof parseStringifiedRelicsSchema>): asserts relics {
+  const invalidEffectIds = relics
+    .flatMap((relic) => relic.effects.map(normalizeEffectId))
+    .filter(
+      (effectId): effectId is number =>
+        (relicEffectMap[effectId] || depthsRelicEffectMap[effectId] || negativeDepthsRelicEffectMap[effectId]) == null,
+    )
+
+  if (invalidEffectIds.length > 0) {
+    invariant(false, `invalidEffectIds: ${[...new Set(invalidEffectIds).values()].join(', ')}`)
+  }
 }
 
 export default function Layout({ loaderData }: Route.ComponentProps) {

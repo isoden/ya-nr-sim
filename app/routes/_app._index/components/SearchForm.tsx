@@ -67,7 +67,9 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
           <Checkbox className="text-sm mr-auto" checked={isAutoSearchEnabled} onChange={setIsAutoSearchEnabled}>
             自動検索をON
           </Checkbox>
-
+          <Checkbox className="text-sm" checked readOnly>
+            深層の遺物を含む
+          </Checkbox>
           <Button
             variant="secondary"
             type="button"

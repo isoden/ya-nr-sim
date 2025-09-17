@@ -1,4 +1,5 @@
 import * as v from 'valibot'
+import { Relic } from '~/data/relics'
 
 const CharIdRequired = 'キャラクター(献器)を選択してください'
 const EffectsRequired = '効果は1つ以上選択してください'
@@ -11,7 +12,7 @@ export const FormSchema = v.object(
       v.record(
         v.string(),
         v.object({
-          count: v.pipe(v.string(), v.transform(Number), v.integer(), v.minValue(1), v.maxValue(3)),
+          count: v.pipe(v.string(), v.transform(Number), v.integer(), v.minValue(1), v.maxValue(Relic.MAX_EFFECTS)),
         }),
       ),
       v.check((value) => Object.keys(value).length > 0, EffectsRequired),

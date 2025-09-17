@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react'
 import { PlusIcon, MinusIcon, ChevronRight, TextSearch, CircleXIcon } from 'lucide-react'
 import { set } from 'es-toolkit/compat'
 import { twMerge } from 'tailwind-merge'
-import { relicCategoryEntries } from '~/data/relics'
+import { Relic, relicCategoryEntries } from '~/data/relics'
 import { Checkbox } from './forms/Checkbox'
 import { Toggle } from './Toggle'
 
@@ -117,7 +117,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                               className="disabled:text-gray-500/50 border border-zinc-600 rounded text-right disabled:border-zinc-800"
                               disabled={effectCountMap[effect.id] == null}
                               min={1}
-                              max={effect.stackable ? 3 : 1}
+                              max={effect.stackable ? Relic.MAX_EFFECTS : 1}
                               value={effectCountMap[effect.id]?.count ?? 1}
                               onChange={(event) => {
                                 const value = event.target.valueAsNumber
@@ -188,7 +188,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                                     className="disabled:text-gray-500/50"
                                     disabled
                                     min={1}
-                                    max={3}
+                                    max={Relic.MAX_EFFECTS}
                                     defaultValue={1}
                                   />
                                 )}
