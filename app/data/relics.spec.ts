@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { mockRelic } from '~/test/mocks/relic'
-import { Relic, RelicColorExtended, RelicColorBase } from './relics'
+import { RelicColorExtended, RelicColorBase } from './relics'
 
 describe('Relic#name', () => {
   describe('遺物(通常)', () => {

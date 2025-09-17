@@ -47,7 +47,9 @@ const ToggleContent: React.FC<ContentProps> = ({ children, className }) => {
   const { id, open } = useContext(ToggleContext)!
 
   return (
-    <div aria-hidden={!open} id={`toggle-${id}`} className={twMerge(className, 'aria-[hidden=true]:collapse-fallback')}>
+    <div aria-hidden={!open} id={`toggle-${id}`} className={twMerge(className, `
+      aria-[hidden=true]:collapse-fallback
+    `)}>
       {children}
     </div>
   )

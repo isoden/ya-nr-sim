@@ -782,7 +782,7 @@ function mapper(item: Relic['name'] | { name: string; unselectable?: boolean; ch
 }
 
 function idGenerator() {
-  let v = {
+  const v = {
     major: 0,
     minor: 0,
     patch: 0,

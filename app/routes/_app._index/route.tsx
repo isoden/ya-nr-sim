@@ -6,7 +6,7 @@ import { parseStringifiedRelicsSchema } from './schema/StringifiedRelicsSchema'
 import { parseQuerySchema } from './schema/QuerySchema'
 import { simulate } from './services/simulator'
 
-export function meta({}: Route.MetaArgs) {
+export const meta: Route.MetaFunction = () => {
   return [{ title: 'YA-ナイトレインビルドシミュレーター' }]
 }
 
@@ -36,7 +36,7 @@ export const clientLoader = async ({ request }: Route.ClientLoaderArgs) => {
 
 export default function Home({ loaderData: { params, result } }: Route.ComponentProps) {
   return (
-    <main className="grid grid-cols-2 min-h-0 gap-6">
+    <main className="grid min-h-0 grid-cols-2 gap-6">
       <SearchForm defaultValues={params} />
       <BuildList resultKey={JSON.stringify(params)} result={result} />
     </main>

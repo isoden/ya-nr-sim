@@ -30,7 +30,11 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
     <fieldset>
       <legend className="text-[15px] text-gray-300">遺物効果</legend>
 
-      <div className="flex items-end justify-between sticky top-0 z-10 bg-zinc-800 pb-4">
+      <div
+        className={`
+          sticky top-0 z-10 flex items-end justify-between bg-zinc-800 pb-4
+        `}
+      >
         <Checkbox
           disabled={!showSelectedOnly && !Object.keys(effectCountMap).length}
           checked={showSelectedOnly}
@@ -59,12 +63,21 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
             <Toggle.Root key={name} storage={name}>
               <div
                 className={twMerge(
-                  'group border bg-zinc-800 shadow border-zinc-700 rounded-md relative',
+                  `
+                    group relative rounded-md border border-zinc-700 bg-zinc-800
+                    shadow
+                  `,
                   invisible && 'collapse-fallback',
                 )}
                 aria-hidden={invisible}
               >
-                <Toggle.Button className="w-full px-4 py-3 leading-0 flex items-center rounded-tr-md rounded-tl-md not-[:open]:rounded-br-md not-[:open]:rounded-bl-md">
+                <Toggle.Button
+                  className={`
+                    flex w-full items-center rounded-tl-md rounded-tr-md px-4
+                    py-3 leading-0
+                    not-[:open]:rounded-br-md not-[:open]:rounded-bl-md
+                  `}
+                >
                   {({ open }) => (
                     <>
                       <span className="text-sm font-bold">{name}</span>
@@ -74,28 +87,44 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                     </>
                   )}
                 </Toggle.Button>
-                <Toggle.Content className="max-h-80 overflow-y-scroll bg-zinc-700/20 rounded-br-md flex flex-col rounded-bl-md">
+                <Toggle.Content
+                  className={`
+                    flex max-h-80 flex-col overflow-y-scroll rounded-br-md
+                    rounded-bl-md bg-zinc-700/20
+                  `}
+                >
                   {children.map((effect, index) => (
                     <Toggle.Root key={effect.id} storage={effect.id} defaultOpen={false}>
                       <div
                         key={effect.id}
                         className={twMerge(
-                          'border-t border-t-zinc-700 grid grid-cols-[1fr_auto_theme(spacing.6)] items-center gap-4',
-                          invisibleEffectIds.includes(effect.id) && 'collapse-fallback',
+                          `
+                            grid grid-cols-[1fr_auto_theme(spacing.6)]
+                            items-center gap-4 border-t border-t-zinc-700
+                          `,
+                          invisibleEffectIds.includes(effect.id) &&
+                            `collapse-fallback`,
                           !rootReadOnly && 'px-4 py-2',
                           rootReadOnly && index % 2 === 0 && 'bg-zinc-800/80',
                           rootReadOnly && index % 2 === 1 && 'bg-zinc-800/50',
                         )}
                       >
                         {rootReadOnly ? (
-                          <Toggle.Button className="px-4 py-2 grid grid-cols-subgrid col-span-full">
+                          <Toggle.Button
+                            className={`
+                              col-span-full grid grid-cols-subgrid px-4 py-2
+                            `}
+                          >
                             {({ open }) => (
                               <>
-                                <span className="text-sm text-left col-span-2">{effect.name}</span>
+                                <span className="col-span-2 text-left text-sm">{effect.name}</span>
                                 <ChevronRight
                                   role="img"
                                   aria-label={`${effect.name}の詳細指定を${open ? '閉じる' : '開く'}`}
-                                  className={twMerge('transition-transform duration-200', open && 'rotate-90')}
+                                  className={twMerge(
+                                    `transition-transform duration-200`,
+                                    open && `rotate-90`,
+                                  )}
                                 />
                               </>
                             )}
@@ -114,7 +143,11 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                             <input
                               type="number"
                               name={`effects.${effect.id}.count`}
-                              className="disabled:text-gray-500/50 border border-zinc-600 rounded text-right disabled:border-zinc-800"
+                              className={`
+                                rounded border border-zinc-600 text-right
+                                disabled:border-zinc-800
+                                disabled:text-gray-500/50
+                              `}
                               disabled={effectCountMap[effect.id] == null}
                               min={1}
                               max={effect.stackable ? Relic.MAX_EFFECTS : 1}
@@ -133,7 +166,10 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                                   <ChevronRight
                                     role="img"
                                     aria-label={`${effect.name}の詳細指定を${open ? '閉じる' : '開く'}`}
-                                    className={twMerge('transition-transform duration-200', open && 'rotate-90')}
+                                    className={twMerge(
+                                      `transition-transform duration-200`,
+                                      open && `rotate-90`,
+                                    )}
                                   />
                                 )}
                               </Toggle.Button>
@@ -144,11 +180,19 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 
                       <Toggle.Content>
                         {!invisibleEffectIds.includes(effect.id) && (
-                          <ul className={twMerge('flex flex-col border-t border-zinc-700', !rootReadOnly && 'pl-6')}>
+                          <ul
+                            className={twMerge(
+                              `flex flex-col border-t border-zinc-700`,
+                              !rootReadOnly && `pl-6`,
+                            )}
+                          >
                             {effect.children?.map((item) => (
                               <li
                                 key={item.id}
-                                className="not-first-of-type:border-t border-zinc-700 flex justify-between px-4 py-2"
+                                className={`
+                                  flex justify-between border-zinc-700 px-4 py-2
+                                  not-first-of-type:border-t
+                                `}
                               >
                                 {rootReadOnly ? (
                                   <Checkbox
@@ -161,7 +205,10 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                                     <span className="text-sm">{item.name}</span>
                                   </Checkbox>
                                 ) : (
-                                  <Checkbox disabled className="has-[:disabled]:opacity-60">
+                                  <Checkbox
+                                    disabled
+                                    className={`has-[:disabled]:opacity-60`}
+                                  >
                                     <span className="text-sm">{item.name}</span>
                                   </Checkbox>
                                 )}
@@ -169,7 +216,11 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                                   <input
                                     type="number"
                                     name={`effects.${item.id}.count`}
-                                    className="disabled:text-gray-500/50 border border-zinc-600 rounded text-right disabled:border-zinc-800"
+                                    className={`
+                                      rounded border border-zinc-600 text-right
+                                      disabled:border-zinc-800
+                                      disabled:text-gray-500/50
+                                    `}
                                     disabled={effectCountMap[item.id] == null}
                                     min={1}
                                     max={item.stackable ? 3 : 1}
@@ -209,12 +260,13 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
   )
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function toggleRecord<Key extends keyof any, Value>(
   obj: Record<Key, Value>,
   key: Key,
   value: Value,
 ): Record<Key, Value> {
-  if (!!obj[key]) {
+  if (obj[key]) {
     const { [key]: _, ...rest } = obj
     return rest as Record<Key, Value>
   } else {
@@ -239,12 +291,12 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
   const isComposingRef = useRef(false)
 
   return (
-    <label className="flex items-center gap-2 relative">
+    <label className="relative flex items-center gap-2">
       <TextSearch aria-label="効果名で絞り込む" />
 
       <input
         type="text"
-        className="border border-white/50 py-1 px-2 rounded"
+        className="rounded border border-white/50 px-2 py-1"
         placeholder="効果名で絞り込む"
         value={value}
         onChange={(event) => {
@@ -269,7 +321,9 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
             setValue('')
             props.setValue('')
           }}
-          className="absolute top-1/2 transform -translate-y-1/2 right-2 text-white/60"
+          className={`
+            absolute top-1/2 right-2 -translate-y-1/2 transform text-white/60
+          `}
         >
           <CircleXIcon className="size-4" />
         </button>

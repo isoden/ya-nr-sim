@@ -34,12 +34,14 @@ export default function Layout({ loaderData }: Route.ComponentProps) {
   ]
 
   return (
-    <div className="h-screen gap-8 p-8 grid grid-rows-[min-content_1fr]">
-      <header className="flex justify-between items-center">
+    <div className="grid h-screen grid-rows-[min-content_1fr] gap-8 p-8">
+      <header className="flex items-center justify-between">
         <h1 className="text-xl font-bold">ナイトレインビルドシミュレーター</h1>
-        <nav className="flex gap-6 ml-auto" aria-label="メインナビゲーション">
+        <nav className="ml-auto flex gap-6" aria-label="メインナビゲーション">
           {navLinks.map((link) => (
-            <NavLink key={link.href} to={link.href} className="nav-link text-sm pb-1">
+            <NavLink key={link.href} to={link.href} className={`
+              nav-link pb-1 text-sm
+            `}>
               {link.label}
             </NavLink>
           ))}

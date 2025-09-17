@@ -35,24 +35,28 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
             setTimeout(() => submit(form, { replace: true, method: 'GET' }), 0)
           }
         }}
-        className="flex flex-col gap-8 h-full"
+        className="flex h-full flex-col gap-8"
         {...getFormProps(form)}
       >
         <h2 className="text-lg font-semibold">条件選択</h2>
 
-        <div className="min-h-0 flex-1 flex flex-col gap-6 overflow-y-auto">
-          <div className="flex gap-4 flex-wrap">
-            <label htmlFor={fields.charId.id} className="text-[15px] text-gray-300">
+        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto">
+          <div className="flex flex-wrap gap-4">
+            <label htmlFor={fields.charId.id} className={`
+              text-[15px] text-gray-300
+            `}>
               キャラクター(献器)
             </label>
-            <select {...getSelectProps(fields.charId)} className="border border-zinc-600 p-1 rounded">
+            <select {...getSelectProps(fields.charId)} className={`
+              rounded border border-zinc-600 p-1
+            `}>
               {characterItems.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.name}
                 </option>
               ))}
             </select>
-            {fields.charId.errors && <p className="text-orange-700 w-full">{fields.charId.errors[0]}</p>}
+            {fields.charId.errors && <p className="w-full text-orange-700">{fields.charId.errors[0]}</p>}
           </div>
 
           <RelicEffectSelector defaultValue={fields.effects.value as unknown as RelicEffectSelectorDefaultValue} />
@@ -64,7 +68,7 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
           <Button variant="primary" type="submit" isDisabled={isAutoSearchEnabled}>
             検索
           </Button>
-          <Checkbox className="text-sm mr-auto" checked={isAutoSearchEnabled} onChange={setIsAutoSearchEnabled}>
+          <Checkbox className="mr-auto text-sm" checked={isAutoSearchEnabled} onChange={setIsAutoSearchEnabled}>
             自動検索をON
           </Checkbox>
           <Checkbox className="text-sm" checked readOnly>

@@ -1,14 +1,12 @@
-import { useId, useRef, useState } from 'react'
+import { useId, useState } from 'react'
 import { Button } from '~/components/forms/Button'
-import type { Route } from './+types/route'
 
 export function clientLoader() {
   return { relicsCount: 1000 }
 }
 
-export default function Page({ loaderData }: Route.ComponentProps) {
+export default function Page() {
   const id = useId()
-  const ref = useRef<HTMLDialogElement>(null)
   const [jsonAsText, setJsonAsText] = useState(() => {
     try {
       const relics = localStorage.getItem('relics')
@@ -24,18 +22,25 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 
   return (
     <main className="overflow-auto">
-      <h2 id={id} className="border-b border-zinc-600 pb-3 text-lg font-semibold">
+      <h2
+        id={id}
+        className={`border-b border-zinc-600 pb-3 text-lg font-semibold`}
+      >
         遺物管理
       </h2>
       <div>
         <textarea
-          className="w-full min-h-[theme(spacing.64)] border border-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 focus:ring-offset-black rounded"
+          className={`
+            min-h-[theme(spacing.64)] w-full rounded border border-zinc-600
+            focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2
+            focus:ring-offset-black focus:outline-none
+          `}
           aria-labelledby={id}
           value={jsonAsText}
           onChange={(event) => setJsonAsText(event.target.value)}
         />
       </div>
-      <div className="flex gap-2 mt-4">
+      <div className="mt-4 flex gap-2">
         <Button variant="primary" type="button" onPress={() => importRelics()}>
           保存
         </Button>

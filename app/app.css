@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @layer base {
   html {
@@ -13,11 +13,11 @@
 
 @layer components {
   .nav-link {
-    &[aria-current='page'] {
+    &[aria-current="page"] {
       @apply relative;
 
       &::before {
-        content: '';
+        content: "";
         @apply absolute bottom-0 w-8 left-1/2 -translate-x-1/2 bg-pink-600 h-0.5 rounded-full;
       }
     }
@@ -27,7 +27,7 @@
 @layer utilities {
   /* visibility: collapse のブラウザ対応が十分になるまでのフォールバック */
   .collapse-fallback,
-  .aria-\[hidden\=true\]\:collapse-fallback[aria-hidden='true'] {
+  .aria-\[hidden\=true\]\:collapse-fallback[aria-hidden="true"] {
     position: absolute;
     width: 1px;
     height: 1px;

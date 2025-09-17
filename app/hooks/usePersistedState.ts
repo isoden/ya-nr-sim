@@ -21,7 +21,9 @@ export function usePersistedState<T>(storeKey: string, defaultValue: T): [T, (va
       setState(value)
       try {
         localStorage.setItem(storeKey, JSON.stringify(value))
-      } catch {}
+      } catch {
+        // ignore runtime errors
+      }
     },
     [storeKey],
   )
