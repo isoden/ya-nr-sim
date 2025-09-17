@@ -1,8 +1,8 @@
 import type { Route } from './+types/route'
 import { vesselsByCharacterMap } from '~/data/vessels'
+import { parseStringifiedRelicsSchema } from '~/schema/StringifiedRelicsSchema'
 import { BuildList } from './components/BuildList'
 import { SearchForm } from './components/SearchForm'
-import { parseStringifiedRelicsSchema } from './schema/StringifiedRelicsSchema'
 import { parseQuerySchema } from './schema/QuerySchema'
 import { simulate } from './services/simulator'
 

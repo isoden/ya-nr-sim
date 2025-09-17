@@ -1,10 +1,6 @@
 import { useId, useState } from 'react'
 import { Button } from '~/components/forms/Button'
 
-export function clientLoader() {
-  return { relicsCount: 1000 }
-}
-
 export default function Page() {
   const id = useId()
   const [jsonAsText, setJsonAsText] = useState(() => {
@@ -22,10 +18,7 @@ export default function Page() {
 
   return (
     <main className="overflow-auto">
-      <h2
-        id={id}
-        className={`border-b border-zinc-600 pb-3 text-lg font-semibold`}
-      >
+      <h2 id={id} className={`border-b border-zinc-600 pb-3 text-lg font-semibold`}>
         遺物管理
       </h2>
       <div>

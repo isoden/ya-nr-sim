@@ -1,4 +1,4 @@
-import type { RelicSchema } from '~/routes/_app._index/schema/StringifiedRelicsSchema'
+import type { RelicSchema } from '~/schema/StringifiedRelicsSchema'
 import { demeritDepthsRelicEffectMap, relicEffectMap } from './relicEffects'
 
 export { relicEffectMap, demeritDepthsRelicEffectMap }
