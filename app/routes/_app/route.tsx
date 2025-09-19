@@ -1,9 +1,10 @@
 import { NavLink, Outlet } from 'react-router'
-import { parseStringifiedRelicsSchema } from '~/schema/StringifiedRelicsSchema'
+import { createUserDataStorageService } from '~/services/storage'
 import type { Route } from './+types/route'
 
 export function clientLoader() {
-  const relics = parseStringifiedRelicsSchema(localStorage.getItem('relics'))
+  const storageService = createUserDataStorageService()
+  const relics = storageService.getRelics()
 
   return { relicsCount: relics.length }
 }

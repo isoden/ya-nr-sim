@@ -1,19 +1,17 @@
 import { useId, useState } from 'react'
 import { Button } from '~/components/forms/Button'
+import { createUserDataStorageService } from '~/services/storage'
 
 export default function Page() {
   const id = useId()
+  const storageService = createUserDataStorageService()
+
   const [jsonAsText, setJsonAsText] = useState(() => {
-    try {
-      const relics = localStorage.getItem('relics')
-      return relics ? JSON.stringify(JSON.parse(relics), null, 4) : ''
-    } catch {
-      return ''
-    }
+    return JSON.stringify(storageService.getRelics(), null, 4)
   })
 
   const importRelics = () => {
-    localStorage.setItem('relics', jsonAsText)
+    storageService.saveRelics(JSON.parse(jsonAsText))
   }
 
   return (
