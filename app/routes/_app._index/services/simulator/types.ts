@@ -4,6 +4,7 @@ import type { Vessel } from '~/data/vessels'
 export type Build = {
   vessel: Vessel
   relics: Relic[]
+  relicsIndexes: { [id: Relic['id']]: number }
 }
 
 export type Args = {

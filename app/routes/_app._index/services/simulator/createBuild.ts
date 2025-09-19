@@ -8,7 +8,7 @@ import type { Build } from './types'
  * solverが返す変数の値（0 or 1）から、実際の器と遺物の組み合わせを作成
  */
 export function createBuild(variables: [string, number][], vessels: Vessel[], relics: Relic[]): Build {
-  const build: Build = { vessel: null!, relics: [] }
+  const build: Build = { vessel: null!, relics: [], relicsIndexes: {} }
 
   // 遺物とそのスロットタイプの情報を収集
   const relicSlotMap = new Map<Relic['id'], 'color' | 'free'>()
@@ -82,6 +82,14 @@ export function createBuild(variables: [string, number][], vessels: Vessel[], re
     // - それ以外はID順
     return a.id.localeCompare(b.id)
   })
+
+  // vessel.slotsのインデックスと遺物IDの対応を生成
+  build.relicsIndexes = build.relics.reduce<typeof build.relicsIndexes>((indexes, relic) => {
+    const slotType = relicSlotMap.get(relic.id)
+    const slotIndex = slotType === 'color' ? getColorSlotIndex(relic) : getFreeSlotIndex()
+    indexes[relic.id] = slotIndex
+    return indexes
+  }, {})
 
   return build
 }

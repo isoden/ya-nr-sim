@@ -90,35 +90,43 @@ function Success({ builds }: { builds: Build[] }) {
           </ul>
         </header>
 
-        <ul className="mt-4 grid grid-cols-3 gap-4">
-          {item.relics.map((relic) => (
-            <li key={relic.id}>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-bold">{relic.name}</span>
-                <span
-                  className={`
-                  relative size-5
-                  ${bgColorMap[relic.colorExtended]}
-                `}
-                />
-              </div>
-              <ul className="mt-2 list-inside list-disc text-sm">
-                {relic.pairedEffectIds.map(([effectId, demeritEffectId], i) => {
-                  return (
+        <ul className=" mt-4 grid grid-cols-3 grid-rows-2 gap-4">
+          {item.vessel.slots.map((slotColor, index) => {
+            const relic = item.relics.find((r) => item.relicsIndexes[r.id] === index)
+
+            if (!relic) {
+              return (
+                <li key={index}>
+                  <div className="gap-2 text-gray-500 border border-dashed border-gray-400 rounded p-4 min-h-16 flex items-center justify-center">
+                    <span className="text-xs">空きスロット</span>
+                    <span className={`size-4 ${bgColorMap[slotColor]}`} />
+                  </div>
+                </li>
+              )
+            }
+
+            return (
+              <li key={index}>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold">{relic.name}</span>
+                  <span className={`relative size-5 ${bgColorMap[relic.colorExtended]}`} />
+                </div>
+                <ul className="mt-2 list-inside list-disc text-sm">
+                  {relic.pairedEffectIds.map(([effectId, demeritEffectId], i) => (
                     <li key={`${effectId}.${i}`} className="mt-1">
                       {relicEffectMap[effectId].name}
 
                       {demeritEffectId && (
                         <ul className="mt-1 pl-5 text-xs text-red-400">
-                          <li className="text-red-400">{demeritDepthsRelicEffectMap[demeritEffectId].name}</li>
+                          <li>{demeritDepthsRelicEffectMap[demeritEffectId].name}</li>
                         </ul>
                       )}
                     </li>
-                  )
-                })}
-              </ul>
-            </li>
-          ))}
+                  ))}
+                </ul>
+              </li>
+            )
+          })}
         </ul>
       </div>
     )
