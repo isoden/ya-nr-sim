@@ -7,7 +7,7 @@ import betterTailwindcss from 'eslint-plugin-better-tailwindcss'
 
 export default defineConfig([
   {
-    ignores: ['.react-router'],
+    ignores: ['.react-router', 'build'],
   },
   {
     files: ['**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],

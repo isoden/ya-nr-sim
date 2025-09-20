@@ -7,7 +7,8 @@ import { simulate } from './simulator'
 describe('マッチするパターン', () => {
   test('マッチするパターン', async () => {
     const vessels = vesselsByCharacterMap['revenant']
-    const relics = [mockRelic({ color: RelicColorBase.Red, effects: [7082600] })]
+    const red = mockRelic({ color: RelicColorBase.Red, effects: [7082600] })
+    const relics = [red]
 
     const result = await simulate({
       vessels,
@@ -27,6 +28,9 @@ describe('マッチするパターン', () => {
         {
           vessel: vessels.find((v) => v.name.includes('復讐者の盃')),
           relics: [relics[0]],
+          relicsIndexes: {
+            [red.id]: 0,
+          },
         },
       ],
     })
@@ -34,11 +38,10 @@ describe('マッチするパターン', () => {
 
   test('グループ内の異なる効果IDでマッチする', async () => {
     const vessels = vesselsByCharacterMap['revenant']
-    const relics = [
-      mockRelic({ color: RelicColorBase.Red, effects: [7000300] }), // 筋力+1
-      mockRelic({ color: RelicColorBase.Blue, effects: [7000301] }), // 筋力+2
-      mockRelic({ color: RelicColorBase.Green, effects: [7000302] }), // 筋力+3
-    ]
+    const red = mockRelic({ color: RelicColorBase.Red, effects: [7000300] }) // 筋力+1
+    const blue = mockRelic({ color: RelicColorBase.Blue, effects: [7000301] }) // 筋力+2
+    const green = mockRelic({ color: RelicColorBase.Green, effects: [7000302] }) // 筋力+3
+    const relics = [red, blue, green]
 
     const result = await simulate({
       vessels,
@@ -58,6 +61,11 @@ describe('マッチするパターン', () => {
           vessel: vessels.find((v) => v.name.includes('復讐者の高杯')),
           // TODO: 並び順に関係なく、含まれていればOKになるようにする
           relics: [relics[1], relics[2], relics[0]],
+          relicsIndexes: {
+            [blue.id]: 0,
+            [green.id]: 1,
+            [red.id]: 2,
+          },
         },
       ],
     })
@@ -86,6 +94,11 @@ describe('マッチするパターン', () => {
           {
             vessel: vessels[0],
             relics: [red, blue, yellow],
+            relicsIndexes: {
+              [red.id]: 0,
+              [blue.id]: 1,
+              [yellow.id]: 2,
+            },
           },
         ],
       })
@@ -113,6 +126,11 @@ describe('マッチするパターン', () => {
           {
             vessel: vessels[0],
             relics: [red, green, yellow],
+            relicsIndexes: {
+              [red.id]: 0,
+              [green.id]: 1,
+              [yellow.id]: 2,
+            },
           },
         ],
       })
@@ -120,7 +138,7 @@ describe('マッチするパターン', () => {
 
     test('同じ色の遺物はID順に並べ替える', async () => {
       const vessels = vesselsByCharacterMap['ironeye']
-        // 赤青黄の順の献器
+        // 黄黄黄の順の献器
         .filter((v) => v.name.includes('黄金樹の聖杯'))
       const yellow1 = mockRelic({ id: '1', color: RelicColorBase.Yellow, effects: [7126000] })
       const yellow2 = mockRelic({ id: '2', color: RelicColorBase.Yellow, effects: [7126000] })
@@ -140,6 +158,11 @@ describe('マッチするパターン', () => {
           {
             vessel: vessels[0],
             relics: [yellow1, yellow2, yellow3],
+            relicsIndexes: {
+              [yellow1.id]: 0,
+              [yellow2.id]: 1,
+              [yellow3.id]: 2,
+            },
           },
         ],
       })

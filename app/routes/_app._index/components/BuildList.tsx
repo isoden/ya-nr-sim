@@ -20,9 +20,9 @@ export const BuildList: React.FC<Props> = ({ resultKey, result }) => {
   return (
     <section
       className={`
-      overflow-y-scroll rounded-lg border border-gray-400/10 bg-zinc-950/20 p-6
-      shadow
-    `}
+        overflow-y-scroll rounded-lg border border-gray-400/10 bg-zinc-950/20
+        p-6 shadow
+      `}
     >
       <h2 className="text-lg font-semibold">検索結果</h2>
 
@@ -79,9 +79,9 @@ function Success({ builds }: { builds: Build[] }) {
                 <li
                   key={`${slot}.${i}`}
                   className={`
-                  relative size-5
-                  ${bgColorMap[slot]}
-                `}
+                    relative size-5
+                    ${bgColorMap[slot]}
+                  `}
                 >
                   <span className="sr-only">{slot}</span>
                 </li>
@@ -90,16 +90,22 @@ function Success({ builds }: { builds: Build[] }) {
           </ul>
         </header>
 
-        <ul className=" mt-4 grid grid-cols-3 grid-rows-2 gap-4">
+        <ul className="mt-4 grid grid-cols-3 grid-rows-2 gap-4">
           {item.vessel.slots.map((slotColor, index) => {
             const relic = item.relics.find((r) => item.relicsIndexes[r.id] === index)
 
             if (!relic) {
               return (
                 <li key={index}>
-                  <div className="gap-2 text-gray-500 border border-dashed border-gray-400 rounded p-4 min-h-16 flex items-center justify-center">
+                  <div className={`
+                    flex min-h-16 items-center justify-center gap-2 rounded
+                    border border-dashed border-gray-400 p-4 text-gray-500
+                  `}>
                     <span className="text-xs">空きスロット</span>
-                    <span className={`size-4 ${bgColorMap[slotColor]}`} />
+                    <span className={`
+                      size-4
+                      ${bgColorMap[slotColor]}
+                    `} />
                   </div>
                 </li>
               )
@@ -109,7 +115,10 @@ function Success({ builds }: { builds: Build[] }) {
               <li key={index}>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-bold">{relic.name}</span>
-                  <span className={`relative size-5 ${bgColorMap[relic.colorExtended]}`} />
+                  <span className={`
+                    relative size-5
+                    ${bgColorMap[relic.colorExtended]}
+                  `} />
                 </div>
                 <ul className="mt-2 list-inside list-disc text-sm">
                   {relic.pairedEffectIds.map(([effectId, demeritEffectId], i) => (

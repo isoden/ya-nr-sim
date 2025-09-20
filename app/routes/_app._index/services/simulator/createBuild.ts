@@ -2,6 +2,11 @@ import type { Relic } from '~/data/relics'
 import { SlotColor, type Vessel } from '~/data/vessels'
 import type { Build } from './types'
 
+const enum SlotType {
+  Color = 'color',
+  Free = 'free',
+}
+
 /**
  * solverの結果の変数を実際のデータにマッピングしてビルドを作成する
  *
@@ -11,7 +16,7 @@ export function createBuild(variables: [string, number][], vessels: Vessel[], re
   const build: Build = { vessel: null!, relics: [], relicsIndexes: {} }
 
   // 遺物とそのスロットタイプの情報を収集
-  const relicSlotMap = new Map<Relic['id'], 'color' | 'free'>()
+  const relicSlotMap = new Map<Relic['id'], SlotType>()
 
   for (const [key, value] of variables) {
     if (value === 0) continue
@@ -28,15 +33,15 @@ export function createBuild(variables: [string, number][], vessels: Vessel[], re
         if (value === 1 && parts.length >= 3) {
           // relic.{id}.color or relic.{id}.free
           const relicId = parts[1]
-          const slotType = parts[2] as 'color' | 'free'
+          const slotType = parts[2] as SlotType
           const relic = relics.find((r) => r.id === relicId)
           if (relic && !build.relics.some((r) => r.id === relicId)) {
             build.relics.push(relic)
             // 実際のスロットタイプを判定する
             // 色スロットとして指定されているが、献器にその色がない場合はFreeスロットとして扱う
             let actualSlotType = slotType
-            if (slotType === 'color' && build.vessel && !build.vessel.slots.includes(relic.colorExtended)) {
-              actualSlotType = 'free'
+            if (slotType === SlotType.Color && build.vessel && !build.vessel.slots.includes(relic.colorExtended)) {
+              actualSlotType = SlotType.Free
             }
             relicSlotMap.set(relicId, actualSlotType)
           }
@@ -56,20 +61,20 @@ export function createBuild(variables: [string, number][], vessels: Vessel[], re
     const aSlotType = relicSlotMap.get(a.id)
     const bSlotType = relicSlotMap.get(b.id)
 
-    if (aSlotType === 'color' && bSlotType === 'color') {
+    if (aSlotType === SlotType.Color && bSlotType === SlotType.Color) {
       // 両方とも色スロットの場合、器のスロット順に並べる
       const aIndex = getColorSlotIndex(a)
       const bIndex = getColorSlotIndex(b)
       const diff = aIndex - bIndex
 
       if (diff !== 0) return diff
-    } else if (aSlotType === 'color' && bSlotType === 'free') {
+    } else if (aSlotType === SlotType.Color && bSlotType === SlotType.Free) {
       // 色スロットとFreeスロットを比較
       const aIndex = getColorSlotIndex(a)
       const bIndex = getFreeSlotIndex()
 
       return aIndex - bIndex
-    } else if (aSlotType === 'free' && bSlotType === 'color') {
+    } else if (aSlotType === SlotType.Free && bSlotType === SlotType.Color) {
       // Freeスロットと色スロットを比較
       const aIndex = getFreeSlotIndex()
       const bIndex = getColorSlotIndex(b)
@@ -84,12 +89,59 @@ export function createBuild(variables: [string, number][], vessels: Vessel[], re
   })
 
   // vessel.slotsのインデックスと遺物IDの対応を生成
-  build.relicsIndexes = build.relics.reduce<typeof build.relicsIndexes>((indexes, relic) => {
-    const slotType = relicSlotMap.get(relic.id)
-    const slotIndex = slotType === 'color' ? getColorSlotIndex(relic) : getFreeSlotIndex()
-    indexes[relic.id] = slotIndex
-    return indexes
-  }, {})
+  build.relicsIndexes = assignRelicsToSlots(build.relics, build.vessel.slots, relicSlotMap)
 
   return build
+}
+
+/**
+ * 遺物をスロットに割り当ててインデックスマップを生成する
+ *
+ * パフォーマンス最適化:
+ * - O(n) の複雑度でスロット位置を事前計算
+ * - 色ごとにスロットインデックスをグループ化
+ */
+function assignRelicsToSlots(
+  relics: Relic[],
+  vesselSlots: Vessel['slots'],
+  relicSlotMap: Map<Relic['id'], SlotType>,
+): Build['relicsIndexes'] {
+  // 色ごとのスロットインデックスを事前計算（O(n)）
+  const slotsByColor = new Map<SlotColor, number[]>()
+  const colorUsageCount = new Map<SlotColor, number>()
+
+  vesselSlots.forEach((color, index) => {
+    if (!slotsByColor.has(color)) {
+      slotsByColor.set(color, [])
+      colorUsageCount.set(color, 0)
+    }
+    slotsByColor.get(color)!.push(index)
+  })
+
+  const relicsIndexes: Build['relicsIndexes'] = {}
+
+  for (const relic of relics) {
+    const slotType = relicSlotMap.get(relic.id)
+
+    if (slotType === SlotType.Color) {
+      const targetColor = relic.colorExtended
+      const availableSlots = slotsByColor.get(targetColor)
+      const usageCount = colorUsageCount.get(targetColor) ?? 0
+
+      if (availableSlots && usageCount < availableSlots.length) {
+        relicsIndexes[relic.id] = availableSlots[usageCount]
+        colorUsageCount.set(targetColor, usageCount + 1)
+      }
+    } else if (slotType === SlotType.Free) {
+      const freeSlots = slotsByColor.get(SlotColor.Free)
+      const usageCount = colorUsageCount.get(SlotColor.Free) ?? 0
+
+      if (freeSlots && usageCount < freeSlots.length) {
+        relicsIndexes[relic.id] = freeSlots[usageCount]
+        colorUsageCount.set(SlotColor.Free, usageCount + 1)
+      }
+    }
+  }
+
+  return relicsIndexes
 }

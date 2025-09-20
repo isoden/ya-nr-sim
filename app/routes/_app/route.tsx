@@ -24,9 +24,7 @@ export default function Layout({ loaderData }: Route.ComponentProps) {
             <NavLink
               key={link.href}
               to={link.href}
-              className={`
-              nav-link pb-1 text-sm
-            `}
+              className={`nav-link pb-1 text-sm`}
             >
               {link.label}
             </NavLink>

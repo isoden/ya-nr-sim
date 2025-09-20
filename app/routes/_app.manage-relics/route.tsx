@@ -16,7 +16,9 @@ export default function Page() {
 
   return (
     <main className="overflow-auto">
-      <h2 id={id} className={`border-b border-zinc-600 pb-3 text-lg font-semibold`}>
+      <h2 id={id} className={`
+        border-b border-zinc-600 pb-3 text-lg font-semibold
+      `}>
         遺物管理
       </h2>
       <div>
