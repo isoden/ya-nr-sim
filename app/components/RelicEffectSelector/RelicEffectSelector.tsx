@@ -1,8 +1,7 @@
 import React, { useRef, useState } from 'react'
-import { PlusIcon, MinusIcon, ChevronRight, TextSearch, CircleXIcon } from 'lucide-react'
+import { ChevronRight, TextSearch, CircleXIcon } from 'lucide-react'
 import { set } from 'es-toolkit/compat'
 import { twMerge } from 'tailwind-merge'
-import { Relic } from '~/data/relics'
 import { Checkbox } from '../forms/Checkbox'
 import { Toggle } from '../Toggle'
 import { relicCategories } from './data'
@@ -28,7 +27,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
   })
 
   return (
-    <fieldset className="flex flex-col h-full min-h-0">
+    <fieldset className="flex h-full min-h-0 flex-col">
       <legend className="text-[15px] text-gray-300">遺物効果</legend>
 
       <div className="flex items-end justify-between bg-zinc-800">
@@ -36,7 +35,10 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
           disabled={!showSelectedOnly && !Object.keys(effectCountMap).length}
           checked={showSelectedOnly}
           onChange={setShowSelectedOnly}
-          className="has-[:disabled]:opacity-60 text-sm"
+          className={`
+            text-sm
+            has-[:disabled]:opacity-60
+          `}
         >
           選択した効果のみ表示
         </Checkbox>
@@ -44,25 +46,30 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
         <SearchInput value={filterText} setValue={setFilterText} />
       </div>
 
-      <div className="mt-3 flex flex-col min-h-0 overflow-y-auto border rounded-md border-zinc-700">
-        {relicCategories.map(({ name, unselectable, children }) => {
-          const invisibleEffectIds = children.reduce<string[]>((acc, effect) => {
+      <div
+        className={`
+        mt-3 flex min-h-0 flex-col overflow-y-auto rounded-md border
+        border-zinc-700
+      `}
+      >
+        {relicCategories.map(({ category, children }) => {
+          const flattenChildren = children.flatMap((item) => item.children)
+          const invisibleEffectIds = flattenChildren.reduce<string[]>((acc, effect) => {
             const isUnselectedInShowMode = showSelectedOnly && effectCountMap[effect.id] == null
             const isFilteredOut = filterText !== '' && !effect.name.includes(filterText)
 
             return isUnselectedInShowMode || isFilteredOut ? acc.concat(effect.id) : acc
           }, [])
 
-          const invisible = invisibleEffectIds.length === children.length
-          const rootReadOnly = unselectable
+          const invisible = invisibleEffectIds.length === flattenChildren.length
 
           return (
-            <Toggle.Root key={name} storage={name}>
+            <Toggle.Root key={category} storage={category}>
               <div
                 className={twMerge(
                   `
-                    group relative not-[:first-child]:border-t  border-zinc-700 bg-zinc-800
-                    shadow
+                    group relative border-zinc-700 bg-zinc-800 shadow
+                    not-[:first-child]:border-t
                   `,
                   invisible && 'collapse-fallback',
                 )}
@@ -70,189 +77,193 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
               >
                 <Toggle.Button
                   className={`
-                    sticky top-0 z-10 flex w-full items-center px-4
-                    bg-inherit
-                    py-2 leading-0
+                    sticky top-0 z-10 flex w-full items-center bg-inherit px-4
+                    py-2 leading-0 shadow-[0_1px_0_0_theme(colors.zinc.700)]
                   `}
                 >
                   {({ open }) => (
                     <>
-                      <span className="text-sm font-bold">{name}</span>
-                      <span className="ml-auto" aria-hidden={true}>
-                        <ChevronRight
-                          role="img"
-                          aria-label={`${name}の詳細指定を${open ? '閉じる' : '開く'}`}
-                          className={twMerge(`transition-transform duration-200`, open && `rotate-90`)}
-                        />
+                      <span className="text-sm font-bold" aria-hidden="true">
+                        {category}
                       </span>
+                      <ChevronRight
+                        role="img"
+                        aria-label={`${category}の詳細指定を${open ? '閉じる' : '開く'}`}
+                        className={twMerge(
+                          `
+                          ml-auto transition-transform duration-200
+                        `,
+                          open && `rotate-90`,
+                        )}
+                      />
                     </>
                   )}
                 </Toggle.Button>
-                <Toggle.Content
-                  className={`
-                    flex flex-col bg-zinc-700/20
-                  `}
-                >
-                  {children.map((effect, index) => (
-                    <Toggle.Root key={effect.id} storage={effect.id} defaultOpen={false}>
+                <Toggle.Content className={`flex flex-col bg-zinc-700/20`}>
+                  {children.map(({ category, children }) => (
+                    <Toggle.Root key={category} storage={category} defaultOpen={false}>
                       <div
-                        key={effect.id}
                         className={twMerge(
                           `
-                            grid grid-cols-[1fr_auto_theme(spacing.6)]
-                            items-center gap-4 border-t border-t-zinc-700
+                            sticky top-10 z-20 grid
+                            grid-cols-[1fr_auto_theme(spacing.6)] items-center
+                            gap-4 border-t border-t-zinc-700 bg-zinc-800
+                            shadow-[0_1px_0_0_theme(colors.zinc.700)]
                           `,
-                          invisibleEffectIds.includes(effect.id) &&
-                            `
-                            collapse-fallback
-                          `,
-                          !rootReadOnly && 'px-4 py-2',
-                          rootReadOnly && index % 2 === 0 && 'bg-zinc-800/80',
-                          rootReadOnly && index % 2 === 1 && 'bg-zinc-800/50',
                         )}
                       >
-                        {rootReadOnly ? (
-                          <Toggle.Button className="col-span-full grid grid-cols-subgrid px-4 py-2">
-                            {({ open }) => (
-                              <>
-                                <span className="col-span-2 text-left text-sm">{effect.name}</span>
-                                <ChevronRight
-                                  role="img"
-                                  aria-label={`${effect.name}の詳細指定を${open ? '閉じる' : '開く'}`}
-                                  className={twMerge(
-                                    `
-                                    transition-transform duration-200
-                                  `,
-                                    open && `rotate-90`,
-                                  )}
-                                />
-                              </>
-                            )}
-                          </Toggle.Button>
-                        ) : (
-                          <>
-                            <Checkbox
-                              value={effect.id}
-                              checked={effectCountMap[effect.id] != null}
-                              onChange={() => {
-                                setEffectCountMap((prev) => toggleRecord(prev, effect.id, { count: 1 }))
-                              }}
-                            >
-                              <span className="text-sm">{effect.name}</span>
-                            </Checkbox>
-                            <input
-                              type="number"
-                              name={`effects.${effect.id}.count`}
-                              className={`
-                                rounded border border-zinc-600 text-right
-                                disabled:border-zinc-800
-                                disabled:text-gray-500/50
-                              `}
-                              disabled={effectCountMap[effect.id] == null}
-                              min={1}
-                              max={effect.stackable ? Relic.MAX_EFFECTS : 1}
-                              value={effectCountMap[effect.id]?.count ?? 1}
-                              onChange={(event) => {
-                                const value = event.target.valueAsNumber
-
-                                setEffectCountMap((prev) =>
-                                  prev[effect.id] == null ? prev : { ...prev, [effect.id]: { count: value } },
-                                )
-                              }}
-                            />
-                            {!!effect.children && (
-                              <Toggle.Button>
-                                {({ open }) => (
-                                  <ChevronRight
-                                    role="img"
-                                    aria-label={`${effect.name}の詳細指定を${open ? '閉じる' : '開く'}`}
-                                    className={twMerge(
-                                      `
-                                      transition-transform duration-200
-                                    `,
-                                      open && `rotate-90`,
-                                    )}
-                                  />
+                        <Toggle.Button
+                          className={`
+                          col-span-full flex items-center py-2 pr-4 pl-6
+                        `}
+                        >
+                          {({ open }) => (
+                            <>
+                              <span className="col-span-2 text-left text-sm" aria-hidden="true">
+                                {category}
+                              </span>
+                              <ChevronRight
+                                role="img"
+                                aria-label={`${category}の詳細指定を${open ? '閉じる' : '開く'}`}
+                                className={twMerge(
+                                  `
+                                  ml-auto transition-transform duration-200
+                                `,
+                                  open && `rotate-90`,
                                 )}
-                              </Toggle.Button>
-                            )}
-                          </>
-                        )}
+                              />
+                            </>
+                          )}
+                        </Toggle.Button>
                       </div>
 
                       <Toggle.Content>
-                        {!invisibleEffectIds.includes(effect.id) && (
-                          <ul
-                            className={twMerge(
-                              `
-                            flex flex-col border-t border-zinc-700
-                          `,
-                              !rootReadOnly && `pl-6`,
-                            )}
-                          >
-                            {effect.children?.map((item) => (
+                        {
+                          <ul className="flex flex-col border-t border-zinc-700">
+                            {children.map((item) => (
                               <li
                                 key={item.id}
-                                className={`
-                                  flex justify-between border-zinc-700 px-4 py-2
-                                  not-first-of-type:border-t
-                                `}
+                                className={twMerge(
+                                  `
+                                    ml-6 border-zinc-700
+                                    not-first-of-type:border-t
+                                  `,
+                                  !item.children && 'pr-8',
+                                  invisibleEffectIds.includes(item.id) &&
+                                    `
+                                    collapse-fallback
+                                  `,
+                                )}
                               >
-                                {rootReadOnly ? (
-                                  <Checkbox
-                                    value={item.id}
-                                    checked={effectCountMap[item.id] != null}
-                                    onChange={() => {
-                                      setEffectCountMap((prev) => toggleRecord(prev, item.id, { count: 1 }))
-                                    }}
-                                  >
-                                    <span className="text-sm">{item.name}</span>
-                                  </Checkbox>
-                                ) : (
-                                  <Checkbox
-                                    disabled
+                                <Toggle.Root storage={item.id} defaultOpen={false}>
+                                  <div className="flex px-4 py-2">
+                                    <Checkbox
+                                      value={item.id}
+                                      checked={effectCountMap[item.id] != null}
+                                      onChange={() => {
+                                        setEffectCountMap((prev) => toggleRecord(prev, item.id, { count: 1 }))
+                                      }}
+                                    >
+                                      <span className="text-sm">{item.name}</span>
+                                    </Checkbox>
+                                    <input
+                                      type="number"
+                                      name={`effects.${item.id}.count`}
+                                      className={`
+                                        ml-auto rounded border border-zinc-600
+                                        text-right
+                                        disabled:border-zinc-800
+                                        disabled:text-gray-500/50
+                                      `}
+                                      aria-label={`${item.name}の必要効果数`}
+                                      disabled={effectCountMap[item.id] == null}
+                                      min={1}
+                                      max={item.stackable ? 3 : 1}
+                                      value={effectCountMap[item.id]?.count ?? 1}
+                                      onChange={(event) => {
+                                        const value = event.target.valueAsNumber
+
+                                        setEffectCountMap((prev) =>
+                                          prev[item.id] == null ? prev : { ...prev, [item.id]: { count: value } },
+                                        )
+                                      }}
+                                    />
+
+                                    {item.children && (
+                                      <Toggle.Button className="ml-2">
+                                        {({ open }) => (
+                                          <ChevronRight
+                                            role="img"
+                                            aria-label={`${item.name}の詳細指定を${open ? '閉じる' : '開く'}`}
+                                            className={twMerge(
+                                              `
+                                                ml-auto transition-transform
+                                                duration-200
+                                              `,
+                                              open && `rotate-90`,
+                                            )}
+                                          />
+                                        )}
+                                      </Toggle.Button>
+                                    )}
+                                  </div>
+
+                                  <Toggle.Content
+                                    key={item.id}
                                     className={`
-                                    has-[:disabled]:opacity-60
+                                    flex flex-col
                                   `}
                                   >
-                                    <span className="text-sm">{item.name}</span>
-                                  </Checkbox>
-                                )}
-                                {rootReadOnly ? (
-                                  <input
-                                    type="number"
-                                    name={`effects.${item.id}.count`}
-                                    className={`
-                                      rounded border border-zinc-600 text-right
-                                      disabled:border-zinc-800
-                                      disabled:text-gray-500/50
-                                    `}
-                                    disabled={effectCountMap[item.id] == null}
-                                    min={1}
-                                    max={item.stackable ? 3 : 1}
-                                    value={effectCountMap[item.id]?.count ?? 1}
-                                    onChange={(event) => {
-                                      const value = event.target.valueAsNumber
+                                    <ul className="border-t border-zinc-700">
+                                      {item.children?.map((item) => (
+                                        <li
+                                          key={item.id}
+                                          className={`
+                                            ml-6 flex border-zinc-700 py-2 pr-12
+                                            pl-4
+                                            not-first-of-type:border-t
+                                          `}
+                                        >
+                                          <Checkbox
+                                            value={item.id}
+                                            checked={effectCountMap[item.id] != null}
+                                            onChange={() => {
+                                              setEffectCountMap((prev) => toggleRecord(prev, item.id, { count: 1 }))
+                                            }}
+                                          >
+                                            <span className="text-sm">{item.name}</span>
+                                          </Checkbox>
+                                          <input
+                                            type="number"
+                                            name={`effects.${item.id}.count`}
+                                            className={`
+                                              ml-auto rounded border
+                                              border-zinc-600 text-right
+                                              disabled:border-zinc-800
+                                              disabled:text-gray-500/50
+                                            `}
+                                            aria-label={`${item.name}の必要効果数`}
+                                            disabled={effectCountMap[item.id] == null}
+                                            min={1}
+                                            max={item.stackable ? 3 : 1}
+                                            value={effectCountMap[item.id]?.count ?? 1}
+                                            onChange={(event) => {
+                                              const value = event.target.valueAsNumber
 
-                                      setEffectCountMap((prev) =>
-                                        prev[item.id] == null ? prev : { ...prev, [item.id]: { count: value } },
-                                      )
-                                    }}
-                                  />
-                                ) : (
-                                  <input
-                                    type="number"
-                                    className="disabled:text-gray-500/50"
-                                    disabled
-                                    min={1}
-                                    max={Relic.MAX_EFFECTS}
-                                    defaultValue={1}
-                                  />
-                                )}
+                                              setEffectCountMap((prev) =>
+                                                prev[item.id] == null ? prev : { ...prev, [item.id]: { count: value } },
+                                              )
+                                            }}
+                                          />
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </Toggle.Content>
+                                </Toggle.Root>
                               </li>
                             ))}
                           </ul>
-                        )}
+                        }
                       </Toggle.Content>
                     </Toggle.Root>
                   ))}
