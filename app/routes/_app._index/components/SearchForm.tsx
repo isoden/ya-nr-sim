@@ -35,23 +35,17 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
             setTimeout(() => submit(form, { replace: true, method: 'GET' }), 0)
           }
         }}
-        className="flex h-full flex-col gap-8"
+        className="flex h-full flex-col min-h-0 gap-6"
         {...getFormProps(form)}
       >
         <h2 className="text-lg font-semibold">条件選択</h2>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto">
-          <div className="flex flex-wrap gap-4">
-            <label
-              htmlFor={fields.charId.id}
-              className={`text-[15px] text-gray-300`}
-            >
+        <div className="flex flex-col min-h-0 gap-y-5">
+          <div className="flex flex-wrap gap-x-3">
+            <label htmlFor={fields.charId.id} className={`text-[15px] text-gray-300`}>
               キャラクター(献器)
             </label>
-            <select
-              {...getSelectProps(fields.charId)}
-              className={`rounded border border-zinc-600 p-1`}
-            >
+            <select {...getSelectProps(fields.charId)} className={`rounded border border-zinc-600 p-1`}>
               {characterItems.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.name}

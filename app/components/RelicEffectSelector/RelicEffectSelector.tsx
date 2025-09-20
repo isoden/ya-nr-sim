@@ -28,19 +28,15 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
   })
 
   return (
-    <fieldset>
+    <fieldset className="flex flex-col h-full min-h-0">
       <legend className="text-[15px] text-gray-300">遺物効果</legend>
 
-      <div
-        className={`
-          sticky top-0 z-10 flex items-end justify-between bg-zinc-800 pb-4
-        `}
-      >
+      <div className="flex items-end justify-between bg-zinc-800">
         <Checkbox
           disabled={!showSelectedOnly && !Object.keys(effectCountMap).length}
           checked={showSelectedOnly}
           onChange={setShowSelectedOnly}
-          className="has-[:disabled]:opacity-60"
+          className="has-[:disabled]:opacity-60 text-sm"
         >
           選択した効果のみ表示
         </Checkbox>
@@ -48,7 +44,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
         <SearchInput value={filterText} setValue={setFilterText} />
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="mt-3 flex flex-col min-h-0 overflow-y-auto border rounded-md border-zinc-700">
         {relicCategories.map(({ name, unselectable, children }) => {
           const invisibleEffectIds = children.reduce<string[]>((acc, effect) => {
             const isUnselectedInShowMode = showSelectedOnly && effectCountMap[effect.id] == null
@@ -65,7 +61,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
               <div
                 className={twMerge(
                   `
-                    group relative rounded-md border border-zinc-700 bg-zinc-800
+                    group relative not-[:first-child]:border-t  border-zinc-700 bg-zinc-800
                     shadow
                   `,
                   invisible && 'collapse-fallback',
@@ -74,24 +70,27 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
               >
                 <Toggle.Button
                   className={`
-                    flex w-full items-center rounded-tl-md rounded-tr-md px-4
-                    py-3 leading-0
-                    not-[:open]:rounded-br-md not-[:open]:rounded-bl-md
+                    sticky top-0 z-10 flex w-full items-center px-4
+                    bg-inherit
+                    py-2 leading-0
                   `}
                 >
                   {({ open }) => (
                     <>
                       <span className="text-sm font-bold">{name}</span>
                       <span className="ml-auto" aria-hidden={true}>
-                        {open ? <MinusIcon /> : <PlusIcon />}
+                        <ChevronRight
+                          role="img"
+                          aria-label={`${name}の詳細指定を${open ? '閉じる' : '開く'}`}
+                          className={twMerge(`transition-transform duration-200`, open && `rotate-90`)}
+                        />
                       </span>
                     </>
                   )}
                 </Toggle.Button>
                 <Toggle.Content
                   className={`
-                    flex max-h-80 flex-col overflow-y-scroll rounded-br-md
-                    rounded-bl-md bg-zinc-700/20
+                    flex flex-col bg-zinc-700/20
                   `}
                 >
                   {children.map((effect, index) => (
@@ -103,7 +102,8 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                             grid grid-cols-[1fr_auto_theme(spacing.6)]
                             items-center gap-4 border-t border-t-zinc-700
                           `,
-                          invisibleEffectIds.includes(effect.id) && `
+                          invisibleEffectIds.includes(effect.id) &&
+                            `
                             collapse-fallback
                           `,
                           !rootReadOnly && 'px-4 py-2',
@@ -112,20 +112,19 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                         )}
                       >
                         {rootReadOnly ? (
-                          <Toggle.Button
-                            className={`
-                              col-span-full grid grid-cols-subgrid px-4 py-2
-                            `}
-                          >
+                          <Toggle.Button className="col-span-full grid grid-cols-subgrid px-4 py-2">
                             {({ open }) => (
                               <>
                                 <span className="col-span-2 text-left text-sm">{effect.name}</span>
                                 <ChevronRight
                                   role="img"
                                   aria-label={`${effect.name}の詳細指定を${open ? '閉じる' : '開く'}`}
-                                  className={twMerge(`
+                                  className={twMerge(
+                                    `
                                     transition-transform duration-200
-                                  `, open && `rotate-90`)}
+                                  `,
+                                    open && `rotate-90`,
+                                  )}
                                 />
                               </>
                             )}
@@ -167,9 +166,12 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                                   <ChevronRight
                                     role="img"
                                     aria-label={`${effect.name}の詳細指定を${open ? '閉じる' : '開く'}`}
-                                    className={twMerge(`
+                                    className={twMerge(
+                                      `
                                       transition-transform duration-200
-                                    `, open && `rotate-90`)}
+                                    `,
+                                      open && `rotate-90`,
+                                    )}
                                   />
                                 )}
                               </Toggle.Button>
@@ -180,9 +182,14 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 
                       <Toggle.Content>
                         {!invisibleEffectIds.includes(effect.id) && (
-                          <ul className={twMerge(`
+                          <ul
+                            className={twMerge(
+                              `
                             flex flex-col border-t border-zinc-700
-                          `, !rootReadOnly && `pl-6`)}>
+                          `,
+                              !rootReadOnly && `pl-6`,
+                            )}
+                          >
                             {effect.children?.map((item) => (
                               <li
                                 key={item.id}
@@ -202,9 +209,12 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                                     <span className="text-sm">{item.name}</span>
                                   </Checkbox>
                                 ) : (
-                                  <Checkbox disabled className={`
+                                  <Checkbox
+                                    disabled
+                                    className={`
                                     has-[:disabled]:opacity-60
-                                  `}>
+                                  `}
+                                  >
                                     <span className="text-sm">{item.name}</span>
                                   </Checkbox>
                                 )}
