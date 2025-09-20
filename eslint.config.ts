@@ -1,14 +1,16 @@
+import { fileURLToPath } from 'node:url'
+import { defineConfig } from 'eslint/config'
 import js from '@eslint/js'
+import { includeIgnoreFile } from '@eslint/compat'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 import react from 'eslint-plugin-react'
-import { defineConfig } from 'eslint/config'
 import betterTailwindcss from 'eslint-plugin-better-tailwindcss'
 
+const gitignorePath = fileURLToPath(new URL('.gitignore', import.meta.url))
+
 export default defineConfig([
-  {
-    ignores: ['.react-router', 'build'],
-  },
+  includeIgnoreFile(gitignorePath, 'Imported .gitignore patterns'),
   {
     files: ['**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     plugins: { js },
