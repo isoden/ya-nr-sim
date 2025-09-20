@@ -75,23 +75,74 @@ describe('Relic#normalizedEffectIds', () => {
 })
 
 describe('Relic#pairedEffectIds', () => {
-  test('デメリット遺物効果がない場合は、 `[遺物効果ID: number][]` の形になる', () => {
+  test('デメリット遺物効果がない場合', () => {
     const relic = mockRelic({
       effects: [7126000, 7126001, 7126002],
     })
 
-    expect(relic.pairedEffectIds).toEqual([[7126000], [7126000], [7126000]])
+    expect(relic.pairedEffects).toMatchInlineSnapshot(`
+      [
+        [
+          {
+            "id": 7126000,
+            "name": "出撃時に「星光の欠片」を持つ",
+          },
+          [],
+        ],
+        [
+          {
+            "id": 7126000,
+            "name": "出撃時に「星光の欠片」を持つ",
+          },
+          [],
+        ],
+        [
+          {
+            "id": 7126000,
+            "name": "出撃時に「星光の欠片」を持つ",
+          },
+          [],
+        ],
+      ]
+    `)
   })
 
-  test('デメリット遺物効果がある場合は、 `[遺物効果ID: number, デメリット遺物効果ID: number][]` の形になる', () => {
+  test('デメリット遺物効果がある場合', () => {
     const relic = mockRelic({
       effects: [7126000, 7126001, 7126002, 6840000],
     })
 
     /* prettier-ignore */
-    expect(relic.pairedEffectIds).toEqual([
-      [7126000], [7126000], [7126000, 6840000]
-    ])
+    expect(relic.pairedEffects).toMatchInlineSnapshot(`
+      [
+        [
+          {
+            "id": 7126000,
+            "name": "出撃時に「星光の欠片」を持つ",
+          },
+          [],
+        ],
+        [
+          {
+            "id": 7126000,
+            "name": "出撃時に「星光の欠片」を持つ",
+          },
+          [],
+        ],
+        [
+          {
+            "id": 7126000,
+            "name": "出撃時に「星光の欠片」を持つ",
+          },
+          [
+            {
+              "id": 6840000,
+              "name": "取得ルーン減少",
+            },
+          ],
+        ],
+      ]
+    `)
   })
 })
 

@@ -178,7 +178,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                                       aria-label={`${item.name}の必要効果数`}
                                       disabled={effectCountMap[item.id] == null}
                                       min={1}
-                                      max={item.stackable ? 3 : 1}
+                                      max={item.canStackOnSelf ? 3 : 1}
                                       value={effectCountMap[item.id]?.count ?? 1}
                                       onChange={(event) => {
                                         const value = event.target.valueAsNumber
@@ -245,7 +245,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                                             aria-label={`${item.name}の必要効果数`}
                                             disabled={effectCountMap[item.id] == null}
                                             min={1}
-                                            max={item.stackable ? 3 : 1}
+                                            max={item.canStackOnSelf ? 3 : 1}
                                             value={effectCountMap[item.id]?.count ?? 1}
                                             onChange={(event) => {
                                               const value = event.target.valueAsNumber

@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react'
 import { Await } from 'react-router'
-import { relicEffectMap, demeritDepthsRelicEffectMap } from '~/data/relics'
+import { RelicInfo } from '~/components/RelicInfo/RelicInfo'
 import { SlotColor } from '~/data/vessels'
 import type { Build, Result } from '../services/simulator/types'
 
@@ -91,50 +91,10 @@ function Success({ builds }: { builds: Build[] }) {
         </header>
 
         <ul className="mt-4 grid grid-cols-3 grid-rows-2 gap-4">
-          {item.vessel.slots.map((slotColor, index) => {
+          {item.vessel.slots.map((_, index) => {
             const relic = item.relics.find((r) => item.relicsIndexes[r.id] === index)
 
-            if (!relic) {
-              return (
-                <li key={index}>
-                  <div className={`
-                    flex min-h-16 items-center justify-center gap-2 rounded
-                    border border-dashed border-gray-400 p-4 text-gray-500
-                  `}>
-                    <span className="text-xs">空きスロット</span>
-                    <span className={`
-                      size-4
-                      ${bgColorMap[slotColor]}
-                    `} />
-                  </div>
-                </li>
-              )
-            }
-
-            return (
-              <li key={index}>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold">{relic.name}</span>
-                  <span className={`
-                    relative size-5
-                    ${bgColorMap[relic.colorExtended]}
-                  `} />
-                </div>
-                <ul className="mt-2 list-inside list-disc text-sm">
-                  {relic.pairedEffectIds.map(([effectId, demeritEffectId], i) => (
-                    <li key={`${effectId}.${i}`} className="mt-1">
-                      {relicEffectMap[effectId].name}
-
-                      {demeritEffectId && (
-                        <ul className="mt-1 pl-5 text-xs text-red-400">
-                          <li>{demeritDepthsRelicEffectMap[demeritEffectId].name}</li>
-                        </ul>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            )
+            return <li key={index}>{relic ? <RelicInfo relic={relic} /> : null}</li>
           })}
         </ul>
       </div>

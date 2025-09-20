@@ -1,3 +1,4 @@
+import { invariant } from 'es-toolkit'
 import type { RelicSchema } from '~/schema/StringifiedRelicsSchema'
 import { demeritDepthsRelicEffectMap, relicEffectMap } from './relicEffects'
 
@@ -70,21 +71,50 @@ export class Relic {
   }
 
   /**
-   * `normalizedEffectIds` を `[遺物効果ID: number, デメリット遺物効果ID?: number][]` のペアにして返す
-   * デメリット効果がない場合は、 `[遺物効果ID: number][]` の形になる
+   * 遺物効果IDと、そのデメリット効果IDの組み合わせを返す
+   *
+   * - デメリット効果がない場合は空配列を返す
    */
-  get pairedEffectIds(): [number, number?][] {
-    return this.normalizedEffectIds.reduce<[number, number?][]>((resolved, effectId) => {
-      const isNegativeEffect = !!demeritDepthsRelicEffectMap[effectId]
+  get pairedEffects(): [{ id: number; name: string }, { id: number; name: string }[]][] {
+    const { normalIds = [], demeritIds = [] } = Object.groupBy(this.normalizedEffectIds, (id) =>
+      id in demeritDepthsRelicEffectMap ? 'demeritIds' : 'normalIds',
+    )
 
-      if (isNegativeEffect) {
-        const last = resolved.splice(resolved.length - 1, 1)
+    const pairedEffects = normalIds.reduce<[{ id: number; name: string }, { id: number; name: string }[]][]>(
+      (resolved, effectId) => {
+        const effect = relicEffectMap[effectId]
 
-        return resolved.concat([[last[0][0], effectId]])
+        invariant(effect, 'Relic effect not found')
+
+        if (effect.hasDemeritEffect) {
+          const demeritId = demeritIds.shift()
+
+          invariant(demeritId, 'Demerit effect not found')
+
+          return resolved.concat([
+            [
+              { id: effectId, name: effect.name },
+              [{ id: demeritId, name: demeritDepthsRelicEffectMap[demeritId].name }],
+            ],
+          ])
+        }
+
+        return resolved.concat([[{ id: effectId, name: effect.name }, []]])
+      },
+      [],
+    )
+
+    if (demeritIds.length > 0) {
+      console.warn(`Unpaired demerit effects found: ${demeritIds.join(', ')}`)
+
+      const lastPair = pairedEffects.at(-1)
+
+      if (lastPair) {
+        lastPair[1].push(...demeritIds.map((id) => ({ id, name: demeritDepthsRelicEffectMap[id].name })))
       }
+    }
 
-      return resolved.concat([[effectId]])
-    }, [])
+    return pairedEffects
   }
 
   /**

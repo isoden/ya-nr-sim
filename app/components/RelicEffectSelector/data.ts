@@ -555,20 +555,19 @@ function createOptionFromName(name: string): {
   // - 選択できない項目の場合は連番で採番
   id: string
   name: string
-  stackable: boolean
-  unselectable?: boolean
+  canStackOnSelf: boolean
   children?: ReturnType<typeof createOptionFromName>[]
 } {
   const exactMatch = allItems.find((item) => item.name === name)
   const relatedItems = findRelatedItems(name)
-  const stackable = relatedItems.some((item) => item.stackable)
+  const canStackOnSelf = relatedItems.some((item) => item.canStackOnSelf)
 
   // 完全一致する遺物効果が存在しない場合、接頭辞にマッチする遺物効果を子項目として持つ
   if (!exactMatch) {
     return {
       id: relatedItems.map((item) => item.id).join(','),
       name,
-      stackable,
+      canStackOnSelf,
       children: relatedItems.map((item) => createOptionFromName(item.name)),
     }
   }
@@ -580,10 +579,10 @@ function createOptionFromName(name: string): {
   return {
     ...exactMatch,
     id: relatedItems.map((item) => item.id).join(','),
-    stackable,
+    canStackOnSelf,
     children: relatedItems.map((item) =>
       item.name === name
-        ? { id: exactMatch.id, name: item.name, stackable: item.stackable }
+        ? { id: exactMatch.id, name: item.name, canStackOnSelf: item.canStackOnSelf }
         : createOptionFromName(item.name),
     ),
   }
