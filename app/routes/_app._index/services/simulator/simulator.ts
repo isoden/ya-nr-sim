@@ -48,9 +48,9 @@ export async function simulate({ vessels, relics: relicsJSON, requiredEffects, v
 }
 
 /**
- * solverを再帰的に呼び出す
+ * solverを再帰的に呼び出す（スコアベース最適化対応）
  * 各再帰呼び出しで：
- * 1. 現在の制約で最適解を見つける
+ * 1. 現在の制約でスコア最大化の最適解を見つける
  * 2. 見つかったビルドを結果に追加
  * 3. 重複排除の制約を追加して再帰呼び出し
  * 4. 解が見つからなくなるまで(or remainingが0になるまで)繰り返す
@@ -72,7 +72,13 @@ function solveRecursively({
 }): Build[] {
   if (remaining === 0) return builds
 
-  const result = solve({ variables, constraints, integers: true })
+  const result = solve({
+    direction: 'maximize',
+    objective: 'score',
+    constraints,
+    variables,
+    integers: true,
+  })
 
   if (result.status === 'optimal') {
     const build = createBuild(result.variables, vessels, relics)

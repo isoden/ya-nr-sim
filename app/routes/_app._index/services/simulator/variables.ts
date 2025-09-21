@@ -2,6 +2,7 @@ import type { Coefficients } from 'yalps'
 import { type Relic, type RelicJSON, RelicColorExtended } from '~/data/relics'
 import { type Vessel, SlotColor } from '~/data/vessels'
 import type { RequiredEffects } from './types'
+import { calculateRelicScore } from './scoring'
 
 /**
  * 変数を作成する
@@ -92,12 +93,16 @@ export function createVariables(
     const hasMatchingSlot = vessels.some((vessel) => vessel.slots.includes(relic.colorExtended))
     const hasAnyFreeSlot = vessels.some((vessel) => vessel.slots.includes(SlotColor.Free))
 
+    // 遺物のスコアを計算（重み付き効果に基づく）
+    const relicScore = calculateRelicScore(relic, requiredEffects)
+
     // 色スロット用変数（対応する色スロットがある場合のみ）
     if (hasMatchingSlot) {
       const colorSlotVars: Record<string, number> = {
         [`relic.${relic.type}`]: 1, // 遺物の選択制約用
         [`relic.${relic.id}`]: 1, // 同じ遺物の重複防止用
         [`slot.${relic.colorExtended}`]: 1, // 色スロット制約
+        score: relicScore, // スコア最適化用係数
       }
 
       // 効果制約（グループ別）
@@ -119,6 +124,7 @@ export function createVariables(
       const freeSlotVars: Record<string, number> = {
         relic: 1, // 遺物の選択制約用
         [`relic.${relic.id}`]: 1, // 同じ遺物の重複防止用
+        score: relicScore, // スコア最適化用係数
       }
 
       // Freeスロット制約

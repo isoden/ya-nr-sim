@@ -31,4 +31,8 @@ export type Result =
 export type RequiredEffects = {
   effectIds: number[]
   count: number
+  weights?: number[]  // effectIds に対応する重み（降順: 高効果 > 低効果）
 }[]
+
+// 後方互換性のため
+export type WeightedRequiredEffects = RequiredEffects

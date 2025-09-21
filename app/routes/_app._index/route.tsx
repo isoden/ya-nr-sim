@@ -23,6 +23,7 @@ export const clientLoader = async ({ request }: Route.ClientLoaderArgs) => {
   const requiredEffects = Object.entries(params.effects).map(([id, { count }]) => ({
     effectIds: id.split(',').map(Number),
     count,
+    weights: id.split(',').map((_, i) => i ** 2 + 1),
   }))
 
   const resultPromise = simulate({
