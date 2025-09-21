@@ -1,4 +1,4 @@
-import { demeritDepthsRelicEffectMap, RelicColorExtended, relicEffectMap, type Relic } from '~/data/relics'
+import { RelicColorExtended, type Relic } from '~/data/relics'
 
 type Props = {
   relic: Relic
@@ -11,12 +11,12 @@ export const RelicInfo: React.FC<Props> = ({ relic }) => {
         <span className="text-sm font-bold">{relic.name}</span>
         <span
           className={`
-                        relative size-5
-                        ${bgColorMap[relic.colorExtended]}
-                      `}
+            relative size-5
+            ${bgColorMap[relic.colorExtended]}
+          `}
         />
       </div>
-      <ul className="mt-2 text-sm flex flex-col gap-y-2">
+      <ul className="mt-2 flex flex-col gap-y-2 text-sm">
         {relic.pairedEffects.map(([effect, demeritEffects], i) => (
           <li key={`${effect.id}.${i}`} className="mt-1">
             {effect.name}

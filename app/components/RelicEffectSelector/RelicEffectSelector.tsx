@@ -48,9 +48,9 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 
       <div
         className={`
-        mt-3 flex min-h-0 flex-col overflow-y-auto rounded-md border
-        border-zinc-700
-      `}
+          mt-3 flex min-h-0 flex-col overflow-y-auto rounded-md border
+          border-zinc-700
+        `}
       >
         {relicCategories.map(({ category, children }) => {
           const flattenChildren = children.flatMap((item) => item.children)
@@ -90,9 +90,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                         role="img"
                         aria-label={`${category}の詳細指定を${open ? '閉じる' : '開く'}`}
                         className={twMerge(
-                          `
-                          ml-auto transition-transform duration-200
-                        `,
+                          `ml-auto transition-transform duration-200`,
                           open && `rotate-90`,
                         )}
                       />
@@ -114,8 +112,8 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                       >
                         <Toggle.Button
                           className={`
-                          col-span-full flex items-center py-2 pr-4 pl-6
-                        `}
+                            col-span-full flex items-center py-2 pr-4 pl-6
+                          `}
                         >
                           {({ open }) => (
                             <>
@@ -126,9 +124,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                                 role="img"
                                 aria-label={`${category}の詳細指定を${open ? '閉じる' : '開く'}`}
                                 className={twMerge(
-                                  `
-                                  ml-auto transition-transform duration-200
-                                `,
+                                  `ml-auto transition-transform duration-200`,
                                   open && `rotate-90`,
                                 )}
                               />
@@ -150,9 +146,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                                   `,
                                   !item.children && 'pr-8',
                                   invisibleEffectIds.includes(item.id) &&
-                                    `
-                                    collapse-fallback
-                                  `,
+                                    `collapse-fallback`,
                                 )}
                               >
                                 <Toggle.Root storage={item.id} defaultOpen={false}>
@@ -210,9 +204,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
 
                                   <Toggle.Content
                                     key={item.id}
-                                    className={`
-                                    flex flex-col
-                                  `}
+                                    className={`flex flex-col`}
                                   >
                                     <ul className="border-t border-zinc-700">
                                       {item.children?.map((item) => (

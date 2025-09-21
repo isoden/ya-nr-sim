@@ -79,9 +79,16 @@ export function createVariables(
     variables.set(`vessel.${vessel.id}`, vesselVars)
   }
 
+  const allRequiredEffectIds = requiredEffects.flatMap(({ effectIds }) => effectIds)
+
   // 遺物の変数を作成
   // 各遺物について、色スロット用とFreeスロット用の変数を分けて作成
   for (const relic of relics) {
+    // perf: 要求される効果を持っている遺物のみ変数に登録
+    if (!relic.normalizedEffectIds.some((id) => allRequiredEffectIds.includes(id))) {
+      continue
+    }
+
     const hasMatchingSlot = vessels.some((vessel) => vessel.slots.includes(relic.colorExtended))
     const hasAnyFreeSlot = vessels.some((vessel) => vessel.slots.includes(SlotColor.Free))
 

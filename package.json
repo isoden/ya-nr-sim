@@ -12,7 +12,9 @@
     "lint:fix": "npm run lint -- --fix",
     "test": "vitest",
     "test:run": "vitest run",
-    "coverage:run": "npm run test:run -- --coverage"
+    "coverage:run": "npm run test:run -- --coverage",
+    "bench": "vitest bench",
+    "bench:run": "vitest bench --run"
   },
   "dependencies": {
     "@conform-to/react": "^1.10.1",
