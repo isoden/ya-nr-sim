@@ -2334,7 +2334,7 @@ exports[`データ構造が一致する 1`] = `
             "canStackOnSelf": true,
             "hasDemeritEffect": false,
             "id": "7012000",
-            "name": "【守護者】アーツ発動時、周囲の味方HPを徐々に回復",
+            "name": "【守護者】アーツ発動時、周囲の味方のHPを徐々に回復",
           },
           {
             "canStackOnSelf": true,

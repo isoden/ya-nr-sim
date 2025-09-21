@@ -313,7 +313,11 @@ export const relicEffectMap: RelicEffectMap = {
   7011200: { name: '【復讐者】アーツ発動時、霊炎の爆発を発生', canStackOnSelf: true, hasDemeritEffect: false },
   7011600: { name: '【守護者】斧槍タメ攻撃時、つむじ風が発生', canStackOnSelf: true, hasDemeritEffect: false },
   7011700: { name: '【執行者】アーツ発動中、咆哮でHP回復', canStackOnSelf: true, hasDemeritEffect: false },
-  7012000: { name: '【守護者】アーツ発動時、周囲の味方HPを徐々に回復', canStackOnSelf: true, hasDemeritEffect: false },
+  7012000: {
+    name: '【守護者】アーツ発動時、周囲の味方のHPを徐々に回復',
+    canStackOnSelf: true,
+    hasDemeritEffect: false,
+  },
   7012200: { name: 'HP低下時、周囲の味方を含めHPをゆっくりと回復', canStackOnSelf: false, hasDemeritEffect: false },
   7012300: { name: 'HP低下時、カット率上昇', canStackOnSelf: true, hasDemeritEffect: false },
   7020000: {
