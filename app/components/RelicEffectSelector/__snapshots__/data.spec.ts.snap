@@ -1105,13 +1105,13 @@ exports[`データ構造が一致する 1`] = `
               },
               {
                 "canStackOnSelf": true,
-                "hasDemeritEffect": false,
+                "hasDemeritEffect": true,
                 "id": "6002600",
                 "name": "魔力カット率上昇+1",
               },
               {
                 "canStackOnSelf": true,
-                "hasDemeritEffect": false,
+                "hasDemeritEffect": true,
                 "id": "6002601",
                 "name": "魔力カット率上昇+2",
               },
@@ -1130,13 +1130,13 @@ exports[`データ構造が一致する 1`] = `
               },
               {
                 "canStackOnSelf": true,
-                "hasDemeritEffect": false,
+                "hasDemeritEffect": true,
                 "id": "6002700",
                 "name": "炎カット率上昇+1",
               },
               {
                 "canStackOnSelf": true,
-                "hasDemeritEffect": false,
+                "hasDemeritEffect": true,
                 "id": "6002701",
                 "name": "炎カット率上昇+2",
               },
@@ -1155,13 +1155,13 @@ exports[`データ構造が一致する 1`] = `
               },
               {
                 "canStackOnSelf": true,
-                "hasDemeritEffect": false,
+                "hasDemeritEffect": true,
                 "id": "6002800",
                 "name": "雷カット率上昇+1",
               },
               {
                 "canStackOnSelf": true,
-                "hasDemeritEffect": false,
+                "hasDemeritEffect": true,
                 "id": "6002801",
                 "name": "雷カット率上昇+2",
               },
@@ -1180,13 +1180,13 @@ exports[`データ構造が一致する 1`] = `
               },
               {
                 "canStackOnSelf": true,
-                "hasDemeritEffect": false,
+                "hasDemeritEffect": true,
                 "id": "6002900",
                 "name": "聖カット率上昇+1",
               },
               {
                 "canStackOnSelf": true,
-                "hasDemeritEffect": false,
+                "hasDemeritEffect": true,
                 "id": "6002901",
                 "name": "聖カット率上昇+2",
               },
