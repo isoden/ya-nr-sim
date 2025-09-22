@@ -2,7 +2,7 @@ import { test, expect, describe } from 'vitest'
 import { performance } from 'perf_hooks'
 import { vesselsByCharacterMap } from '~/data/vessels'
 import { simulate } from './simulator'
-import { mockRelic } from '~/test/mocks/relic'
+import { fakeRelic } from '~/test/mocks/relic'
 
 // 環境別の閾値設定
 const isCI = process.env.CI === 'true'
@@ -135,5 +135,5 @@ function generateLargeRelicSet(
   },
 ) {
   // TODO: requiredEffectRatio に基づいて遺物の効果を調整
-  return Array.from({ length: count }, (_, i) => mockRelic({ id: `${i + 1}` }))
+  return Array.from({ length: count }, (_, i) => fakeRelic({ id: `${i + 1}` }))
 }

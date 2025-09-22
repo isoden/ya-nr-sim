@@ -1,21 +1,8 @@
 import { expect, test } from 'vitest'
+import { fakeRelic } from '~/test/mocks/relic'
 import { parseStringifiedRelicsSchema } from './StringifiedRelicsSchema'
-import { Relic, RelicColorBase } from '~/data/relics'
 
-const relics = [
-  Relic.new({
-    id: 'relic1',
-    color: RelicColorBase.Red,
-    effects: [1, 2],
-    itemId: 1001,
-  }),
-  Relic.new({
-    id: 'relic2',
-    color: RelicColorBase.Blue,
-    effects: [3, 3, 3],
-    itemId: 1500,
-  }),
-]
+const relics = [fakeRelic.red(), fakeRelic.blue()]
 
 test.each([[JSON.stringify(relics), relics]])('%# パースに成功する', (input, expected) => {
   expect(parseStringifiedRelicsSchema(input)).toEqual(expected)

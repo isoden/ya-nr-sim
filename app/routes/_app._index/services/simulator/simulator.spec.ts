@@ -1,13 +1,14 @@
 import { expect, test, describe } from 'vitest'
-import { vesselsByCharacterMap } from '~/data/vessels'
+import { SlotColor, vesselsByCharacterMap } from '~/data/vessels'
 import { RelicColorBase } from '~/data/relics'
-import { mockRelic } from '~/test/mocks/relic'
+import { fakeRelic } from '~/test/mocks/relic'
+import { getVesselBySlots } from '~/test/helpers/vessel'
 import { simulate } from './simulator'
 
 describe('マッチするパターン', () => {
   test('マッチするパターン', async () => {
     const vessels = vesselsByCharacterMap['revenant']
-    const red = mockRelic({ color: RelicColorBase.Red, effects: [7082600] })
+    const red = fakeRelic({ color: RelicColorBase.Red, effects: [7082600] })
     const relics = [red]
 
     const result = await simulate({
@@ -38,9 +39,9 @@ describe('マッチするパターン', () => {
 
   test('グループ内の異なる効果IDでマッチする', async () => {
     const vessels = vesselsByCharacterMap['revenant']
-    const red = mockRelic({ color: RelicColorBase.Red, effects: [7000300] }) // 筋力+1
-    const blue = mockRelic({ color: RelicColorBase.Blue, effects: [7000301] }) // 筋力+2
-    const green = mockRelic({ color: RelicColorBase.Green, effects: [7000302] }) // 筋力+3
+    const red = fakeRelic.red({ effects: [7000300] }) // 筋力+1
+    const blue = fakeRelic.blue({ effects: [7000301] }) // 筋力+2
+    const green = fakeRelic.green({ effects: [7000302] }) // 筋力+3
     const relics = [red, blue, green]
 
     const result = await simulate({
@@ -73,12 +74,10 @@ describe('マッチするパターン', () => {
 
   describe('ビルドの遺物の並び順', () => {
     test('遺物を献器のスロットの色順に並べ替える', async () => {
-      const vessels = vesselsByCharacterMap['ironeye']
-        // 赤青黄の順の献器
-        .filter((v) => v.name.includes('鉄の目の盃'))
-      const blue = mockRelic({ color: RelicColorBase.Blue, effects: [7126000] })
-      const yellow = mockRelic({ color: RelicColorBase.Yellow, effects: [7126000] })
-      const red = mockRelic({ color: RelicColorBase.Red, effects: [7126000] })
+      const vessels = [getVesselBySlots([SlotColor.Red, SlotColor.Blue, SlotColor.Yellow])]
+      const blue = fakeRelic({ color: RelicColorBase.Blue, effects: [7126000] })
+      const yellow = fakeRelic({ color: RelicColorBase.Yellow, effects: [7126000] })
+      const red = fakeRelic({ color: RelicColorBase.Red, effects: [7126000] })
       const relics = [blue, yellow, red]
 
       const result = await simulate({
@@ -105,12 +104,10 @@ describe('マッチするパターン', () => {
     })
 
     test('自由枠は最後に並べ替える', async () => {
-      const vessels = vesselsByCharacterMap['ironeye']
-        // 赤緑白の順の献器
-        .filter((v) => v.name.includes('鉄の目の高杯'))
-      const green = mockRelic({ color: RelicColorBase.Green, effects: [7126000] })
-      const yellow = mockRelic({ color: RelicColorBase.Yellow, effects: [7126000] })
-      const red = mockRelic({ color: RelicColorBase.Red, effects: [7126000] })
+      const vessels = [getVesselBySlots([SlotColor.Red, SlotColor.Green, SlotColor.Free])]
+      const green = fakeRelic({ color: RelicColorBase.Green, effects: [7126000] })
+      const yellow = fakeRelic({ color: RelicColorBase.Yellow, effects: [7126000] })
+      const red = fakeRelic({ color: RelicColorBase.Red, effects: [7126000] })
       const relics = [green, yellow, red]
 
       const result = await simulate({
@@ -137,12 +134,10 @@ describe('マッチするパターン', () => {
     })
 
     test('同じ色の遺物はID順に並べ替える', async () => {
-      const vessels = vesselsByCharacterMap['ironeye']
-        // 黄黄黄の順の献器
-        .filter((v) => v.name.includes('黄金樹の聖杯'))
-      const yellow1 = mockRelic({ id: '1', color: RelicColorBase.Yellow, effects: [7126000] })
-      const yellow2 = mockRelic({ id: '2', color: RelicColorBase.Yellow, effects: [7126000] })
-      const yellow3 = mockRelic({ id: '3', color: RelicColorBase.Yellow, effects: [7126000] })
+      const vessels = [getVesselBySlots([SlotColor.Yellow, SlotColor.Yellow, SlotColor.Yellow])]
+      const yellow1 = fakeRelic({ id: '1', color: RelicColorBase.Yellow, effects: [7126000] })
+      const yellow2 = fakeRelic({ id: '2', color: RelicColorBase.Yellow, effects: [7126000] })
+      const yellow3 = fakeRelic({ id: '3', color: RelicColorBase.Yellow, effects: [7126000] })
       const relics = [yellow3, yellow1, yellow2]
 
       const result = await simulate({
@@ -185,7 +180,7 @@ describe('マッチしないパターン', () => {
   function setup() {
     const effectId = 7126000
     const vessels = vesselsByCharacterMap['revenant']
-    const relics = [mockRelic({ color: RelicColorBase.Blue, effects: [effectId] })]
+    const relics = [fakeRelic({ color: RelicColorBase.Blue, effects: [effectId] })]
 
     return { vessels, relics, effectId }
   }

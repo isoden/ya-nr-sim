@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { mockRelic } from '~/test/mocks/relic'
+import { fakeRelic } from '~/test/mocks/relic'
 import { RelicColorExtended, RelicColorBase } from './relics'
 
 describe('Relic#name', () => {
@@ -18,7 +18,7 @@ describe('Relic#name', () => {
       [RelicColorBase.Yellow, 2, '端正な輝く景色'],
       [RelicColorBase.Yellow, 3, '壮大な輝く景色'],
     ])('色=%s, サイズ=%d => %s', (color, size, expectedName) => {
-      const relic = mockRelic({
+      const relic = fakeRelic({
         color,
         effects: new Array(size).fill(null).map((_, i) => i + 1),
       })
@@ -42,7 +42,7 @@ describe('Relic#name', () => {
       [RelicColorBase.Yellow, 2, '端正な輝く昏景'],
       [RelicColorBase.Yellow, 3, '壮大な輝く昏景'],
     ])('色=%s, サイズ=%d => %s', (color, size, expectedName) => {
-      const relic = mockRelic({
+      const relic = fakeRelic({
         color,
         effects: new Array(size).fill(null).map((_, i) => i + 1),
         dn: true,
@@ -54,7 +54,7 @@ describe('Relic#name', () => {
 
   describe('固有遺物', () => {
     test('itemId のマッピングが定義されている場合、 固有の遺物名を返す', () => {
-      const relic = mockRelic({
+      const relic = fakeRelic({
         itemId: 16002,
       })
 
@@ -65,7 +65,7 @@ describe('Relic#name', () => {
 
 describe('Relic#normalizedEffectIds', () => {
   test('effects で重複として定義されている ID を、 基準となる ID に変換する', () => {
-    const relic = mockRelic({
+    const relic = fakeRelic({
       effects: [7126000, 7126001, 7126002],
     })
 
@@ -76,7 +76,7 @@ describe('Relic#normalizedEffectIds', () => {
 
 describe('Relic#pairedEffectIds', () => {
   test('デメリット遺物効果がない場合', () => {
-    const relic = mockRelic({
+    const relic = fakeRelic({
       effects: [7126000, 7126001, 7126002],
     })
 
@@ -108,7 +108,7 @@ describe('Relic#pairedEffectIds', () => {
   })
 
   test('デメリット遺物効果がある場合', () => {
-    const relic = mockRelic({
+    const relic = fakeRelic({
       effects: [7126000, 7126001, 7126002, 6840000],
     })
 
@@ -151,7 +151,7 @@ describe('Relic#type', () => {
     [false, 'normal'],
     [true, 'depths'],
   ])('dn=%s => %s', (dn, expectedType) => {
-    const relic = mockRelic({ dn })
+    const relic = fakeRelic({ dn })
 
     expect(relic.type).toEqual(expectedType)
   })
@@ -165,7 +165,7 @@ describe('Relic#resolvedColor', () => {
       [RelicColorBase.Green, RelicColorExtended.Green],
       [RelicColorBase.Yellow, RelicColorExtended.Yellow],
     ])('color=%s, dn=false => %s', (color, expectedColor) => {
-      const relic = mockRelic({ color })
+      const relic = fakeRelic({ color })
 
       expect(relic.colorExtended).toBe(expectedColor)
     })
@@ -178,7 +178,7 @@ describe('Relic#resolvedColor', () => {
       [RelicColorBase.Green, RelicColorExtended.DeepGreen],
       [RelicColorBase.Yellow, RelicColorExtended.DeepYellow],
     ])('color=%s, dn=true => %s', (color, expectedColor) => {
-      const relic = mockRelic({ color, dn: true })
+      const relic = fakeRelic({ color, dn: true })
 
       expect(relic.colorExtended).toBe(expectedColor)
     })

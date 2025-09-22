@@ -1,32 +1,23 @@
 import { expect, test } from 'vitest'
-import { Vessel, vesselsByCharacterMap } from '~/data/vessels'
-import { Relic, RelicColorBase } from '~/data/relics'
+import { getVesselBySlots } from '~/test/helpers/vessel'
+import { fakeRelic } from '~/test/mocks/relic'
+import { SlotColor, vesselsByCharacterMap } from '~/data/vessels'
 import { createBuild } from './createBuild'
 
 test('ビルドの遺物を器の色順に並べる', () => {
   // arrange
   const vessels = vesselsByCharacterMap['revenant']
-  const green = Relic.new({
-    id: 'relic-green',
-    color: RelicColorBase.Green,
-    effects: [7082600],
-    itemId: 1,
-  })
-  const blue = Relic.new({
-    id: 'relic-blue',
-    color: RelicColorBase.Blue,
-    effects: [7126000, 7126001, 7126002],
-    itemId: 2,
-  })
+  const green = fakeRelic.green()
+  const blue = fakeRelic.blue()
   const relics = [green, blue]
-  const vesselToUse = getVesselByName('復讐者の高杯')
+  const vesselToUse = getVesselBySlots([SlotColor.Blue, SlotColor.Green, SlotColor.Free])
 
   // act
   const build = createBuild(
     [
       [`vessel.${vesselToUse.id}`, 1],
-      ['relic.relic-green.color', 1],
-      ['relic.relic-blue.color', 1],
+      [`relic.${green.id}.color`, 1],
+      [`relic.${blue.id}.color`, 1],
     ],
     vessels,
     relics,
@@ -45,28 +36,18 @@ test('ビルドの遺物を器の色順に並べる', () => {
 
 test('色が同じ場合はID順に並べる', async () => {
   // arrange
-  const vesselToUse = getVesselByName('復讐者の盃')
+  const vesselToUse = getVesselBySlots([SlotColor.Red, SlotColor.Red, SlotColor.Green])
   const vessels = [vesselToUse]
-  const red1 = Relic.new({
-    id: 'relic-red-1',
-    color: RelicColorBase.Red,
-    effects: [7126000],
-    itemId: 1,
-  })
-  const red2 = Relic.new({
-    id: 'relic-red-2',
-    color: RelicColorBase.Red,
-    effects: [7082600],
-    itemId: 2,
-  })
+  const red1 = fakeRelic.red({ id: 'red-1' })
+  const red2 = fakeRelic.red({ id: 'red-2' })
   const relics = [red2, red1]
 
   // act
   const build = createBuild(
     [
       [`vessel.${vesselToUse.id}`, 1],
-      ['relic.relic-red-1.color', 1],
-      ['relic.relic-red-2.color', 1],
+      [`relic.${red1.id}.color`, 1],
+      [`relic.${red2.id}.color`, 1],
     ],
     vessels,
     relics,
@@ -86,51 +67,24 @@ test('色が同じ場合はID順に並べる', async () => {
 // [通常,通常,フリー,深層,深層,深層] のスロット順の器に対して、対応する色の遺物を配置する
 test('深き夜の献器対応', async () => {
   // arrange
-  const vesselToUse = getVesselByName('復讐者の高杯')
+  const vesselToUse = getVesselBySlots([SlotColor.Blue, SlotColor.Green, SlotColor.Free])
   const vessels = [vesselToUse]
-  const blue1 = Relic.new({
-    id: 'relic-blue-1',
-    color: RelicColorBase.Blue,
-    effects: [7126000],
-    itemId: 1,
-  })
-  const green1 = Relic.new({
-    id: 'relic-green-1',
-    color: RelicColorBase.Green,
-    effects: [7082600],
-    itemId: 2,
-  })
-  const red1 = Relic.new({
-    id: 'relic-red-1',
-    color: RelicColorBase.Red,
-    effects: [7082600],
-    itemId: 3,
-  })
-  const deepYellow1 = Relic.new({
-    id: 'relic-deep-yellow-1',
-    color: RelicColorBase.Yellow,
-    effects: [7082600],
-    itemId: 4,
-    dn: true,
-  })
-  const deepGreen1 = Relic.new({
-    id: 'relic-deep-green-1',
-    color: RelicColorBase.Green,
-    effects: [7082600],
-    itemId: 4,
-    dn: true,
-  })
-  const relics = [red1, deepYellow1, deepGreen1, blue1, green1]
+  const blue = fakeRelic.blue()
+  const green = fakeRelic.green()
+  const red = fakeRelic.red()
+  const deepYellow = fakeRelic.deepYellow()
+  const deepGreen = fakeRelic.deepGreen()
+  const relics = [red, deepYellow, deepGreen, blue, green]
 
   // act
   const build = createBuild(
     [
       [`vessel.${vesselToUse.id}`, 1],
-      ['relic.relic-red-1.color', 1],
-      ['relic.relic-blue-1.color', 1],
-      ['relic.relic-green-1.color', 1],
-      ['relic.relic-deep-yellow-1.color', 1],
-      ['relic.relic-deep-green-1.color', 1],
+      [`relic.${red.id}.color`, 1],
+      [`relic.${blue.id}.color`, 1],
+      [`relic.${green.id}.color`, 1],
+      [`relic.${deepYellow.id}.color`, 1],
+      [`relic.${deepGreen.id}.color`, 1],
     ],
     vessels,
     relics,
@@ -139,25 +93,13 @@ test('深き夜の献器対応', async () => {
   // assert
   expect(build).toEqual({
     vessel: vesselToUse,
-    relics: [blue1, green1, red1, deepYellow1, deepGreen1],
+    relics: [blue, green, red, deepYellow, deepGreen],
     relicsIndexes: {
-      [blue1.id]: 0,
-      [green1.id]: 1,
-      [red1.id]: 2,
-      [deepYellow1.id]: 4,
-      [deepGreen1.id]: 5,
+      [blue.id]: 0,
+      [green.id]: 1,
+      [red.id]: 2,
+      [deepYellow.id]: 4,
+      [deepGreen.id]: 5,
     },
   })
 })
-
-function getVesselByName(name: string): Vessel {
-  const vessel = Object.values(vesselsByCharacterMap)
-    .flat()
-    .find((vessel) => vessel.name === name)
-
-  if (!vessel) {
-    throw new Error(`Vessel with name "${name}" not found`)
-  }
-
-  return vessel
-}

@@ -1,7 +1,7 @@
 import { bench, describe } from 'vitest'
 import { vesselsByCharacterMap } from '~/data/vessels'
 import { simulate } from './simulator'
-import { mockRelic } from '~/test/mocks/relic'
+import { fakeRelic } from '~/test/mocks/relic'
 
 describe('Simulator Performance Benchmarks', () => {
   // 軽量ケース: 遺物数少・制約シンプル
@@ -98,5 +98,5 @@ function generateLargeRelicSet(
   },
 ) {
   // TODO: requiredEffectRatio に基づいて遺物の効果を調整
-  return Array.from({ length: count }, (_, i) => mockRelic({ id: `${i + 1}` }))
+  return Array.from({ length: count }, (_, i) => fakeRelic({ id: `${i + 1}` }))
 }
