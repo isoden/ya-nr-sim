@@ -9,10 +9,10 @@ exports[`データ構造が一致する 1`] = `
         "category": "能力値",
         "children": [
           {
-            "canStackOnSelf": false,
+            "canStackOnSelf": true,
             "children": [
               {
-                "canStackOnSelf": false,
+                "canStackOnSelf": true,
                 "hasDemeritEffect": true,
                 "id": "6610400",
                 "name": "最大HP上昇(+10%)",
@@ -28,10 +28,10 @@ exports[`データ構造が一致する 1`] = `
             "name": "最大HP上昇",
           },
           {
-            "canStackOnSelf": false,
+            "canStackOnSelf": true,
             "children": [
               {
-                "canStackOnSelf": false,
+                "canStackOnSelf": true,
                 "hasDemeritEffect": true,
                 "id": "6610500",
                 "name": "最大FP上昇(+15%)",
@@ -47,7 +47,7 @@ exports[`データ構造が一致する 1`] = `
             "name": "最大FP上昇",
           },
           {
-            "canStackOnSelf": false,
+            "canStackOnSelf": true,
             "children": [
               {
                 "canStackOnSelf": false,
@@ -56,7 +56,7 @@ exports[`データ構造が一致する 1`] = `
                 "name": "最大スタミナ上昇(+10)",
               },
               {
-                "canStackOnSelf": false,
+                "canStackOnSelf": true,
                 "hasDemeritEffect": true,
                 "id": "6610600",
                 "name": "最大スタミナ上昇(1.12倍)",
@@ -297,25 +297,25 @@ exports[`データ構造が一致する 1`] = `
             "name": "魔術師塔の仕掛けが解除される度、最大FP上昇",
           },
           {
-            "canStackOnSelf": true,
+            "canStackOnSelf": false,
             "hasDemeritEffect": false,
             "id": "6060400",
             "name": "小砦の強敵を倒す度、取得ルーン増加、発見力上昇",
           },
           {
-            "canStackOnSelf": true,
+            "canStackOnSelf": false,
             "hasDemeritEffect": false,
             "id": "6060300",
             "name": "大教会の強敵を倒す度、最大HP上昇",
           },
           {
-            "canStackOnSelf": true,
+            "canStackOnSelf": false,
             "hasDemeritEffect": false,
             "id": "6060600",
             "name": "大野営地の強敵を倒す度、最大スタミナ上昇",
           },
           {
-            "canStackOnSelf": true,
+            "canStackOnSelf": false,
             "hasDemeritEffect": false,
             "id": "6060500",
             "name": "遺跡の強敵を倒す度、神秘上昇",
@@ -877,7 +877,7 @@ exports[`データ構造が一致する 1`] = `
             "name": "アーツゲージ蓄積増加",
           },
           {
-            "canStackOnSelf": true,
+            "canStackOnSelf": false,
             "children": [
               {
                 "canStackOnSelf": false,
@@ -885,13 +885,13 @@ exports[`データ構造が一致する 1`] = `
                 "name": "敵を倒した時のアーツゲージ蓄積増加",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": true,
                 "id": "6090000",
                 "name": "敵を倒した時のアーツゲージ蓄積増加+1",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": true,
                 "id": "6090001",
                 "name": "敵を倒した時のアーツゲージ蓄積増加+2",
@@ -902,7 +902,7 @@ exports[`データ構造が一致する 1`] = `
             "name": "敵を倒した時のアーツゲージ蓄積増加",
           },
           {
-            "canStackOnSelf": true,
+            "canStackOnSelf": false,
             "children": [
               {
                 "canStackOnSelf": false,
@@ -910,13 +910,13 @@ exports[`データ構造が一致する 1`] = `
                 "name": "致命の一撃で、アーツゲージ蓄積増加",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": true,
                 "id": "6030800",
                 "name": "致命の一撃で、アーツゲージ蓄積増加+1",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": true,
                 "id": "6030801",
                 "name": "致命の一撃で、アーツゲージ蓄積増加+2",
@@ -927,7 +927,7 @@ exports[`データ構造が一致する 1`] = `
             "name": "致命の一撃で、アーツゲージ蓄積増加",
           },
           {
-            "canStackOnSelf": true,
+            "canStackOnSelf": false,
             "children": [
               {
                 "canStackOnSelf": false,
@@ -935,13 +935,13 @@ exports[`データ構造が一致する 1`] = `
                 "name": "ガード成功時、アーツゲージを蓄積",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": true,
                 "id": "6030600",
                 "name": "ガード成功時、アーツゲージを蓄積+1",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": true,
                 "id": "6030601",
                 "name": "ガード成功時、アーツゲージを蓄積+2",
@@ -1411,7 +1411,7 @@ exports[`データ構造が一致する 1`] = `
             "name": "ガード成功時、HP回復",
           },
           {
-            "canStackOnSelf": true,
+            "canStackOnSelf": false,
             "children": [
               {
                 "canStackOnSelf": false,
@@ -1419,13 +1419,13 @@ exports[`データ構造が一致する 1`] = `
                 "name": "刺突カウンター発生時、HP回復",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": true,
                 "id": "6160000",
                 "name": "刺突カウンター発生時、HP回復+1",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": true,
                 "id": "6160001",
                 "name": "刺突カウンター発生時、HP回復+2",
@@ -1436,7 +1436,7 @@ exports[`データ構造が一致する 1`] = `
             "name": "刺突カウンター発生時、HP回復",
           },
           {
-            "canStackOnSelf": true,
+            "canStackOnSelf": false,
             "children": [
               {
                 "canStackOnSelf": false,
@@ -1444,13 +1444,13 @@ exports[`データ構造が一致する 1`] = `
                 "name": "ダメージを受けた直後、攻撃によりHPの一部を回復",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": true,
                 "id": "6005600",
                 "name": "ダメージを受けた直後、攻撃によりHPの一部を回復+1",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": true,
                 "id": "6005601",
                 "name": "ダメージを受けた直後、攻撃によりHPの一部を回復+2",
@@ -1461,7 +1461,7 @@ exports[`データ構造が一致する 1`] = `
             "name": "ダメージを受けた直後、攻撃によりHPの一部を回復",
           },
           {
-            "canStackOnSelf": true,
+            "canStackOnSelf": false,
             "children": [
               {
                 "canStackOnSelf": false,
@@ -1469,13 +1469,13 @@ exports[`データ構造が一致する 1`] = `
                 "name": "苔薬などのアイテム使用でHP回復",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": false,
                 "id": "6030200",
                 "name": "苔薬などのアイテム使用でHP回復+1",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": false,
                 "id": "6030201",
                 "name": "苔薬などのアイテム使用でHP回復+2",
@@ -1548,15 +1548,15 @@ exports[`データ構造が一致する 1`] = `
             "name": "攻撃命中時、スタミナ回復",
           },
           {
-            "canStackOnSelf": true,
+            "canStackOnSelf": false,
             "children": [
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "id": "7035100",
                 "name": "致命の一撃で、スタミナ回復速度上昇",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": false,
                 "id": "6035100",
                 "name": "致命の一撃で、スタミナ回復速度上昇+1",
@@ -1603,7 +1603,7 @@ exports[`データ構造が一致する 1`] = `
             "name": "武器の持ち替え時、いずれかの属性攻撃力を付加",
           },
           {
-            "canStackOnSelf": true,
+            "canStackOnSelf": false,
             "hasDemeritEffect": false,
             "id": "7030700",
             "name": "ガード中、敵に狙われやすくなる",
@@ -1615,7 +1615,7 @@ exports[`データ構造が一致する 1`] = `
             "name": "ジェスチャー「あぐら」により、発狂が蓄積",
           },
           {
-            "canStackOnSelf": true,
+            "canStackOnSelf": false,
             "children": [
               {
                 "canStackOnSelf": false,
@@ -1623,13 +1623,13 @@ exports[`データ構造が一致する 1`] = `
                 "name": "毒状態の敵に対する攻撃を強化",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": true,
                 "id": "6260000",
                 "name": "毒状態の敵に対する攻撃を強化+1",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": true,
                 "id": "6260001",
                 "name": "毒状態の敵に対する攻撃を強化+2",
@@ -1640,7 +1640,7 @@ exports[`データ構造が一致する 1`] = `
             "name": "毒状態の敵に対する攻撃を強化",
           },
           {
-            "canStackOnSelf": true,
+            "canStackOnSelf": false,
             "children": [
               {
                 "canStackOnSelf": false,
@@ -1648,13 +1648,13 @@ exports[`データ構造が一致する 1`] = `
                 "name": "腐敗状態の敵に対する攻撃を強化",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": true,
                 "id": "6260300",
                 "name": "腐敗状態の敵に対する攻撃を強化+1",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": true,
                 "id": "6260301",
                 "name": "腐敗状態の敵に対する攻撃を強化+2",
@@ -1665,7 +1665,7 @@ exports[`データ構造が一致する 1`] = `
             "name": "腐敗状態の敵に対する攻撃を強化",
           },
           {
-            "canStackOnSelf": true,
+            "canStackOnSelf": false,
             "children": [
               {
                 "canStackOnSelf": false,
@@ -1673,13 +1673,13 @@ exports[`データ構造が一致する 1`] = `
                 "name": "凍傷状態の敵に対する攻撃を強化",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": true,
                 "id": "6260400",
                 "name": "凍傷状態の敵に対する攻撃を強化+1",
               },
               {
-                "canStackOnSelf": true,
+                "canStackOnSelf": false,
                 "hasDemeritEffect": true,
                 "id": "6260401",
                 "name": "凍傷状態の敵に対する攻撃を強化+2",
