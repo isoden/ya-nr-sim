@@ -1,7 +1,7 @@
 import { getFormProps, getSelectProps, useForm } from '@conform-to/react'
 import { parseWithValibot } from '@conform-to/valibot'
 import { Form, useSubmit } from 'react-router'
-import { RelicEffectSelector } from '~/components/RelicEffectSelector'
+import { BuildCriteria } from '~/components/BuildCriteria'
 import { Checkbox } from '~/components/forms/Checkbox'
 import { Button } from '~/components/forms/Button'
 import { characterMap } from '~/data/characters'
@@ -12,7 +12,7 @@ type Props = {
   defaultValues?: FormSchema
 }
 
-type RelicEffectSelectorDefaultValue = React.ComponentProps<typeof RelicEffectSelector>['defaultValue']
+type BuildCriteriaDefaultValue = React.ComponentProps<typeof BuildCriteria>['defaultValue']
 
 export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
   const submit = useSubmit()
@@ -42,14 +42,20 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 
         <div className="flex min-h-0 flex-col gap-y-5">
           <div className="flex flex-wrap gap-x-3">
-            <label htmlFor={fields.charId.id} className={`
+            <label
+              htmlFor={fields.charId.id}
+              className={`
               text-[15px] text-gray-300
-            `}>
+            `}
+            >
               キャラクター(献器)
             </label>
-            <select {...getSelectProps(fields.charId)} className={`
+            <select
+              {...getSelectProps(fields.charId)}
+              className={`
               rounded border border-zinc-600 p-1
-            `}>
+            `}
+            >
               {characterItems.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.name}
@@ -59,7 +65,7 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
             {fields.charId.errors && <p className="w-full text-orange-700">{fields.charId.errors[0]}</p>}
           </div>
 
-          <RelicEffectSelector defaultValue={fields.effects.value as unknown as RelicEffectSelectorDefaultValue} />
+          <BuildCriteria defaultValue={fields.effects.value as unknown as BuildCriteriaDefaultValue} />
 
           {fields.effects.errors?.length ? <p className="text-orange-700">{fields.effects.errors[0]}</p> : null}
         </div>

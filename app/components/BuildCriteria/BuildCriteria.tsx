@@ -15,7 +15,7 @@ type Props = {
  *
  * @param props - {@link Props}
  */
-export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
+export const BuildCriteria: React.FC<Props> = ({ defaultValue }) => {
   const [filterText, setFilterText] = useState('')
   const [showSelectedOnly, setShowSelectedOnly] = useState(false)
   const [effectCountMap, setEffectCountMap] = useState(() => {
@@ -89,10 +89,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                       <ChevronRight
                         role="img"
                         aria-label={`${category}の詳細指定を${open ? '閉じる' : '開く'}`}
-                        className={twMerge(
-                          `ml-auto transition-transform duration-200`,
-                          open && `rotate-90`,
-                        )}
+                        className={twMerge(`ml-auto transition-transform duration-200`, open && `rotate-90`)}
                       />
                     </>
                   )}
@@ -123,10 +120,7 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                               <ChevronRight
                                 role="img"
                                 aria-label={`${category}の詳細指定を${open ? '閉じる' : '開く'}`}
-                                className={twMerge(
-                                  `ml-auto transition-transform duration-200`,
-                                  open && `rotate-90`,
-                                )}
+                                className={twMerge(`ml-auto transition-transform duration-200`, open && `rotate-90`)}
                               />
                             </>
                           )}
@@ -136,124 +130,127 @@ export const RelicEffectSelector: React.FC<Props> = ({ defaultValue }) => {
                       <Toggle.Content>
                         {
                           <ul className="flex flex-col border-t border-zinc-700">
-                            {children.map((item) => (
-                              <li
-                                key={item.id}
-                                className={twMerge(
-                                  `
+                            {children.map((item) => {
+                              const hasChildEffectSelected = item.children?.some((child) => !!effectCountMap[child.id])
+
+                              return (
+                                <li
+                                  key={item.id}
+                                  className={twMerge(
+                                    `
                                     ml-6 border-zinc-700
                                     not-first-of-type:border-t
                                   `,
-                                  !item.children && 'pr-8',
-                                  invisibleEffectIds.includes(item.id) &&
-                                    `collapse-fallback`,
-                                )}
-                              >
-                                <Toggle.Root storage={item.id} defaultOpen={false}>
-                                  <div className="flex px-4 py-2">
-                                    <Checkbox
-                                      value={item.id}
-                                      checked={effectCountMap[item.id] != null}
-                                      onChange={() => {
-                                        setEffectCountMap((prev) => toggleRecord(prev, item.id, { count: 1 }))
-                                      }}
-                                    >
-                                      <span className="text-sm">{item.name}</span>
-                                    </Checkbox>
-                                    <input
-                                      type="number"
-                                      name={`effects.${item.id}.count`}
-                                      className={`
+                                    !item.children && 'pr-8',
+                                    invisibleEffectIds.includes(item.id) && `collapse-fallback`,
+                                  )}
+                                >
+                                  <Toggle.Root storage={item.id} defaultOpen={false}>
+                                    <div className="flex px-4 py-2">
+                                      <Checkbox
+                                        value={item.id}
+                                        checked={effectCountMap[item.id] != null}
+                                        onChange={() => {
+                                          setEffectCountMap((prev) => toggleRecord(prev, item.id, { count: 1 }))
+                                        }}
+                                        disabled={hasChildEffectSelected}
+                                      >
+                                        <span className="text-sm">{item.name}</span>
+                                      </Checkbox>
+                                      <input
+                                        type="number"
+                                        name={`effects.${item.id}.count`}
+                                        className={`
                                         ml-auto rounded border border-zinc-600
                                         text-right
                                         disabled:border-zinc-800
                                         disabled:text-gray-500/50
                                       `}
-                                      aria-label={`${item.name}の必要効果数`}
-                                      disabled={effectCountMap[item.id] == null}
-                                      min={1}
-                                      max={item.canStackOnSelf ? 3 : 1}
-                                      value={effectCountMap[item.id]?.count ?? 1}
-                                      onChange={(event) => {
-                                        const value = event.target.valueAsNumber
+                                        aria-label={`${item.name}の必要効果数`}
+                                        disabled={effectCountMap[item.id] == null || hasChildEffectSelected}
+                                        min={1}
+                                        max={item.canStackOnSelf ? 3 : 1}
+                                        value={effectCountMap[item.id]?.count ?? 1}
+                                        onChange={(event) => {
+                                          const value = event.target.valueAsNumber
 
-                                        setEffectCountMap((prev) =>
-                                          prev[item.id] == null ? prev : { ...prev, [item.id]: { count: value } },
-                                        )
-                                      }}
-                                    />
+                                          setEffectCountMap((prev) =>
+                                            prev[item.id] == null ? prev : { ...prev, [item.id]: { count: value } },
+                                          )
+                                        }}
+                                      />
 
-                                    {item.children && (
-                                      <Toggle.Button className="ml-2">
-                                        {({ open }) => (
-                                          <ChevronRight
-                                            role="img"
-                                            aria-label={`${item.name}の詳細指定を${open ? '閉じる' : '開く'}`}
-                                            className={twMerge(
-                                              `
+                                      {item.children && (
+                                        <Toggle.Button className="ml-2">
+                                          {({ open }) => (
+                                            <ChevronRight
+                                              role="img"
+                                              aria-label={`${item.name}の詳細指定を${open ? '閉じる' : '開く'}`}
+                                              className={twMerge(
+                                                `
                                                 ml-auto transition-transform
                                                 duration-200
                                               `,
-                                              open && `rotate-90`,
-                                            )}
-                                          />
-                                        )}
-                                      </Toggle.Button>
-                                    )}
-                                  </div>
+                                                open && `rotate-90`,
+                                              )}
+                                            />
+                                          )}
+                                        </Toggle.Button>
+                                      )}
+                                    </div>
 
-                                  <Toggle.Content
-                                    key={item.id}
-                                    className={`flex flex-col`}
-                                  >
-                                    <ul className="border-t border-zinc-700">
-                                      {item.children?.map((item) => (
-                                        <li
-                                          key={item.id}
-                                          className={`
+                                    <Toggle.Content key={item.id} className={`flex flex-col`}>
+                                      <ul className="border-t border-zinc-700">
+                                        {item.children?.map((item) => (
+                                          <li
+                                            key={item.id}
+                                            className={`
                                             ml-6 flex border-zinc-700 py-2 pr-12
                                             pl-4
                                             not-first-of-type:border-t
                                           `}
-                                        >
-                                          <Checkbox
-                                            value={item.id}
-                                            checked={effectCountMap[item.id] != null}
-                                            onChange={() => {
-                                              setEffectCountMap((prev) => toggleRecord(prev, item.id, { count: 1 }))
-                                            }}
                                           >
-                                            <span className="text-sm">{item.name}</span>
-                                          </Checkbox>
-                                          <input
-                                            type="number"
-                                            name={`effects.${item.id}.count`}
-                                            className={`
+                                            <Checkbox
+                                              value={item.id}
+                                              checked={effectCountMap[item.id] != null}
+                                              onChange={() => {
+                                                setEffectCountMap((prev) => toggleRecord(prev, item.id, { count: 1 }))
+                                              }}
+                                            >
+                                              <span className="text-sm">{item.name}</span>
+                                            </Checkbox>
+                                            <input
+                                              type="number"
+                                              name={`effects.${item.id}.count`}
+                                              className={`
                                               ml-auto rounded border
                                               border-zinc-600 text-right
                                               disabled:border-zinc-800
                                               disabled:text-gray-500/50
                                             `}
-                                            aria-label={`${item.name}の必要効果数`}
-                                            disabled={effectCountMap[item.id] == null}
-                                            min={1}
-                                            max={item.canStackOnSelf ? 3 : 1}
-                                            value={effectCountMap[item.id]?.count ?? 1}
-                                            onChange={(event) => {
-                                              const value = event.target.valueAsNumber
+                                              aria-label={`${item.name}の必要効果数`}
+                                              disabled={effectCountMap[item.id] == null}
+                                              min={1}
+                                              max={item.canStackOnSelf ? 3 : 1}
+                                              value={effectCountMap[item.id]?.count ?? 1}
+                                              onChange={(event) => {
+                                                const value = event.target.valueAsNumber
 
-                                              setEffectCountMap((prev) =>
-                                                prev[item.id] == null ? prev : { ...prev, [item.id]: { count: value } },
-                                              )
-                                            }}
-                                          />
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </Toggle.Content>
-                                </Toggle.Root>
-                              </li>
-                            ))}
+                                                setEffectCountMap((prev) =>
+                                                  prev[item.id] == null
+                                                    ? prev
+                                                    : { ...prev, [item.id]: { count: value } },
+                                                )
+                                              }}
+                                            />
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </Toggle.Content>
+                                  </Toggle.Root>
+                                </li>
+                              )
+                            })}
                           </ul>
                         }
                       </Toggle.Content>

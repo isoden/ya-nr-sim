@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { expect, test, vi } from 'vitest'
-import { RelicEffectSelector } from './RelicEffectSelector'
+import { BuildCriteria } from './BuildCriteria'
 
 const mockEffects = vi.hoisted(() => ({
   1: { name: 'Effect 1', stackable: true },
@@ -18,7 +18,7 @@ vi.mock('~/data/relics', async (importOriginal) => ({
 test.skip('デフォルトでは、全ての選択肢が表示される', async () => {
   const user = userEvent.setup()
 
-  render(<RelicEffectSelector />)
+  render(<BuildCriteria />)
 
   const comboBox = screen.getByRole('combobox', { name: 'Test Effect Selector' })
   expect(comboBox).toBeInTheDocument()
