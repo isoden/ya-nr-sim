@@ -1,7 +1,7 @@
 import { solve, type Coefficients, type Constraint } from 'yalps'
 import { Relic } from '~/data/relics'
 import { type Vessel } from '~/data/vessels'
-import { createExclusionConstraints, createConstraints } from './constraints'
+import { createExclusionConstraints, createConstraints, consolidateRelicEffectGroups } from './constraints'
 import { createExclusionVariables, createVariables } from './variables'
 import { createBuild } from './createBuild'
 import type { Args, Result, Build } from './types'
@@ -25,8 +25,9 @@ import type { Args, Result, Build } from './types'
 export async function simulate({ vessels, relics: relicsJSON, requiredEffects, volume = 5 }: Args): Promise<Result> {
   try {
     const relics = relicsJSON.map((relic) => Relic.new(relic))
-    const variables = createVariables(vessels, relics, requiredEffects)
-    const constraints = createConstraints(vessels, relics, requiredEffects)
+    const consolidatedRequiredEffects = consolidateRelicEffectGroups(requiredEffects)
+    const variables = createVariables(vessels, relics, consolidatedRequiredEffects)
+    const constraints = createConstraints(vessels, relics, consolidatedRequiredEffects)
     const builds = solveRecursively({
       remaining: volume,
       variables,

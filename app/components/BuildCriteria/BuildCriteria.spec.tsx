@@ -1,32 +1,29 @@
-import { render, screen } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { expect, test, vi } from 'vitest'
+import { expect, test } from 'vitest'
+import { useForm } from '@conform-to/react'
+import { parseWithValibot } from '@conform-to/valibot'
+import { FormSchema } from '~/routes/_app._index/schema/FormSchema'
 import { BuildCriteria } from './BuildCriteria'
 
-const mockEffects = vi.hoisted(() => ({
-  1: { name: 'Effect 1', stackable: true },
-  2: { name: 'Effect 2', stackable: false },
-  3: { name: 'Effect 3', stackable: true },
-}))
+test('smoke test', async () => {
+  const { container } = setup()
 
-// Mock the relics data
-vi.mock('~/data/relics', async (importOriginal) => ({
-  ...(await importOriginal()),
-  relicEffectMap: mockEffects,
-}))
+  expect(container.firstElementChild).toBeInTheDocument()
+})
 
-test.skip('デフォルトでは、全ての選択肢が表示される', async () => {
+function setup() {
   const user = userEvent.setup()
 
-  render(<BuildCriteria />)
+  function TestComponent() {
+    const [, fields] = useForm({
+      onValidate: ({ formData }) => parseWithValibot(formData, { schema: FormSchema }),
+    })
 
-  const comboBox = screen.getByRole('combobox', { name: 'Test Effect Selector' })
-  expect(comboBox).toBeInTheDocument()
+    return <BuildCriteria meta={fields.effects} />
+  }
 
-  const trigger = screen.getByRole('button', { name: /show suggestions/i })
-  await user.click(trigger)
+  const view = render(<TestComponent />)
 
-  const options = screen.getAllByRole('option')
-
-  expect(options).toHaveLength(Object.keys(mockEffects).length)
-})
+  return { user, ...view }
+}

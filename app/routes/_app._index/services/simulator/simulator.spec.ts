@@ -20,6 +20,7 @@ describe('マッチするパターン', () => {
           count: 1,
         },
       ],
+      volume: 1,
     })
 
     // assert: マッチするパターン
@@ -165,6 +166,68 @@ describe('マッチするパターン', () => {
   })
 })
 
+describe('効果の重複ルール', () => {
+  test('stacksWithSelf=trueの効果は重複可能', async () => {
+    const vessels = vesselsByCharacterMap['revenant']
+    const relic1 = fakeRelic.red({ effects: [7000300] }) // 筋力+1 (stacksWithSelf: true)
+    const relic2 = fakeRelic.blue({ effects: [7000301] }) // 筋力+2 (stacksWithSelf: true)
+    const relics = [relic1, relic2]
+
+    const result = await simulate({
+      vessels,
+      relics,
+      requiredEffects: [{ effectIds: [7000300, 7000301], count: 2 }],
+    })
+
+    // assert: stacksWithSelfの効果は重複可能
+    expect(result).toEqual({
+      success: true,
+      data: [
+        {
+          vessel: vessels.find((v) => v.name.includes('復讐者の高杯')),
+          relics: [relic2, relic1],
+          relicsIndexes: {
+            [relic2.id]: 0,
+            [relic1.id]: 2,
+          },
+        },
+      ],
+    })
+  })
+
+  test('stacksAcrossLevels=trueの効果は同じIDは1つまで', async () => {
+    const vessels = vesselsByCharacterMap['revenant']
+    const relic1 = fakeRelic.red({ effects: [7090000] }) // 敵を倒した時のアーツゲージ蓄積増加 (stacksAcrossLevels: true)
+    const relic2 = fakeRelic.blue({ effects: [7090000] }) // 同じ効果ID
+    const relics = [relic1, relic2]
+
+    const result = await simulate({
+      vessels,
+      relics,
+      requiredEffects: [{ effectIds: [7090000], count: 2 }],
+    })
+
+    // assert: 同じ効果IDは1つまでしか装備できない
+    expect(result.success).toBe(false)
+  })
+
+  test('重複不可の効果は1つまで', async () => {
+    const vessels = vesselsByCharacterMap['revenant']
+    const relic1 = fakeRelic.red({ effects: [10001] }) // 攻撃を受けると攻撃力上昇 (stacksWithSelf: false, stacksAcrossLevels: undefined)
+    const relic2 = fakeRelic.blue({ effects: [10001] }) // 同じ効果ID
+    const relics = [relic1, relic2]
+
+    const result = await simulate({
+      vessels,
+      relics,
+      requiredEffects: [{ effectIds: [10001], count: 2 }],
+    })
+
+    // assert: 重複不可の効果は1つまでしか装備できない
+    expect(result.success).toBe(false)
+  })
+})
+
 describe('マッチしないパターン', () => {
   test.each([2, 3])('同じ遺物を%d個選ぶと失敗する', async (count) => {
     const { vessels, relics, effectId } = setup()
@@ -245,5 +308,142 @@ test('通常の遺物はフリースロットに装備できる', async () => {
         },
       },
     ],
+  })
+})
+
+describe('stacksAcrossLevels統合テスト', () => {
+  test('個別選択と中カテゴリ選択で同じ結果になる', async () => {
+    const vessels = vesselsByCharacterMap['revenant']
+    const relic1 = fakeRelic.red({ effects: [7090000] }) // 敵を倒した時のアーツゲージ蓄積増加+0
+    const relic2 = fakeRelic.blue({ effects: [6090000] }) // 敵を倒した時のアーツゲージ蓄積増加+1
+    const relics = [relic1, relic2]
+
+    // 個別選択パターン
+    const individualResult = await simulate({
+      vessels,
+      relics,
+      requiredEffects: [
+        { effectIds: [7090000], count: 1 },
+        { effectIds: [6090000], count: 1 },
+      ],
+      volume: 1,
+    })
+
+    // 中カテゴリ選択パターン
+    const groupResult = await simulate({
+      vessels,
+      relics,
+      requiredEffects: [{ effectIds: [7090000, 6090000], count: 2 }],
+      volume: 1,
+    })
+
+    // 両方とも成功し、同じ結果になることを確認
+    expect(individualResult.success).toBe(true)
+    expect(groupResult.success).toBe(true)
+
+    if (individualResult.success && groupResult.success) {
+      expect(individualResult.data[0]?.relics.length).toBe(groupResult.data[0]?.relics.length)
+      expect(individualResult.data[0]?.relics.length).toBe(2) // 2つの遺物が選択される
+    }
+  })
+
+  test('stacksAcrossLevelsでない効果は統合されない', async () => {
+    const vessels = vesselsByCharacterMap['revenant']
+    const relic1 = fakeRelic.red({ effects: [7000300] }) // 筋力+1 (stacksWithSelf: true)
+    const relic2 = fakeRelic.blue({ effects: [7000301] }) // 筋力+2 (stacksWithSelf: true)
+    const relics = [relic1, relic2]
+
+    // 個別選択 - 統合されないので別々の制約として扱われる
+    const result = await simulate({
+      vessels,
+      relics,
+      requiredEffects: [
+        { effectIds: [7000300], count: 1 },
+        { effectIds: [7000301], count: 1 },
+      ],
+      volume: 1,
+    })
+
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data[0]?.relics.length).toBe(2) // 2つの遺物が選択される
+    }
+  })
+})
+
+describe('リグレッションテスト', () => {
+  test('複数の効果グループを同時に要求した際のマッチング (Issue: 効果係数の重複カウント)', async () => {
+    // arrange
+    const vessels = vesselsByCharacterMap['wylder']
+    const vitality = fakeRelic.red({ effects: [7000000] }) // 生命力+1
+    const magic1 = fakeRelic.blue({ effects: [7090000] }) // 敵を倒した時のアーツゲージ蓄積増加+0
+    const magic2 = fakeRelic.yellow({ effects: [6090000] }) // 敵を倒した時のアーツゲージ蓄積増加+1
+    const relics = [vitality, magic1, magic2]
+
+    // act
+    const result = await simulate({
+      vessels,
+      relics,
+      requiredEffects: [
+        {
+          effectIds: [7000000, 7000001, 7000002], // 生命力効果のいずれか
+          count: 1,
+        },
+        {
+          effectIds: [7090000, 6090000], // マジックスプレッド効果のいずれか
+          count: 2,
+        },
+      ],
+      volume: 1,
+    })
+
+    // assert
+    expect(result).toEqual({
+      success: true,
+      data: [
+        {
+          vessel: vessels.find((v) => v.name.includes('追跡者の高杯')),
+          relics: [vitality, magic2, magic1],
+          relicsIndexes: {
+            [vitality.id]: 0,
+            [magic2.id]: 1,
+            [magic1.id]: 2,
+          },
+        },
+      ],
+    })
+  })
+
+  test('単一効果グループでは正常に動作する', async () => {
+    // arrange
+    const vessels = vesselsByCharacterMap['wylder']
+    const vitality = fakeRelic.red({ effects: [7000000] })
+
+    // act
+    const result = await simulate({
+      vessels,
+      relics: [vitality],
+      requiredEffects: [
+        {
+          effectIds: [7000000, 7000001, 7000002],
+          count: 1,
+        },
+      ],
+      volume: 1,
+    })
+
+    // assert
+    expect(result).toEqual({
+      success: true,
+      data: [
+        {
+          vessel: vessels.find((v) => v.name.includes('追跡者の器')),
+          relics: [vitality],
+          relicsIndexes: {
+            [vitality.id]: 0,
+          },
+        },
+      ],
+    })
   })
 })

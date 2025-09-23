@@ -1,7 +1,59 @@
-import { type Constraint, equalTo, lessEq, greaterEq } from 'yalps'
-import { type Relic, type RelicJSON, RelicColorExtended } from '~/data/relics'
+import { type Constraint, equalTo, lessEq } from 'yalps'
+import { type Relic, type RelicJSON, RelicColorExtended, relicEffectMap } from '~/data/relics'
 import { type Vessel, SlotColor } from '~/data/vessels'
+import { relicEffectGroups } from '~/data/generated/relicEffectGroups'
 import type { RequiredEffects } from './types'
+
+/**
+ * relicEffectGroupsの効果を統合する
+ *
+ * 個別選択された効果でも、同じrelicEffectGroupsに属する場合は
+ * 統合して一つのrequiredEffectとして扱う
+ *
+ * @param requiredEffects - 統合前の必要効果リスト
+ */
+export function consolidateRelicEffectGroups(requiredEffects: RequiredEffects): RequiredEffects {
+  // 統合処理
+  const consolidatedEffects: RequiredEffects = []
+  const processedEffectIds = new Set<number>()
+
+  for (const requiredEffect of requiredEffects) {
+    const { effectIds } = requiredEffect
+
+    // このrequiredEffectがrelicEffectGroupsに属するかチェック
+    const groupIndex = relicEffectGroups.findIndex((groupEffectIds) =>
+      effectIds.some((id) => groupEffectIds.includes(id)),
+    )
+
+    if (groupIndex !== -1) {
+      // グループに属する場合、まだ処理されていなければ統合
+      const groupEffectIds = relicEffectGroups[groupIndex]
+
+      if (!groupEffectIds.some((id) => processedEffectIds.has(id))) {
+        // このグループの全effectIdsを統合
+        const totalCount = requiredEffects
+          .filter((re) => re.effectIds.some((id) => groupEffectIds.includes(id)))
+          .reduce((sum, re) => sum + re.count, 0)
+
+        consolidatedEffects.push({
+          effectIds: [...groupEffectIds],
+          count: totalCount,
+        })
+
+        // 処理済みマーク
+        groupEffectIds.forEach((id) => processedEffectIds.add(id))
+      }
+    } else {
+      // グループに属さない場合はそのまま追加
+      if (!effectIds.some((id) => processedEffectIds.has(id))) {
+        consolidatedEffects.push(requiredEffect)
+        effectIds.forEach((id) => processedEffectIds.add(id))
+      }
+    }
+  }
+
+  return consolidatedEffects
+}
 
 /**
  * 制約を作成する
@@ -50,11 +102,31 @@ export function createConstraints(
     }
   }
 
-  // 効果制約（指定された数以上）
-  // 各効果グループについて、そのグループ内の効果を持つ遺物の合計 ≥ 指定された数
+  // 効果制約（指定された数と等しい）
+  // 各効果グループについて、そのグループ内の効果を持つ遺物の合計 = 指定された数
   for (let i = 0; i < requiredEffects.length; i++) {
     const group = requiredEffects[i]
-    constraints.set(`effectGroup.${i}`, greaterEq(group.count))
+    constraints.set(`effectGroup.${i}`, equalTo(group.count))
+  }
+
+  // 各効果IDに対する重複制約
+  for (const relic of relics) {
+    for (const effectId of relic.normalizedEffectIds) {
+      const effect = relicEffectMap[effectId]
+      if (!effect) continue
+
+      // 自身の効果が重複可能な場合は制約なし
+      if (effect.stacksWithSelf) continue
+
+      // 異なるレベル同士で重複可能な場合、同じ効果IDは1つまで
+      if (effect.stacksAcrossLevels) {
+        constraints.set(`effect.${effectId}`, lessEq(1))
+        continue
+      }
+
+      // 重複不可の場合、同じ効果IDは1つまで
+      constraints.set(`effect.${effectId}`, lessEq(1))
+    }
   }
 
   // 同じ遺物は1つしか装備できない（色スロット用とFreeスロット用の合計で1つまで）

@@ -105,6 +105,12 @@ export function createVariables(
         score: relicScore, // スコア最適化用係数
       }
 
+      // 効果制約（個別効果）
+      for (const effectId of relic.normalizedEffectIds) {
+        colorSlotVars[`effect.${effectId}`] ??= 0
+        colorSlotVars[`effect.${effectId}`] += 1
+      }
+
       // 効果制約（グループ別）
       for (let groupIndex = 0; groupIndex < requiredEffects.length; groupIndex++) {
         const group = requiredEffects[groupIndex]
@@ -133,6 +139,12 @@ export function createVariables(
         if (freeSlotCount > 0) {
           freeSlotVars[`freeSlot.${vessel.id}`] = 1
         }
+      }
+
+      // 効果制約（個別効果）
+      for (const effectId of relic.normalizedEffectIds) {
+        freeSlotVars[`effect.${effectId}`] ??= 0
+        freeSlotVars[`effect.${effectId}`] += 1
       }
 
       // 効果制約（グループ別）
