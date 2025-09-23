@@ -119,10 +119,10 @@ export function createVariables(
       variables.set(`relic.${relic.id}.color`, colorSlotVars)
     }
 
-    // Freeスロット用変数（Freeスロットがある場合のみ）
-    if (hasAnyFreeSlot) {
+    // Freeスロット用変数（Freeスロットがある場合かつ通常遺物の場合のみ）
+    if (hasAnyFreeSlot && relic.type === 'normal') {
       const freeSlotVars: Record<string, number> = {
-        relic: 1, // 遺物の選択制約用
+        [`relic.${relic.type}`]: 1, // 通常遺物の選択制約用
         [`relic.${relic.id}`]: 1, // 同じ遺物の重複防止用
         score: relicScore, // スコア最適化用係数
       }

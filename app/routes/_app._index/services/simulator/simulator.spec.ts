@@ -185,3 +185,65 @@ describe('マッチしないパターン', () => {
     return { vessels, relics, effectId }
   }
 })
+
+test('深層の遺物はフリースロットに装備できない', async () => {
+  // arrange: フリースロットを含む献器を使用
+  const vessels = [
+    getVesselBySlots([
+      SlotColor.Red,
+      SlotColor.Green,
+      SlotColor.Free,
+      SlotColor.DeepRed,
+      SlotColor.DeepRed,
+      SlotColor.DeepGreen,
+    ]),
+  ]
+  // 深層青の遺物（対応する色スロットなし）
+  const relics = [fakeRelic.deepBlue({ effects: [7126000] })]
+
+  const result = await simulate({
+    vessels,
+    relics,
+    requiredEffects: [{ effectIds: [7126000], count: 1 }],
+  })
+
+  // assert: 深層の遺物はフリースロットに装備できないため失敗する
+  expect(result.success).toBe(false)
+})
+
+test('通常の遺物はフリースロットに装備できる', async () => {
+  // arrange: フリースロットを含む献器を使用
+  const vessels = [
+    getVesselBySlots([
+      SlotColor.Red,
+      SlotColor.Green,
+      SlotColor.Free,
+      SlotColor.DeepRed,
+      SlotColor.DeepRed,
+      SlotColor.DeepGreen,
+    ]),
+  ]
+  // 青の遺物（対応する色スロットなし、フリーのみ利用可能）
+  const normalBlue = fakeRelic.blue({ effects: [7126000] })
+  const relics = [normalBlue]
+
+  const result = await simulate({
+    vessels,
+    relics,
+    requiredEffects: [{ effectIds: [7126000], count: 1 }],
+  })
+
+  // assert: 通常の遺物はフリースロットに装備できる
+  expect(result).toEqual({
+    success: true,
+    data: [
+      {
+        vessel: vessels[0],
+        relics: [normalBlue],
+        relicsIndexes: {
+          [normalBlue.id]: 2, // フリースロットのインデックス
+        },
+      },
+    ],
+  })
+})
