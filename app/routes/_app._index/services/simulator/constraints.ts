@@ -1,5 +1,5 @@
-import { type Constraint, equalTo, lessEq, greaterEq } from 'yalps'
-import { type Relic, type RelicJSON, RelicColorExtended } from '~/data/relics'
+import { type Constraint, equalTo, lessEq } from 'yalps'
+import { type Relic, type RelicJSON, RelicColorExtended, relicEffectMap } from '~/data/relics'
 import { type Vessel, SlotColor } from '~/data/vessels'
 import type { RequiredEffects } from './types'
 
@@ -50,11 +50,31 @@ export function createConstraints(
     }
   }
 
-  // 効果制約（指定された数以上）
-  // 各効果グループについて、そのグループ内の効果を持つ遺物の合計 ≥ 指定された数
+  // 効果制約（指定された数と等しい）
+  // 各効果グループについて、そのグループ内の効果を持つ遺物の合計 = 指定された数
   for (let i = 0; i < requiredEffects.length; i++) {
     const group = requiredEffects[i]
-    constraints.set(`effectGroup.${i}`, greaterEq(group.count))
+    constraints.set(`effectGroup.${i}`, equalTo(group.count))
+  }
+
+  // 各効果IDに対する重複制約
+  for (const relic of relics) {
+    for (const effectId of relic.normalizedEffectIds) {
+      const effect = relicEffectMap[effectId]
+      if (!effect) continue
+
+      // 自身の効果が重複可能な場合は制約なし
+      if (effect.stacksWithSelf) continue
+
+      // 異なるレベル同士で重複可能な場合、同じ効果IDは1つまで
+      if (effect.stacksAcrossLevels) {
+        constraints.set(`effect.${effectId}`, lessEq(1))
+        continue
+      }
+
+      // 重複不可の場合、同じ効果IDは1つまで
+      constraints.set(`effect.${effectId}`, lessEq(1))
+    }
   }
 
   // 同じ遺物は1つしか装備できない（色スロット用とFreeスロット用の合計で1つまで）

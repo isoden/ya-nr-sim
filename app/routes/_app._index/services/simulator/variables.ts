@@ -109,6 +109,9 @@ export function createVariables(
       for (let groupIndex = 0; groupIndex < requiredEffects.length; groupIndex++) {
         const group = requiredEffects[groupIndex]
         for (const effectId of relic.normalizedEffectIds) {
+          colorSlotVars[`effect.${effectId}`] ??= 0
+          colorSlotVars[`effect.${effectId}`] += 1
+
           if (group.effectIds.includes(effectId)) {
             colorSlotVars[`effectGroup.${groupIndex}`] ??= 0
             colorSlotVars[`effectGroup.${groupIndex}`] += 1
@@ -139,6 +142,9 @@ export function createVariables(
       for (let groupIndex = 0; groupIndex < requiredEffects.length; groupIndex++) {
         const group = requiredEffects[groupIndex]
         for (const effectId of relic.normalizedEffectIds) {
+          freeSlotVars[`effect.${effectId}`] ??= 0
+          freeSlotVars[`effect.${effectId}`] += 1
+
           if (group.effectIds.includes(effectId)) {
             freeSlotVars[`effectGroup.${groupIndex}`] ??= 0
             freeSlotVars[`effectGroup.${groupIndex}`] += 1

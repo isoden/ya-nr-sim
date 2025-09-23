@@ -20,6 +20,7 @@ describe('マッチするパターン', () => {
           count: 1,
         },
       ],
+      volume: 1,
     })
 
     // assert: マッチするパターン
@@ -162,6 +163,68 @@ describe('マッチするパターン', () => {
         ],
       })
     })
+  })
+})
+
+describe('効果の重複ルール', () => {
+  test('stacksWithSelf=trueの効果は重複可能', async () => {
+    const vessels = vesselsByCharacterMap['revenant']
+    const relic1 = fakeRelic.red({ effects: [7000300] }) // 筋力+1 (stacksWithSelf: true)
+    const relic2 = fakeRelic.blue({ effects: [7000301] }) // 筋力+2 (stacksWithSelf: true)
+    const relics = [relic1, relic2]
+
+    const result = await simulate({
+      vessels,
+      relics,
+      requiredEffects: [{ effectIds: [7000300, 7000301], count: 2 }],
+    })
+
+    // assert: stacksWithSelfの効果は重複可能
+    expect(result).toEqual({
+      success: true,
+      data: [
+        {
+          vessel: vessels.find((v) => v.name.includes('復讐者の高杯')),
+          relics: [relic2, relic1],
+          relicsIndexes: {
+            [relic2.id]: 0,
+            [relic1.id]: 2,
+          },
+        },
+      ],
+    })
+  })
+
+  test('stacksAcrossLevels=trueの効果は同じIDは1つまで', async () => {
+    const vessels = vesselsByCharacterMap['revenant']
+    const relic1 = fakeRelic.red({ effects: [7090000] }) // 敵を倒した時のアーツゲージ蓄積増加 (stacksAcrossLevels: true)
+    const relic2 = fakeRelic.blue({ effects: [7090000] }) // 同じ効果ID
+    const relics = [relic1, relic2]
+
+    const result = await simulate({
+      vessels,
+      relics,
+      requiredEffects: [{ effectIds: [7090000], count: 2 }],
+    })
+
+    // assert: 同じ効果IDは1つまでしか装備できない
+    expect(result.success).toBe(false)
+  })
+
+  test('重複不可の効果は1つまで', async () => {
+    const vessels = vesselsByCharacterMap['revenant']
+    const relic1 = fakeRelic.red({ effects: [10001] }) // 攻撃を受けると攻撃力上昇 (stacksWithSelf: false, stacksAcrossLevels: undefined)
+    const relic2 = fakeRelic.blue({ effects: [10001] }) // 同じ効果ID
+    const relics = [relic1, relic2]
+
+    const result = await simulate({
+      vessels,
+      relics,
+      requiredEffects: [{ effectIds: [10001], count: 2 }],
+    })
+
+    // assert: 重複不可の効果は1つまでしか装備できない
+    expect(result.success).toBe(false)
   })
 })
 

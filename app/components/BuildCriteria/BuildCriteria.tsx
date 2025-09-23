@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react'
+import type { FieldMetadata } from '@conform-to/react'
 import { ChevronRight, TextSearch, CircleXIcon } from 'lucide-react'
 import { set } from 'es-toolkit/compat'
 import { twMerge } from 'tailwind-merge'
@@ -6,21 +7,24 @@ import { Checkbox } from '../forms/Checkbox'
 import { Toggle } from '../Toggle'
 import { relicCategories } from './data'
 
+type EffectCountState<Type extends string | number> = {
+  [effectIds: string]: { count: Type }
+}
+
 type Props = {
-  defaultValue?: { [id: string]: { count: string } }
+  meta: FieldMetadata<EffectCountState<number>>
 }
 
 /**
- * 遺物効果を選択するためのコンボボックスコンポーネント
+ * ビルド条件として要求する遺物効果と必要数を選択するコンポーネント
  *
  * @param props - {@link Props}
  */
-export const BuildCriteria: React.FC<Props> = ({ defaultValue }) => {
+export const BuildCriteria: React.FC<Props> = ({ meta }) => {
   const [filterText, setFilterText] = useState('')
   const [showSelectedOnly, setShowSelectedOnly] = useState(false)
   const [effectCountMap, setEffectCountMap] = useState(() => {
-    if (!defaultValue) return {}
-    return Object.entries(defaultValue).reduce<Record<string, { count: number }>>(
+    return Object.entries((meta.value || {}) as EffectCountState<string>).reduce<EffectCountState<number>>(
       (acc, [key, { count }]) => set(acc, key, { count: Number(count) }),
       {},
     )
@@ -89,7 +93,12 @@ export const BuildCriteria: React.FC<Props> = ({ defaultValue }) => {
                       <ChevronRight
                         role="img"
                         aria-label={`${category}の詳細指定を${open ? '閉じる' : '開く'}`}
-                        className={twMerge(`ml-auto transition-transform duration-200`, open && `rotate-90`)}
+                        className={twMerge(
+                          `
+                          ml-auto transition-transform duration-200
+                        `,
+                          open && `rotate-90`,
+                        )}
                       />
                     </>
                   )}
@@ -97,160 +106,105 @@ export const BuildCriteria: React.FC<Props> = ({ defaultValue }) => {
                 <Toggle.Content className={`flex flex-col bg-zinc-700/20`}>
                   {children.map(({ category, children }) => (
                     <Toggle.Root key={category} storage={category} defaultOpen={false}>
-                      <div
-                        className={twMerge(
-                          `
-                            sticky top-10 z-20 grid
-                            grid-cols-[1fr_auto_theme(spacing.6)] items-center
-                            gap-4 border-t border-t-zinc-700 bg-zinc-800
-                            shadow-[0_1px_0_0_theme(colors.zinc.700)]
-                          `,
-                        )}
+                      <Toggle.Button
+                        className={`
+                          sticky top-10 z-20 flex items-center gap-4 border-t
+                          border-t-zinc-700 bg-zinc-800 py-2 pr-4 pl-6
+                          shadow-[0_1px_0_0_theme(colors.zinc.700)]
+                        `}
                       >
-                        <Toggle.Button
-                          className={`
-                            col-span-full flex items-center py-2 pr-4 pl-6
-                          `}
-                        >
-                          {({ open }) => (
-                            <>
-                              <span className="col-span-2 text-left text-sm" aria-hidden="true">
-                                {category}
-                              </span>
-                              <ChevronRight
-                                role="img"
-                                aria-label={`${category}の詳細指定を${open ? '閉じる' : '開く'}`}
-                                className={twMerge(`ml-auto transition-transform duration-200`, open && `rotate-90`)}
-                              />
-                            </>
-                          )}
-                        </Toggle.Button>
-                      </div>
+                        {({ open }) => (
+                          <>
+                            <span className="flex-1 text-left text-sm" aria-hidden="true">
+                              {category}
+                            </span>
+                            <ChevronRight
+                              role="img"
+                              aria-label={`${category}の詳細指定を${open ? '閉じる' : '開く'}`}
+                              className={twMerge(
+                                `
+                                transition-transform duration-200
+                              `,
+                                open && `rotate-90`,
+                              )}
+                            />
+                          </>
+                        )}
+                      </Toggle.Button>
 
                       <Toggle.Content>
                         {
                           <ul className="flex flex-col border-t border-zinc-700">
-                            {children.map((item) => {
-                              const hasChildEffectSelected = item.children?.some((child) => !!effectCountMap[child.id])
-
-                              return (
-                                <li
-                                  key={item.id}
-                                  className={twMerge(
-                                    `
+                            {children.map((item) => (
+                              <li
+                                key={item.id}
+                                className={twMerge(
+                                  `
                                     ml-6 border-zinc-700
                                     not-first-of-type:border-t
                                   `,
-                                    !item.children && 'pr-8',
-                                    invisibleEffectIds.includes(item.id) && `collapse-fallback`,
-                                  )}
-                                >
-                                  <Toggle.Root storage={item.id} defaultOpen={false}>
-                                    <div className="flex px-4 py-2">
-                                      <Checkbox
-                                        value={item.id}
-                                        checked={effectCountMap[item.id] != null}
-                                        onChange={() => {
-                                          setEffectCountMap((prev) => toggleRecord(prev, item.id, { count: 1 }))
-                                        }}
-                                        disabled={hasChildEffectSelected}
-                                      >
-                                        <span className="text-sm">{item.name}</span>
-                                      </Checkbox>
-                                      <input
-                                        type="number"
-                                        name={`effects.${item.id}.count`}
-                                        className={`
-                                        ml-auto rounded border border-zinc-600
-                                        text-right
-                                        disabled:border-zinc-800
-                                        disabled:text-gray-500/50
-                                      `}
-                                        aria-label={`${item.name}の必要効果数`}
-                                        disabled={effectCountMap[item.id] == null || hasChildEffectSelected}
-                                        min={1}
-                                        max={item.canStackOnSelf ? 3 : 1}
-                                        value={effectCountMap[item.id]?.count ?? 1}
-                                        onChange={(event) => {
-                                          const value = event.target.valueAsNumber
+                                  !item.children && 'pr-8',
+                                  invisibleEffectIds.includes(item.id) &&
+                                    `
+                                    collapse-fallback
+                                  `,
+                                )}
+                              >
+                                <Toggle.Root storage={item.id} defaultOpen={false}>
+                                  <div className="flex items-center px-4 py-2">
+                                    <EffectItem
+                                      item={item}
+                                      effectCountMap={effectCountMap}
+                                      setEffectCountMap={setEffectCountMap}
+                                    />
 
-                                          setEffectCountMap((prev) =>
-                                            prev[item.id] == null ? prev : { ...prev, [item.id]: { count: value } },
-                                          )
-                                        }}
-                                      />
-
-                                      {item.children && (
-                                        <Toggle.Button className="ml-2">
-                                          {({ open }) => (
-                                            <ChevronRight
-                                              role="img"
-                                              aria-label={`${item.name}の詳細指定を${open ? '閉じる' : '開く'}`}
-                                              className={twMerge(
-                                                `
+                                    {item.children && (
+                                      <Toggle.Button className="ml-2">
+                                        {({ open }) => (
+                                          <ChevronRight
+                                            role="img"
+                                            aria-label={`${item.name}の詳細指定を${open ? '閉じる' : '開く'}`}
+                                            className={twMerge(
+                                              `
                                                 ml-auto transition-transform
                                                 duration-200
                                               `,
-                                                open && `rotate-90`,
-                                              )}
-                                            />
-                                          )}
-                                        </Toggle.Button>
-                                      )}
-                                    </div>
+                                              open && `rotate-90`,
+                                            )}
+                                          />
+                                        )}
+                                      </Toggle.Button>
+                                    )}
+                                  </div>
 
-                                    <Toggle.Content key={item.id} className={`flex flex-col`}>
-                                      <ul className="border-t border-zinc-700">
-                                        {item.children?.map((item) => (
-                                          <li
-                                            key={item.id}
-                                            className={`
-                                            ml-6 flex border-zinc-700 py-2 pr-12
-                                            pl-4
+                                  <Toggle.Content
+                                    key={item.id}
+                                    className={`
+                                    flex flex-col
+                                  `}
+                                  >
+                                    <ul className="border-t border-zinc-700">
+                                      {item.children?.map((item) => (
+                                        <li
+                                          key={item.id}
+                                          className={`
+                                            ml-6 flex items-center
+                                            border-zinc-700 py-2 pr-12 pl-4
                                             not-first-of-type:border-t
                                           `}
-                                          >
-                                            <Checkbox
-                                              value={item.id}
-                                              checked={effectCountMap[item.id] != null}
-                                              onChange={() => {
-                                                setEffectCountMap((prev) => toggleRecord(prev, item.id, { count: 1 }))
-                                              }}
-                                            >
-                                              <span className="text-sm">{item.name}</span>
-                                            </Checkbox>
-                                            <input
-                                              type="number"
-                                              name={`effects.${item.id}.count`}
-                                              className={`
-                                              ml-auto rounded border
-                                              border-zinc-600 text-right
-                                              disabled:border-zinc-800
-                                              disabled:text-gray-500/50
-                                            `}
-                                              aria-label={`${item.name}の必要効果数`}
-                                              disabled={effectCountMap[item.id] == null}
-                                              min={1}
-                                              max={item.canStackOnSelf ? 3 : 1}
-                                              value={effectCountMap[item.id]?.count ?? 1}
-                                              onChange={(event) => {
-                                                const value = event.target.valueAsNumber
-
-                                                setEffectCountMap((prev) =>
-                                                  prev[item.id] == null
-                                                    ? prev
-                                                    : { ...prev, [item.id]: { count: value } },
-                                                )
-                                              }}
-                                            />
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    </Toggle.Content>
-                                  </Toggle.Root>
-                                </li>
-                              )
-                            })}
+                                        >
+                                          <EffectItem
+                                            item={item}
+                                            effectCountMap={effectCountMap}
+                                            setEffectCountMap={setEffectCountMap}
+                                          />
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </Toggle.Content>
+                                </Toggle.Root>
+                              </li>
+                            ))}
                           </ul>
                         }
                       </Toggle.Content>
@@ -263,6 +217,53 @@ export const BuildCriteria: React.FC<Props> = ({ defaultValue }) => {
         })}
       </div>
     </fieldset>
+  )
+}
+
+const EffectItem: React.FC<{
+  item: (typeof relicCategories)[number]['children'][number]['children'][number]
+  effectCountMap: EffectCountState<number>
+  setEffectCountMap: React.Dispatch<React.SetStateAction<EffectCountState<number>>>
+}> = ({ item, effectCountMap, setEffectCountMap }) => {
+  const hasChildEffectSelected = item.children?.some((child) => !!effectCountMap[child.id])
+  const isShowingCount = item.stacksWithSelf || item.children?.some((child) => child.stacksAcrossLevels)
+
+  return (
+    <>
+      <Checkbox
+        value={item.id}
+        className="flex-1"
+        checked={!!effectCountMap[item.id]}
+        onChange={() => {
+          setEffectCountMap((prev) => toggleRecord(prev, item.id, { count: 1 }))
+        }}
+        disabled={hasChildEffectSelected}
+      >
+        <span className="text-sm">{item.name}</span>
+      </Checkbox>
+      {isShowingCount ? (
+        <input
+          type="number"
+          name={`effects.${item.id}.count`}
+          className={`
+            ml-auto rounded border border-zinc-600 text-right
+            disabled:border-zinc-800 disabled:text-gray-500/50
+          `}
+          aria-label={`${item.name}の必要効果数`}
+          disabled={!effectCountMap[item.id] || hasChildEffectSelected}
+          min={1}
+          max={6}
+          value={effectCountMap[item.id]?.count ?? 1}
+          onChange={(event) => {
+            const value = event.target.valueAsNumber
+
+            setEffectCountMap((prev) => (prev[item.id] == null ? prev : { ...prev, [item.id]: { count: value } }))
+          }}
+        />
+      ) : (
+        <input type="hidden" name={`effects.${item.id}.count`} value="1" disabled={effectCountMap[item.id] == null} />
+      )}
+    </>
   )
 }
 
