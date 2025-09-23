@@ -16,7 +16,7 @@ function setup() {
   const user = userEvent.setup()
 
   function TestComponent() {
-    const [form, fields] = useForm({
+    const [, fields] = useForm({
       onValidate: ({ formData }) => parseWithValibot(formData, { schema: FormSchema }),
     })
 

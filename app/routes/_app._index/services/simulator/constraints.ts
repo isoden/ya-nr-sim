@@ -1,7 +1,59 @@
 import { type Constraint, equalTo, lessEq } from 'yalps'
 import { type Relic, type RelicJSON, RelicColorExtended, relicEffectMap } from '~/data/relics'
 import { type Vessel, SlotColor } from '~/data/vessels'
+import { relicEffectGroups } from '~/data/generated/relicEffectGroups'
 import type { RequiredEffects } from './types'
+
+/**
+ * relicEffectGroupsの効果を統合する
+ *
+ * 個別選択された効果でも、同じrelicEffectGroupsに属する場合は
+ * 統合して一つのrequiredEffectとして扱う
+ *
+ * @param requiredEffects - 統合前の必要効果リスト
+ */
+export function consolidateRelicEffectGroups(requiredEffects: RequiredEffects): RequiredEffects {
+  // 統合処理
+  const consolidatedEffects: RequiredEffects = []
+  const processedEffectIds = new Set<number>()
+
+  for (const requiredEffect of requiredEffects) {
+    const { effectIds } = requiredEffect
+
+    // このrequiredEffectがrelicEffectGroupsに属するかチェック
+    const groupIndex = relicEffectGroups.findIndex((groupEffectIds) =>
+      effectIds.some((id) => groupEffectIds.includes(id)),
+    )
+
+    if (groupIndex !== -1) {
+      // グループに属する場合、まだ処理されていなければ統合
+      const groupEffectIds = relicEffectGroups[groupIndex]
+
+      if (!groupEffectIds.some((id) => processedEffectIds.has(id))) {
+        // このグループの全effectIdsを統合
+        const totalCount = requiredEffects
+          .filter((re) => re.effectIds.some((id) => groupEffectIds.includes(id)))
+          .reduce((sum, re) => sum + re.count, 0)
+
+        consolidatedEffects.push({
+          effectIds: [...groupEffectIds],
+          count: totalCount,
+        })
+
+        // 処理済みマーク
+        groupEffectIds.forEach((id) => processedEffectIds.add(id))
+      }
+    } else {
+      // グループに属さない場合はそのまま追加
+      if (!effectIds.some((id) => processedEffectIds.has(id))) {
+        consolidatedEffects.push(requiredEffect)
+        effectIds.forEach((id) => processedEffectIds.add(id))
+      }
+    }
+  }
+
+  return consolidatedEffects
+}
 
 /**
  * 制約を作成する

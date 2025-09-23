@@ -310,3 +310,65 @@ test('通常の遺物はフリースロットに装備できる', async () => {
     ],
   })
 })
+
+describe('stacksAcrossLevels統合テスト', () => {
+  test('個別選択と中カテゴリ選択で同じ結果になる', async () => {
+    const vessels = vesselsByCharacterMap['revenant']
+    const relic1 = fakeRelic.red({ effects: [7090000] }) // 敵を倒した時のアーツゲージ蓄積増加+0
+    const relic2 = fakeRelic.blue({ effects: [6090000] }) // 敵を倒した時のアーツゲージ蓄積増加+1
+    const relics = [relic1, relic2]
+
+    // 個別選択パターン
+    const individualResult = await simulate({
+      vessels,
+      relics,
+      requiredEffects: [
+        { effectIds: [7090000], count: 1 },
+        { effectIds: [6090000], count: 1 }
+      ],
+      volume: 1,
+    })
+
+    // 中カテゴリ選択パターン
+    const groupResult = await simulate({
+      vessels,
+      relics,
+      requiredEffects: [
+        { effectIds: [7090000, 6090000], count: 2 }
+      ],
+      volume: 1,
+    })
+
+    // 両方とも成功し、同じ結果になることを確認
+    expect(individualResult.success).toBe(true)
+    expect(groupResult.success).toBe(true)
+
+    if (individualResult.success && groupResult.success) {
+      expect(individualResult.data[0]?.relics.length).toBe(groupResult.data[0]?.relics.length)
+      expect(individualResult.data[0]?.relics.length).toBe(2) // 2つの遺物が選択される
+    }
+  })
+
+  test('stacksAcrossLevelsでない効果は統合されない', async () => {
+    const vessels = vesselsByCharacterMap['revenant']
+    const relic1 = fakeRelic.red({ effects: [7000300] }) // 筋力+1 (stacksWithSelf: true)
+    const relic2 = fakeRelic.blue({ effects: [7000301] }) // 筋力+2 (stacksWithSelf: true)
+    const relics = [relic1, relic2]
+
+    // 個別選択 - 統合されないので別々の制約として扱われる
+    const result = await simulate({
+      vessels,
+      relics,
+      requiredEffects: [
+        { effectIds: [7000300], count: 1 },
+        { effectIds: [7000301], count: 1 }
+      ],
+      volume: 1,
+    })
+
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data[0]?.relics.length).toBe(2) // 2つの遺物が選択される
+    }
+  })
+})

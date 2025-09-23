@@ -14,7 +14,8 @@
     "test:run": "vitest run",
     "coverage:run": "npm run test:run -- --coverage",
     "bench": "vitest bench",
-    "bench:run": "vitest bench --run"
+    "bench:run": "vitest bench --run",
+    "generate:relic-data": "tsx scripts/generate-relic-data.ts"
   },
   "dependencies": {
     "@conform-to/react": "^1.10.1",
@@ -56,6 +57,7 @@
     "isbot": "^5.1.30",
     "prettier": "^3.6.2",
     "tailwindcss": "^4.1.13",
+    "tsx": "^4.20.5",
     "type-fest": "^5.0.1",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.44.0",

@@ -94,9 +94,7 @@ export const BuildCriteria: React.FC<Props> = ({ meta }) => {
                         role="img"
                         aria-label={`${category}の詳細指定を${open ? '閉じる' : '開く'}`}
                         className={twMerge(
-                          `
-                          ml-auto transition-transform duration-200
-                        `,
+                          `ml-auto transition-transform duration-200`,
                           open && `rotate-90`,
                         )}
                       />
@@ -122,9 +120,7 @@ export const BuildCriteria: React.FC<Props> = ({ meta }) => {
                               role="img"
                               aria-label={`${category}の詳細指定を${open ? '閉じる' : '開く'}`}
                               className={twMerge(
-                                `
-                                transition-transform duration-200
-                              `,
+                                `transition-transform duration-200`,
                                 open && `rotate-90`,
                               )}
                             />
@@ -145,9 +141,7 @@ export const BuildCriteria: React.FC<Props> = ({ meta }) => {
                                   `,
                                   !item.children && 'pr-8',
                                   invisibleEffectIds.includes(item.id) &&
-                                    `
-                                    collapse-fallback
-                                  `,
+                                    `collapse-fallback`,
                                 )}
                               >
                                 <Toggle.Root storage={item.id} defaultOpen={false}>
@@ -179,9 +173,7 @@ export const BuildCriteria: React.FC<Props> = ({ meta }) => {
 
                                   <Toggle.Content
                                     key={item.id}
-                                    className={`
-                                    flex flex-col
-                                  `}
+                                    className={`flex flex-col`}
                                   >
                                     <ul className="border-t border-zinc-700">
                                       {item.children?.map((item) => (
