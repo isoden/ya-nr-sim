@@ -93,10 +93,9 @@ export const BuildCriteria: React.FC<Props> = ({ meta }) => {
                       <ChevronRight
                         role="img"
                         aria-label={`${category}の詳細指定を${open ? '閉じる' : '開く'}`}
-                        className={twMerge(
-                          `ml-auto transition-transform duration-200`,
-                          open && `rotate-90`,
-                        )}
+                        className={twMerge(`
+                          ml-auto transition-transform duration-200
+                        `, open && `rotate-90`)}
                       />
                     </>
                   )}
@@ -119,10 +118,9 @@ export const BuildCriteria: React.FC<Props> = ({ meta }) => {
                             <ChevronRight
                               role="img"
                               aria-label={`${category}の詳細指定を${open ? '閉じる' : '開く'}`}
-                              className={twMerge(
-                                `transition-transform duration-200`,
-                                open && `rotate-90`,
-                              )}
+                              className={twMerge(`
+                                transition-transform duration-200
+                              `, open && `rotate-90`)}
                             />
                           </>
                         )}
@@ -140,8 +138,9 @@ export const BuildCriteria: React.FC<Props> = ({ meta }) => {
                                     not-first-of-type:border-t
                                   `,
                                   !item.children && 'pr-8',
-                                  invisibleEffectIds.includes(item.id) &&
-                                    `collapse-fallback`,
+                                  invisibleEffectIds.includes(item.id) && `
+                                    collapse-fallback
+                                  `,
                                 )}
                               >
                                 <Toggle.Root storage={item.id} defaultOpen={false}>
@@ -171,10 +170,9 @@ export const BuildCriteria: React.FC<Props> = ({ meta }) => {
                                     )}
                                   </div>
 
-                                  <Toggle.Content
-                                    key={item.id}
-                                    className={`flex flex-col`}
-                                  >
+                                  <Toggle.Content key={item.id} className={`
+                                    flex flex-col
+                                  `}>
                                     <ul className="border-t border-zinc-700">
                                       {item.children?.map((item) => (
                                         <li
@@ -218,7 +216,7 @@ const EffectItem: React.FC<{
   setEffectCountMap: React.Dispatch<React.SetStateAction<EffectCountState<number>>>
 }> = ({ item, effectCountMap, setEffectCountMap }) => {
   const hasChildEffectSelected = item.children?.some((child) => !!effectCountMap[child.id])
-  const isShowingCount = item.stacksWithSelf || item.children?.some((child) => child.stacksAcrossLevels)
+  const isShowingCount = item.maxStacks > 1 || item.children?.some((child) => child.maxStacks > 1)
 
   return (
     <>
@@ -244,7 +242,7 @@ const EffectItem: React.FC<{
           aria-label={`${item.name}の必要効果数`}
           disabled={!effectCountMap[item.id] || hasChildEffectSelected}
           min={1}
-          max={6}
+          max={item.maxStacks}
           value={effectCountMap[item.id]?.count ?? 1}
           onChange={(event) => {
             const value = event.target.valueAsNumber

@@ -324,7 +324,7 @@ describe('stacksAcrossLevels統合テスト', () => {
       relics,
       requiredEffects: [
         { effectIds: [7090000], count: 1 },
-        { effectIds: [6090000], count: 1 }
+        { effectIds: [6090000], count: 1 },
       ],
       volume: 1,
     })
@@ -333,9 +333,7 @@ describe('stacksAcrossLevels統合テスト', () => {
     const groupResult = await simulate({
       vessels,
       relics,
-      requiredEffects: [
-        { effectIds: [7090000, 6090000], count: 2 }
-      ],
+      requiredEffects: [{ effectIds: [7090000, 6090000], count: 2 }],
       volume: 1,
     })
 
@@ -361,7 +359,7 @@ describe('stacksAcrossLevels統合テスト', () => {
       relics,
       requiredEffects: [
         { effectIds: [7000300], count: 1 },
-        { effectIds: [7000301], count: 1 }
+        { effectIds: [7000301], count: 1 },
       ],
       volume: 1,
     })
@@ -370,5 +368,82 @@ describe('stacksAcrossLevels統合テスト', () => {
     if (result.success) {
       expect(result.data[0]?.relics.length).toBe(2) // 2つの遺物が選択される
     }
+  })
+})
+
+describe('リグレッションテスト', () => {
+  test('複数の効果グループを同時に要求した際のマッチング (Issue: 効果係数の重複カウント)', async () => {
+    // arrange
+    const vessels = vesselsByCharacterMap['wylder']
+    const vitality = fakeRelic.red({ effects: [7000000] }) // 生命力+1
+    const magic1 = fakeRelic.blue({ effects: [7090000] }) // 敵を倒した時のアーツゲージ蓄積増加+0
+    const magic2 = fakeRelic.yellow({ effects: [6090000] }) // 敵を倒した時のアーツゲージ蓄積増加+1
+    const relics = [vitality, magic1, magic2]
+
+    // act
+    const result = await simulate({
+      vessels,
+      relics,
+      requiredEffects: [
+        {
+          effectIds: [7000000, 7000001, 7000002], // 生命力効果のいずれか
+          count: 1,
+        },
+        {
+          effectIds: [7090000, 6090000], // マジックスプレッド効果のいずれか
+          count: 2,
+        },
+      ],
+      volume: 1,
+    })
+
+    // assert
+    expect(result).toEqual({
+      success: true,
+      data: [
+        {
+          vessel: vessels.find((v) => v.name.includes('追跡者の高杯')),
+          relics: [vitality, magic2, magic1],
+          relicsIndexes: {
+            [vitality.id]: 0,
+            [magic2.id]: 1,
+            [magic1.id]: 2,
+          },
+        },
+      ],
+    })
+  })
+
+  test('単一効果グループでは正常に動作する', async () => {
+    // arrange
+    const vessels = vesselsByCharacterMap['wylder']
+    const vitality = fakeRelic.red({ effects: [7000000] })
+
+    // act
+    const result = await simulate({
+      vessels,
+      relics: [vitality],
+      requiredEffects: [
+        {
+          effectIds: [7000000, 7000001, 7000002],
+          count: 1,
+        },
+      ],
+      volume: 1,
+    })
+
+    // assert
+    expect(result).toEqual({
+      success: true,
+      data: [
+        {
+          vessel: vessels.find((v) => v.name.includes('追跡者の器')),
+          relics: [vitality],
+          relicsIndexes: {
+            [vitality.id]: 0,
+          },
+        },
+      ],
+    })
   })
 })

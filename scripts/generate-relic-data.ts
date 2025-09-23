@@ -3,6 +3,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { omit } from 'es-toolkit'
 import { relicEffectMap } from '../app/data/relicEffects.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -19,8 +20,7 @@ type RelicEffect = {
 type OptionItem = {
   id: string
   name: string
-  stacksWithSelf: boolean
-  stacksAcrossLevels?: boolean
+  maxStacks: number
   children?: OptionItem[]
 }
 
@@ -42,39 +42,47 @@ const allItems: RelicEffect[] = Object.entries(relicEffectMap).map(([id, data]) 
 function createOptionFromName(name: string): OptionItem {
   const exactMatch = allItems.find((item) => item.name === name)
   const relatedItems = findRelatedItems(name)
-  const stacksWithSelf = relatedItems.some((item) => item.stacksWithSelf)
-  const stacksAcrossLevels = relatedItems.some((item) => item.stacksAcrossLevels)
 
   // 完全一致する遺物効果が存在しない場合、接頭辞にマッチする遺物効果を子項目として持つ
   if (!exactMatch) {
     return {
       id: relatedItems.map((item) => item.id).join(','),
       name,
-      stacksWithSelf,
-      stacksAcrossLevels,
+      maxStacks: countMaxStacks(relatedItems),
       children: relatedItems.map((item) => createOptionFromName(item.name)),
     }
   }
 
+  const optionItem = omit(exactMatch, ['stacksWithSelf', 'stacksAcrossLevels'])
+
   // 関連する遺物効果が1つしかない場合、子項目を持たない
-  if (relatedItems.length <= 1) return exactMatch
+  if (relatedItems.length <= 1) {
+    return { ...optionItem, maxStacks: countMaxStacks(exactMatch) }
+  }
 
   // 関連する遺物効果が複数ある場合、子項目を持つ
   return {
-    ...exactMatch,
+    ...optionItem,
     id: relatedItems.map((item) => item.id).join(','),
-    stacksWithSelf,
-    stacksAcrossLevels,
+    maxStacks: countMaxStacks(relatedItems),
     children: relatedItems.map((item) =>
       item.name === name
-        ? {
-            id: exactMatch.id,
-            name: item.name,
-            stacksWithSelf: item.stacksWithSelf,
-          }
+        ? { id: exactMatch.id, name: item.name, maxStacks: countMaxStacks(item) }
         : createOptionFromName(item.name),
     ),
   }
+}
+
+function countMaxStacks(itemOrItems: RelicEffect | RelicEffect[]): number {
+  if (Array.isArray(itemOrItems)) {
+    const items = itemOrItems
+    if (items.some((item) => item.stacksWithSelf)) return 6
+
+    return items.length
+  }
+
+  const item = itemOrItems
+  return item.stacksWithSelf ? 6 : 1
 }
 
 /**
@@ -640,8 +648,7 @@ function generateTypeDefinitions(): string {
   return `export type RelicCategoryItem = {
   id: string
   name: string
-  stacksWithSelf: boolean
-  stacksAcrossLevels?: boolean
+  maxStacks: number
   hasDemeritEffect?: boolean
   children?: RelicCategoryItem[]
 }
