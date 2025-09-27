@@ -1,4 +1,5 @@
-import React, { useCallback, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { isFunction } from 'es-toolkit/compat'
 
 /**
  * 状態を永続化するカスタムフック
@@ -6,27 +7,26 @@ import React, { useCallback, useState } from 'react'
  * @param storeKey - localStorageのキー
  * @param defaultValue - デフォルト値
  */
-export function usePersistedState<T>(storeKey: string, defaultValue: T): [T, (value: React.SetStateAction<T>) => void] {
+export function usePersistedState<T>(
+  storeKey: string,
+  defaultValue: T | (() => T),
+): [T, (value: React.SetStateAction<T>) => void] {
   const [state, setState] = useState<T>(() => {
     try {
       const storedValue = localStorage.getItem(storeKey)
-      return storedValue ? JSON.parse(storedValue) : defaultValue
+      return storedValue ? JSON.parse(storedValue) : isFunction(defaultValue) ? defaultValue() : defaultValue
     } catch {
-      return defaultValue
+      return isFunction(defaultValue) ? defaultValue() : defaultValue
     }
   })
 
-  const setPersistedState = useCallback(
-    (value: React.SetStateAction<T>) => {
-      setState(value)
-      try {
-        localStorage.setItem(storeKey, JSON.stringify(value))
-      } catch {
-        // ignore runtime errors
-      }
-    },
-    [storeKey],
-  )
+  useEffect(() => {
+    try {
+      localStorage.setItem(storeKey, JSON.stringify(state))
+    } catch {
+      // ignore runtime errors
+    }
+  }, [state])
 
-  return [state, setPersistedState]
+  return [state, setState]
 }

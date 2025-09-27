@@ -1,29 +1,28 @@
 import React, { createContext, useContext, useId } from 'react'
 import { twMerge } from 'tailwind-merge'
-import { usePersistedState } from '~/hooks/usePersistedState'
 
-const ToggleContext = createContext<
-  { id: string; open: boolean; setOpen: React.Dispatch<React.SetStateAction<boolean>> } | undefined
->(undefined)
+const ToggleContext = createContext<{ id: string; open: boolean; setOpen: (open: boolean) => void } | undefined>(
+  undefined,
+)
 
 type RootProps = React.PropsWithChildren<{
-  storage?: string
-  defaultOpen?: boolean
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }>
 
-const ToggleRoot: React.FC<RootProps> = ({ children, storage = genId(), defaultOpen = true }) => {
+const ToggleRoot: React.FC<RootProps> = ({ children, open, onOpenChange: setOpen }) => {
   const id = useId()
-  const [open, setOpen] = usePersistedState(storage, defaultOpen)
 
   return <ToggleContext.Provider value={{ id, open, setOpen }}>{children}</ToggleContext.Provider>
 }
 
 type ButtonProps = {
-  children?: React.ReactNode | ((props: { open: boolean }) => React.ReactNode)
+  children?: React.ReactNode
   className?: string
+  disabled?: boolean
 }
 
-const ToggleButton: React.FC<ButtonProps> = ({ children, className }) => {
+const ToggleButton: React.FC<ButtonProps> = ({ children, className, disabled }) => {
   const { id, open, setOpen } = useContext(ToggleContext)!
 
   return (
@@ -33,8 +32,9 @@ const ToggleButton: React.FC<ButtonProps> = ({ children, className }) => {
       aria-controls={`toggle-${id}`}
       onClick={() => setOpen(!open)}
       className={className}
+      disabled={disabled}
     >
-      {typeof children === 'function' ? children({ open }) : children}
+      {children}
     </button>
   )
 }
@@ -47,9 +47,16 @@ const ToggleContent: React.FC<ContentProps> = ({ children, className }) => {
   const { id, open } = useContext(ToggleContext)!
 
   return (
-    <div aria-hidden={!open} id={`toggle-${id}`} className={twMerge(className, `
+    <div
+      aria-hidden={!open}
+      id={`toggle-${id}`}
+      className={twMerge(
+        className,
+        `
       aria-[hidden=true]:collapse-fallback
-    `)}>
+    `,
+      )}
+    >
       {children}
     </div>
   )

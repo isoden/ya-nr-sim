@@ -3,6 +3,8 @@ import type { FieldMetadata } from '@conform-to/react'
 import { ChevronRight, TextSearch, CircleXIcon } from 'lucide-react'
 import { set } from 'es-toolkit/compat'
 import { twMerge } from 'tailwind-merge'
+import { usePersistedState } from '~/hooks/usePersistedState'
+import { characterList, characterMap } from '~/data/characters'
 import { Checkbox } from '../forms/Checkbox'
 import { Toggle } from '../Toggle'
 import { relicCategories } from './data'
@@ -12,15 +14,25 @@ type EffectCountState<Type extends string | number> = {
 }
 
 type Props = {
+  // conform のメタデータ
   meta: FieldMetadata<EffectCountState<number>>
+
+  // 選択中のキャラクター ID
+  selectedCharId: string | undefined
 }
+
+const characterUniqueEffect = '特定キャラクターのみ'
+const characterNames = characterList.reduce<Record<string, boolean>>(
+  (memo, character) => ({ ...memo, [character.name]: false }),
+  {},
+)
 
 /**
  * ビルド条件として要求する遺物効果と必要数を選択するコンポーネント
  *
  * @param props - {@link Props}
  */
-export const BuildCriteria: React.FC<Props> = ({ meta }) => {
+export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
   const [filterText, setFilterText] = useState('')
   const [showSelectedOnly, setShowSelectedOnly] = useState(false)
   const [effectCountMap, setEffectCountMap] = useState(() => {
@@ -29,6 +41,23 @@ export const BuildCriteria: React.FC<Props> = ({ meta }) => {
       {},
     )
   })
+  const [toggleState, setToggleState] = usePersistedState<Record<string, boolean>>('build-criteria-toggle-state', () =>
+    Object.fromEntries(
+      relicCategories.flatMap<[string, boolean][]>(({ category, children }) => [
+        [category, true],
+        ...children.flatMap<[string, boolean]>(({ category, children }) => [
+          [category, false],
+          ...(children?.map<[string, boolean]>(({ id }) => [id, false]) ?? []),
+        ]),
+      ]),
+    ),
+  )
+  const [prevSelectedCharId, setPrevSelectedCharId] = useState(selectedCharId)
+
+  if (selectedCharId !== prevSelectedCharId) {
+    setToggleState((prevState) => ({ ...prevState, ...characterNames }))
+    setPrevSelectedCharId(selectedCharId)
+  }
 
   return (
     <fieldset className="flex h-full min-h-0 flex-col">
@@ -68,7 +97,11 @@ export const BuildCriteria: React.FC<Props> = ({ meta }) => {
           const invisible = invisibleEffectIds.length === flattenChildren.length
 
           return (
-            <Toggle.Root key={category} storage={category}>
+            <Toggle.Root
+              key={category}
+              open={toggleState[category]}
+              onOpenChange={(open) => setToggleState((prevState) => ({ ...prevState, [category]: open }))}
+            >
               <div
                 className={twMerge(
                   `
@@ -85,45 +118,54 @@ export const BuildCriteria: React.FC<Props> = ({ meta }) => {
                     py-2 leading-0 shadow-[0_1px_0_0_theme(colors.zinc.700)]
                   `}
                 >
-                  {({ open }) => (
-                    <>
-                      <span className="text-sm font-bold" aria-hidden="true">
-                        {category}
-                      </span>
-                      <ChevronRight
-                        role="img"
-                        aria-label={`${category}の詳細指定を${open ? '閉じる' : '開く'}`}
-                        className={twMerge(`
+                  <span className="text-sm font-bold" aria-hidden="true">
+                    {category}
+                  </span>
+                  <ChevronRight
+                    role="img"
+                    aria-label={`${category}の詳細指定を${toggleState[category] ? '閉じる' : '開く'}`}
+                    className={twMerge(
+                      `
                           ml-auto transition-transform duration-200
-                        `, open && `rotate-90`)}
-                      />
-                    </>
-                  )}
+                        `,
+                      toggleState[category] && `rotate-90`,
+                    )}
+                  />
                 </Toggle.Button>
                 <Toggle.Content className={`flex flex-col bg-zinc-700/20`}>
-                  {children.map(({ category, children }) => (
-                    <Toggle.Root key={category} storage={category} defaultOpen={false}>
+                  {children.map(({ category: subCategory, children }) => (
+                    <Toggle.Root
+                      key={subCategory}
+                      open={toggleState[subCategory]}
+                      onOpenChange={(open) => {
+                        setToggleState((prevState) => ({ ...prevState, [subCategory]: open }))
+                      }}
+                    >
                       <Toggle.Button
                         className={`
                           sticky top-10 z-20 flex items-center gap-4 border-t
                           border-t-zinc-700 bg-zinc-800 py-2 pr-4 pl-6
                           shadow-[0_1px_0_0_theme(colors.zinc.700)]
+                          disabled:text-current/50
                         `}
+                        disabled={
+                          category === characterUniqueEffect &&
+                          characterMap[selectedCharId as keyof typeof characterMap]?.name !== subCategory
+                        }
                       >
-                        {({ open }) => (
-                          <>
-                            <span className="flex-1 text-left text-sm" aria-hidden="true">
-                              {category}
-                            </span>
-                            <ChevronRight
-                              role="img"
-                              aria-label={`${category}の詳細指定を${open ? '閉じる' : '開く'}`}
-                              className={twMerge(`
+                        <span className="flex-1 text-left text-sm" aria-hidden="true">
+                          {subCategory}
+                        </span>
+                        <ChevronRight
+                          role="img"
+                          aria-label={`${subCategory}の詳細指定を${toggleState[subCategory] ? '閉じる' : '開く'}`}
+                          className={twMerge(
+                            `
                                 transition-transform duration-200
-                              `, open && `rotate-90`)}
-                            />
-                          </>
-                        )}
+                              `,
+                            toggleState[subCategory] && `rotate-90`,
+                          )}
+                        />
                       </Toggle.Button>
 
                       <Toggle.Content>
@@ -138,12 +180,18 @@ export const BuildCriteria: React.FC<Props> = ({ meta }) => {
                                     not-first-of-type:border-t
                                   `,
                                   !item.children && 'pr-8',
-                                  invisibleEffectIds.includes(item.id) && `
+                                  invisibleEffectIds.includes(item.id) &&
+                                    `
                                     collapse-fallback
                                   `,
                                 )}
                               >
-                                <Toggle.Root storage={item.id} defaultOpen={false}>
+                                <Toggle.Root
+                                  open={toggleState[item.id]}
+                                  onOpenChange={(open) =>
+                                    setToggleState((prevState) => ({ ...prevState, [item.id]: open }))
+                                  }
+                                >
                                   <div className="flex items-center px-4 py-2">
                                     <EffectItem
                                       item={item}
@@ -153,26 +201,27 @@ export const BuildCriteria: React.FC<Props> = ({ meta }) => {
 
                                     {item.children && (
                                       <Toggle.Button className="ml-2">
-                                        {({ open }) => (
-                                          <ChevronRight
-                                            role="img"
-                                            aria-label={`${item.name}の詳細指定を${open ? '閉じる' : '開く'}`}
-                                            className={twMerge(
-                                              `
+                                        <ChevronRight
+                                          role="img"
+                                          aria-label={`${item.name}の詳細指定を${toggleState[item.id] ? '閉じる' : '開く'}`}
+                                          className={twMerge(
+                                            `
                                                 ml-auto transition-transform
                                                 duration-200
                                               `,
-                                              open && `rotate-90`,
-                                            )}
-                                          />
-                                        )}
+                                            toggleState[item.id] && `rotate-90`,
+                                          )}
+                                        />
                                       </Toggle.Button>
                                     )}
                                   </div>
 
-                                  <Toggle.Content key={item.id} className={`
+                                  <Toggle.Content
+                                    key={item.id}
+                                    className={`
                                     flex flex-col
-                                  `}>
+                                  `}
+                                  >
                                     <ul className="border-t border-zinc-700">
                                       {item.children?.map((item) => (
                                         <li
