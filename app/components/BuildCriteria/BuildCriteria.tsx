@@ -59,6 +59,18 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
     setPrevSelectedCharId(selectedCharId)
   }
 
+  const getVisibility = (visible: boolean) => {
+    const isForceVisible = showSelectedOnly || filterText !== ''
+    return isForceVisible ? true : visible
+  }
+
+  // フィルタリング判定関数
+  const shouldHideItem = (item: { id: string; name: string }) => {
+    const isUnselectedInShowMode = showSelectedOnly && effectCountMap[item.id] == null
+    const isFilteredOut = filterText !== '' && !item.name.includes(filterText)
+    return isUnselectedInShowMode || isFilteredOut
+  }
+
   return (
     <fieldset className="flex h-full min-h-0 flex-col">
       <legend className="text-[15px] text-gray-300">遺物効果</legend>
@@ -87,170 +99,191 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
       >
         {relicCategories.map(({ category, children }) => {
           const flattenChildren = children.flatMap((item) => item.children)
-          const invisibleEffectIds = flattenChildren.reduce<string[]>((acc, effect) => {
-            const isUnselectedInShowMode = showSelectedOnly && effectCountMap[effect.id] == null
-            const isFilteredOut = filterText !== '' && !effect.name.includes(filterText)
-
-            return isUnselectedInShowMode || isFilteredOut ? acc.concat(effect.id) : acc
-          }, [])
-
-          const invisible = invisibleEffectIds.length === flattenChildren.length
+          const hiddenItems = flattenChildren.filter(shouldHideItem)
+          const invisible = hiddenItems.length === flattenChildren.length
 
           return (
             <Toggle.Root
               key={category}
-              open={toggleState[category]}
+              open={getVisibility(toggleState[category])}
               onOpenChange={(open) => setToggleState((prevState) => ({ ...prevState, [category]: open }))}
             >
-              <div
-                className={twMerge(
-                  `
-                    group relative border-zinc-700 bg-zinc-800 shadow
-                    not-[:first-child]:border-t
-                  `,
-                  invisible && 'collapse-fallback',
-                )}
-                aria-hidden={invisible}
-              >
-                <Toggle.Button
-                  className={`
-                    sticky top-0 z-10 flex w-full items-center bg-inherit px-4
-                    py-2 leading-0 shadow-[0_1px_0_0_theme(colors.zinc.700)]
-                  `}
+              {({ open: isCategoryOpen }) => (
+                <div
+                  className={twMerge(
+                    `
+                      group relative border-zinc-700 bg-zinc-800 shadow
+                      not-[:first-child]:border-t
+                    `,
+                    invisible && 'collapse-fallback',
+                  )}
+                  aria-hidden={invisible}
                 >
-                  <span className="text-sm font-bold" aria-hidden="true">
-                    {category}
-                  </span>
-                  <ChevronRight
-                    role="img"
-                    aria-label={`${category}の詳細指定を${toggleState[category] ? '閉じる' : '開く'}`}
-                    className={twMerge(
-                      `
-                          ml-auto transition-transform duration-200
-                        `,
-                      toggleState[category] && `rotate-90`,
-                    )}
-                  />
-                </Toggle.Button>
-                <Toggle.Content className={`flex flex-col bg-zinc-700/20`}>
-                  {children.map(({ category: subCategory, children }) => (
-                    <Toggle.Root
-                      key={subCategory}
-                      open={toggleState[subCategory]}
-                      onOpenChange={(open) => {
-                        setToggleState((prevState) => ({ ...prevState, [subCategory]: open }))
-                      }}
-                    >
-                      <Toggle.Button
-                        className={`
-                          sticky top-10 z-20 flex items-center gap-4 border-t
-                          border-t-zinc-700 bg-zinc-800 py-2 pr-4 pl-6
-                          shadow-[0_1px_0_0_theme(colors.zinc.700)]
-                          disabled:text-current/50
-                        `}
-                        disabled={
-                          category === characterUniqueEffect &&
-                          characterMap[selectedCharId as keyof typeof characterMap]?.name !== subCategory
-                        }
+                  <Toggle.Button
+                    className={`
+                      sticky top-0 z-10 flex w-full items-center bg-inherit px-4
+                      py-2 leading-0 shadow-[0_1px_0_0_theme(colors.zinc.700)]
+                    `}
+                  >
+                    <span className="text-sm font-bold" aria-hidden="true">
+                      {category}
+                    </span>
+                    <ChevronRight
+                      role="img"
+                      aria-label={`${category}の詳細指定を${isCategoryOpen ? '閉じる' : '開く'}`}
+                      className={twMerge(`
+                        ml-auto transition-transform duration-200
+                      `, isCategoryOpen && `rotate-90`)}
+                    />
+                  </Toggle.Button>
+                  <Toggle.Content className={`flex flex-col bg-zinc-700/20`}>
+                    {children.map(({ category: subCategory, children }) => (
+                      <Toggle.Root
+                        key={subCategory}
+                        open={getVisibility(toggleState[subCategory])}
+                        onOpenChange={(open) => {
+                          setToggleState((prevState) => ({ ...prevState, [subCategory]: open }))
+                        }}
                       >
-                        <span className="flex-1 text-left text-sm" aria-hidden="true">
-                          {subCategory}
-                        </span>
-                        <ChevronRight
-                          role="img"
-                          aria-label={`${subCategory}の詳細指定を${toggleState[subCategory] ? '閉じる' : '開く'}`}
-                          className={twMerge(
-                            `
-                                transition-transform duration-200
-                              `,
-                            toggleState[subCategory] && `rotate-90`,
-                          )}
-                        />
-                      </Toggle.Button>
-
-                      <Toggle.Content>
-                        {
-                          <ul className="flex flex-col border-t border-zinc-700">
-                            {children.map((item) => (
-                              <li
-                                key={item.id}
+                        {({ open: isSubCategoryOpen }) => (
+                          <>
+                            <Toggle.Button
+                              className={twMerge(
+                                `
+                                  sticky top-10 z-20 flex items-center gap-4
+                                  border-t border-t-zinc-700 bg-zinc-800 py-2
+                                  pr-4 pl-6
+                                  shadow-[0_1px_0_0_theme(colors.zinc.700)]
+                                  disabled:text-current/50
+                                `,
+                                children.filter(shouldHideItem).length === children.length && `
+                                  collapse-fallback
+                                `,
+                              )}
+                              disabled={
+                                category === characterUniqueEffect &&
+                                characterMap[selectedCharId as keyof typeof characterMap]?.name !== subCategory
+                              }
+                            >
+                              <span className="flex-1 text-left text-sm" aria-hidden="true">
+                                {subCategory}
+                              </span>
+                              <ChevronRight
+                                role="img"
+                                aria-label={`${subCategory}の詳細指定を${isSubCategoryOpen ? '閉じる' : '開く'}`}
                                 className={twMerge(
-                                  `
-                                    ml-6 border-zinc-700
-                                    not-first-of-type:border-t
-                                  `,
-                                  !item.children && 'pr-8',
-                                  invisibleEffectIds.includes(item.id) &&
-                                    `
-                                    collapse-fallback
-                                  `,
+                                  `transition-transform duration-200`,
+                                  isSubCategoryOpen && `rotate-90`,
                                 )}
-                              >
-                                <Toggle.Root
-                                  open={toggleState[item.id]}
-                                  onOpenChange={(open) =>
-                                    setToggleState((prevState) => ({ ...prevState, [item.id]: open }))
-                                  }
-                                >
-                                  <div className="flex items-center px-4 py-2">
-                                    <EffectItem
-                                      item={item}
-                                      effectCountMap={effectCountMap}
-                                      setEffectCountMap={setEffectCountMap}
-                                    />
+                              />
+                            </Toggle.Button>
 
-                                    {item.children && (
-                                      <Toggle.Button className="ml-2">
-                                        <ChevronRight
-                                          role="img"
-                                          aria-label={`${item.name}の詳細指定を${toggleState[item.id] ? '閉じる' : '開く'}`}
-                                          className={twMerge(
-                                            `
-                                                ml-auto transition-transform
-                                                duration-200
-                                              `,
-                                            toggleState[item.id] && `rotate-90`,
-                                          )}
-                                        />
-                                      </Toggle.Button>
-                                    )}
-                                  </div>
-
-                                  <Toggle.Content
-                                    key={item.id}
-                                    className={`
-                                    flex flex-col
+                            <Toggle.Content
+                              className={twMerge(
+                                children.filter(shouldHideItem).length === children.length && `
+                                  collapse-fallback
+                                `,
+                              )}
+                            >
+                              {
+                                <ul
+                                  className={`
+                                    flex flex-col border-t border-zinc-700
                                   `}
-                                  >
-                                    <ul className="border-t border-zinc-700">
-                                      {item.children?.map((item) => (
-                                        <li
-                                          key={item.id}
-                                          className={`
-                                            ml-6 flex items-center
-                                            border-zinc-700 py-2 pr-12 pl-4
-                                            not-first-of-type:border-t
-                                          `}
-                                        >
-                                          <EffectItem
-                                            item={item}
-                                            effectCountMap={effectCountMap}
-                                            setEffectCountMap={setEffectCountMap}
-                                          />
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </Toggle.Content>
-                                </Toggle.Root>
-                              </li>
-                            ))}
-                          </ul>
-                        }
-                      </Toggle.Content>
-                    </Toggle.Root>
-                  ))}
-                </Toggle.Content>
-              </div>
+                                >
+                                  {children.map((item) => (
+                                    <li
+                                      key={item.id}
+                                      className={twMerge(
+                                        `
+                                          ml-6 border-zinc-700
+                                          not-first-of-type:border-t
+                                        `,
+                                        !item.children && 'pr-8',
+                                        shouldHideItem(item) && `
+                                          collapse-fallback
+                                        `,
+                                      )}
+                                    >
+                                      <Toggle.Root
+                                        open={getVisibility(toggleState[item.id])}
+                                        onOpenChange={(open) =>
+                                          setToggleState((prevState) => ({ ...prevState, [item.id]: open }))
+                                        }
+                                      >
+                                        {({ open: isOpen }) => (
+                                          <>
+                                            <div
+                                              className={`
+                                                flex items-center px-4 py-2
+                                              `}
+                                            >
+                                              <EffectItem
+                                                item={item}
+                                                effectCountMap={effectCountMap}
+                                                setEffectCountMap={setEffectCountMap}
+                                              />
+
+                                              {item.children && (
+                                                <Toggle.Button className="ml-2">
+                                                  <ChevronRight
+                                                    role="img"
+                                                    aria-label={`${item.name}の詳細指定を${isOpen ? '閉じる' : '開く'}`}
+                                                    className={twMerge(
+                                                      `
+                                                        ml-auto
+                                                        transition-transform
+                                                        duration-200
+                                                      `,
+                                                      isOpen && `rotate-90`,
+                                                    )}
+                                                  />
+                                                </Toggle.Button>
+                                              )}
+                                            </div>
+
+                                            <Toggle.Content key={item.id} className={`
+                                              flex flex-col
+                                            `}>
+                                              <ul
+                                                className={`
+                                                  border-t border-zinc-700
+                                                `}
+                                              >
+                                                {item.children?.map((item) => (
+                                                  <li
+                                                    key={item.id}
+                                                    className={`
+                                                      ml-6 flex items-center
+                                                      border-zinc-700 py-2 pr-12
+                                                      pl-4
+                                                      not-first-of-type:border-t
+                                                    `}
+                                                  >
+                                                    <EffectItem
+                                                      item={item}
+                                                      effectCountMap={effectCountMap}
+                                                      setEffectCountMap={setEffectCountMap}
+                                                    />
+                                                  </li>
+                                                ))}
+                                              </ul>
+                                            </Toggle.Content>
+                                          </>
+                                        )}
+                                      </Toggle.Root>
+                                    </li>
+                                  ))}
+                                </ul>
+                              }
+                            </Toggle.Content>
+                          </>
+                        )}
+                      </Toggle.Root>
+                    ))}
+                  </Toggle.Content>
+                </div>
+              )}
             </Toggle.Root>
           )
         })}

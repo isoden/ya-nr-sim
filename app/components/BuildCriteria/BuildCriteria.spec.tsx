@@ -4,6 +4,7 @@ import { expect, test } from 'vitest'
 import { useForm } from '@conform-to/react'
 import { parseWithValibot } from '@conform-to/valibot'
 import { FormSchema } from '~/routes/_app._index/schema/FormSchema'
+import { characterMap } from '~/data/characters'
 import { BuildCriteria } from './BuildCriteria'
 
 test('smoke test', async () => {
@@ -20,7 +21,7 @@ function setup() {
       onValidate: ({ formData }) => parseWithValibot(formData, { schema: FormSchema }),
     })
 
-    return <BuildCriteria meta={fields.effects} />
+    return <BuildCriteria meta={fields.effects} selectedCharId={characterMap.wylder.id} />
   }
 
   const view = render(<TestComponent />)
