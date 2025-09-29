@@ -5,15 +5,20 @@ const ToggleContext = createContext<{ id: string; open: boolean; setOpen: (open:
   undefined,
 )
 
-type RootProps = React.PropsWithChildren<{
+type RootProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-}>
+  children: React.ReactNode | ((props: { open: boolean }) => React.ReactNode)
+}
 
 const ToggleRoot: React.FC<RootProps> = ({ children, open, onOpenChange: setOpen }) => {
   const id = useId()
 
-  return <ToggleContext.Provider value={{ id, open, setOpen }}>{children}</ToggleContext.Provider>
+  return (
+    <ToggleContext.Provider value={{ id, open, setOpen }}>
+      {typeof children === 'function' ? children({ open }) : children}
+    </ToggleContext.Provider>
+  )
 }
 
 type ButtonProps = {
@@ -47,16 +52,9 @@ const ToggleContent: React.FC<ContentProps> = ({ children, className }) => {
   const { id, open } = useContext(ToggleContext)!
 
   return (
-    <div
-      aria-hidden={!open}
-      id={`toggle-${id}`}
-      className={twMerge(
-        className,
-        `
+    <div aria-hidden={!open} id={`toggle-${id}`} className={twMerge(className, `
       aria-[hidden=true]:collapse-fallback
-    `,
-      )}
-    >
+    `)}>
       {children}
     </div>
   )
@@ -70,7 +68,3 @@ export const Toggle = Object.assign(
     Content: ToggleContent,
   },
 )
-
-function genId() {
-  return `${Math.random().toString(36).slice(2, 9)}`
-}
