@@ -9,6 +9,7 @@ import type { RequiredEffects } from './types'
  *
  * 個別選択された効果でも、同じrelicEffectGroupsに属する場合は
  * 統合して一つのrequiredEffectとして扱う
+ * ただし、stacksWithSelf: false の効果は統合対象から除外し、個別に処理する
  *
  * @param requiredEffects - 統合前の必要効果リスト
  */
@@ -16,9 +17,38 @@ export function consolidateRelicEffectGroups(requiredEffects: RequiredEffects): 
   // 統合処理
   const consolidatedEffects: RequiredEffects = []
   const processedEffectIds = new Set<number>()
+  const processedGroups = new Set<number>()
 
+  // まず stacksWithSelf: false の効果を個別に処理
   for (const requiredEffect of requiredEffects) {
     const { effectIds } = requiredEffect
+
+    const hasNonStackableEffect = effectIds.some((id) => {
+      const effect = relicEffectMap[id]
+      return effect && !effect.stacksWithSelf
+    })
+
+    if (hasNonStackableEffect) {
+      if (!effectIds.some((id) => processedEffectIds.has(id))) {
+        consolidatedEffects.push(requiredEffect)
+        effectIds.forEach((id) => processedEffectIds.add(id))
+      }
+    }
+  }
+
+  // 次に stacksWithSelf: true の効果をグループ単位で統合
+  for (const requiredEffect of requiredEffects) {
+    const { effectIds } = requiredEffect
+
+    // stacksWithSelf: false の効果が含まれている場合はスキップ（既に処理済み）
+    const hasNonStackableEffect = effectIds.some((id) => {
+      const effect = relicEffectMap[id]
+      return effect && !effect.stacksWithSelf
+    })
+
+    if (hasNonStackableEffect) {
+      continue
+    }
 
     // このrequiredEffectがrelicEffectGroupsに属するかチェック
     const groupIndex = relicEffectGroups.findIndex((groupEffectIds) =>
@@ -27,21 +57,33 @@ export function consolidateRelicEffectGroups(requiredEffects: RequiredEffects): 
 
     if (groupIndex !== -1) {
       // グループに属する場合、まだ処理されていなければ統合
-      const groupEffectIds = relicEffectGroups[groupIndex]
+      if (!processedGroups.has(groupIndex)) {
+        const groupEffectIds = relicEffectGroups[groupIndex]
 
-      if (!groupEffectIds.some((id) => processedEffectIds.has(id))) {
-        // このグループの全effectIdsを統合
-        const totalCount = requiredEffects
-          .filter((re) => re.effectIds.some((id) => groupEffectIds.includes(id)))
-          .reduce((sum, re) => sum + re.count, 0)
-
-        consolidatedEffects.push({
-          effectIds: [...groupEffectIds],
-          count: totalCount,
+        // このグループのstacksWithSelf: true の効果のみを対象とする
+        const stackableGroupEffectIds = groupEffectIds.filter((id) => {
+          const effect = relicEffectMap[id]
+          return effect && effect.stacksWithSelf
         })
 
-        // 処理済みマーク
-        groupEffectIds.forEach((id) => processedEffectIds.add(id))
+        const totalCount = requiredEffects
+          .filter((re) =>
+            re.effectIds.some((id) => stackableGroupEffectIds.includes(id)) &&
+            re.effectIds.every((id) => {
+              const effect = relicEffectMap[id]
+              return effect && effect.stacksWithSelf
+            })
+          )
+          .reduce((sum, re) => sum + re.count, 0)
+
+        if (stackableGroupEffectIds.length > 0 && totalCount > 0) {
+          consolidatedEffects.push({
+            effectIds: stackableGroupEffectIds,
+            count: totalCount,
+          })
+        }
+
+        processedGroups.add(groupIndex)
       }
     } else {
       // グループに属さない場合はそのまま追加
