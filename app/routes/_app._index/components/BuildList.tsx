@@ -24,7 +24,7 @@ export const BuildList: React.FC<Props> = ({ resultKey, result }) => {
         p-6 shadow
       `}
     >
-      <h2 className="text-lg font-semibold">検索結果</h2>
+      <h2 className="text-lg font-semibold text-accent-light">検索結果</h2>
 
       <div className="mt-6 flex flex-col gap-6">
         <Suspense key={resultKey} fallback={<p>検索中...</p>}>

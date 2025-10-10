@@ -73,9 +73,9 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
 
   return (
     <fieldset className="flex h-full min-h-0 flex-col">
-      <legend className="text-[15px] text-gray-300">遺物効果</legend>
+      <legend className="text-[15px] text-accent-light">遺物効果</legend>
 
-      <div className="flex items-end justify-between bg-zinc-800">
+      <div className="flex items-end justify-between">
         <Checkbox
           disabled={!showSelectedOnly && !Object.keys(effectCountMap).length}
           checked={showSelectedOnly}
@@ -123,6 +123,7 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                     className={`
                       sticky top-0 z-10 flex w-full items-center bg-inherit px-4
                       py-2 leading-0 shadow-[0_1px_0_0_theme(colors.zinc.700)]
+
                     `}
                   >
                     <span className="text-sm font-bold" aria-hidden="true">
@@ -131,9 +132,12 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                     <ChevronRight
                       role="img"
                       aria-label={`${category}の詳細指定を${isCategoryOpen ? '閉じる' : '開く'}`}
-                      className={twMerge(`
+                      className={twMerge(
+                        `
                         ml-auto transition-transform duration-200
-                      `, isCategoryOpen && `rotate-90`)}
+                      `,
+                        isCategoryOpen && `rotate-90`,
+                      )}
                     />
                   </Toggle.Button>
                   <Toggle.Content className={`flex flex-col bg-zinc-700/20`}>
@@ -154,9 +158,10 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                                   border-t border-t-zinc-700 bg-zinc-800 py-2
                                   pr-4 pl-6
                                   shadow-[0_1px_0_0_theme(colors.zinc.700)]
-                                  disabled:text-current/50
+                                  disabled:text-current/60
                                 `,
-                                children.filter(shouldHideItem).length === children.length && `
+                                children.filter(shouldHideItem).length === children.length &&
+                                  `
                                   collapse-fallback
                                 `,
                               )}
@@ -180,7 +185,8 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
 
                             <Toggle.Content
                               className={twMerge(
-                                children.filter(shouldHideItem).length === children.length && `
+                                children.filter(shouldHideItem).length === children.length &&
+                                  `
                                   collapse-fallback
                                 `,
                               )}
@@ -200,7 +206,8 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                                           not-first-of-type:border-t
                                         `,
                                         !item.children && 'pr-8',
-                                        shouldHideItem(item) && `
+                                        shouldHideItem(item) &&
+                                          `
                                           collapse-fallback
                                         `,
                                       )}
@@ -242,9 +249,12 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                                               )}
                                             </div>
 
-                                            <Toggle.Content key={item.id} className={`
+                                            <Toggle.Content
+                                              key={item.id}
+                                              className={`
                                               flex flex-col
-                                            `}>
+                                            `}
+                                            >
                                               <ul
                                                 className={`
                                                   border-t border-zinc-700
@@ -401,7 +411,7 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
             props.setValue('')
           }}
           className={`
-            absolute top-1/2 right-2 -translate-y-1/2 transform text-white/60
+            absolute top-1/2 right-2 -translate-y-1/2 transform
           `}
         >
           <CircleXIcon className="size-4" />

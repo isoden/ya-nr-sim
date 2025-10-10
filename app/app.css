@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
+@theme {
+  --color-accent-light: #B9C6E9;
+  --color-primary-dark: #0A0E1A;
+}
+
 @layer base {
   html {
-    @apply bg-zinc-800 text-white;
+    @apply font-serif bg-primary-dark text-white;
   }
 
   button,
@@ -18,7 +23,7 @@
 
       &::before {
         content: "";
-        @apply absolute bottom-0 w-8 left-1/2 -translate-x-1/2 bg-pink-600 h-0.5 rounded-full;
+        @apply absolute bottom-0 w-8 left-1/2 -translate-x-1/2 bg-accent-light h-0.5 rounded-full;
       }
     }
   }
