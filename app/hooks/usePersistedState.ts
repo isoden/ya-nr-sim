@@ -14,7 +14,11 @@ export function usePersistedState<T>(
   const [state, setState] = useState<T>(() => {
     try {
       const storedValue = localStorage.getItem(storeKey)
-      return storedValue ? JSON.parse(storedValue) : isFunction(defaultValue) ? defaultValue() : defaultValue
+      return storedValue
+        ? JSON.parse(storedValue)
+        : isFunction(defaultValue)
+          ? defaultValue()
+          : defaultValue
     } catch {
       return isFunction(defaultValue) ? defaultValue() : defaultValue
     }
@@ -26,7 +30,7 @@ export function usePersistedState<T>(
     } catch {
       // ignore runtime errors
     }
-  }, [state])
+  }, [state, storeKey])
 
   return [state, setState]
 }

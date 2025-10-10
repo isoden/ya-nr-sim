@@ -112,7 +112,6 @@ describe('Relic#pairedEffectIds', () => {
       effects: [7126000, 7126001, 7126002, 6840000],
     })
 
-    /* prettier-ignore */
     expect(relic.pairedEffects).toMatchInlineSnapshot(`
       [
         [

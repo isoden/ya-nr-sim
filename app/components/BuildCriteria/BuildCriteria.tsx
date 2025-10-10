@@ -160,10 +160,12 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                     <ChevronRight
                       role="img"
                       aria-label={`${category}の詳細指定を${isCategoryOpen ? '閉じる' : '開く'}`}
-                      className={twMerge(`ml-auto transition-transform duration-200`, isCategoryOpen && `rotate-90`)}
+                      className={twMerge(`
+                        ml-auto transition-transform duration-200
+                      `, isCategoryOpen && 'rotate-90')}
                     />
                   </Toggle.Button>
-                  <Toggle.Content className={`flex flex-col bg-zinc-700/20`}>
+                  <Toggle.Content className={'flex flex-col bg-zinc-700/20'}>
                     {children.map(({ category: subCategory, children }) => (
                       <Toggle.Root
                         key={subCategory}
@@ -183,7 +185,9 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                                   shadow-[0_1px_0_0_theme(colors.zinc.700)]
                                   disabled:text-current/60
                                 `,
-                                children.filter(shouldHideItem).length === children.length && `collapse-fallback`,
+                                children.filter(shouldHideItem).length === children.length && `
+                                  collapse-fallback
+                                `,
                               )}
                               disabled={
                                 category === characterUniqueEffect &&
@@ -197,15 +201,17 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                                 role="img"
                                 aria-label={`${subCategory}の詳細指定を${isSubCategoryOpen ? '閉じる' : '開く'}`}
                                 className={twMerge(
-                                  `transition-transform duration-200`,
-                                  isSubCategoryOpen && `rotate-90`,
+                                  'transition-transform duration-200',
+                                  isSubCategoryOpen && 'rotate-90',
                                 )}
                               />
                             </Toggle.Button>
 
                             <Toggle.Content
                               className={twMerge(
-                                children.filter(shouldHideItem).length === children.length && `collapse-fallback`,
+                                children.filter(shouldHideItem).length === children.length && `
+                                  collapse-fallback
+                                `,
                               )}
                             >
                               {
@@ -223,7 +229,9 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                                           not-first-of-type:border-t
                                         `,
                                         !item.children && 'pr-8',
-                                        shouldHideItem(item) && `collapse-fallback`,
+                                        shouldHideItem(item) && `
+                                          collapse-fallback
+                                        `,
                                       )}
                                     >
                                       <Toggle.Root
@@ -256,14 +264,16 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                                                         transition-transform
                                                         duration-200
                                                       `,
-                                                      isOpen && `rotate-90`,
+                                                      isOpen && 'rotate-90',
                                                     )}
                                                   />
                                                 </Toggle.Button>
                                               )}
                                             </div>
 
-                                            <Toggle.Content key={item.id} className={`flex flex-col`}>
+                                            <Toggle.Content key={item.id} className={`
+                                              flex flex-col
+                                            `}>
                                               <ul
                                                 className={`
                                                   border-t border-zinc-700
@@ -441,7 +451,7 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
             setValue('')
             props.setValue('')
           }}
-          className={`absolute top-1/2 right-2 -translate-y-1/2 transform`}
+          className={'absolute top-1/2 right-2 -translate-y-1/2 transform'}
         >
           <CircleXIcon className="size-4" />
         </button>

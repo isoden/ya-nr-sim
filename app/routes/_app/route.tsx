@@ -14,7 +14,9 @@ export default function Layout() {
         <h1 className="text-xl font-bold text-accent-light">ナイトレインビルドシミュレーター</h1>
         <nav className="ml-auto flex gap-6" aria-label="メインナビゲーション">
           {navLinks.map((link) => (
-            <NavLink key={link.href} to={link.href} className={`nav-link pb-1 text-sm text-accent-light`}>
+            <NavLink key={link.href} to={link.href} className={`
+              nav-link pb-1 text-sm text-accent-light
+            `}>
               {link.label}
             </NavLink>
           ))}

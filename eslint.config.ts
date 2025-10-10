@@ -7,6 +7,7 @@ import tseslint from 'typescript-eslint'
 import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import betterTailwindcss from 'eslint-plugin-better-tailwindcss'
+import stylistic from '@stylistic/eslint-plugin'
 
 const gitignorePath = fileURLToPath(new URL('.gitignore', import.meta.url))
 
@@ -14,13 +15,21 @@ export default defineConfig([
   includeIgnoreFile(gitignorePath, 'Imported .gitignore patterns'),
   {
     files: ['**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    plugins: { js },
+    plugins: {
+      js,
+      '@stylistic': stylistic,
+    },
     extends: ['js/recommended'],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
     settings: {
       react: {
         version: 'detect',
       },
+    },
+    rules: {
+      '@stylistic/indent': ['error', 2],
+      '@stylistic/quotes': ['error', 'single'],
+      '@stylistic/semi': ['error', 'never'],
     },
   },
   tseslint.configs.recommended,

@@ -15,7 +15,6 @@
 - **ビルドツール**: Vite
 - **テスト**: Vitest + happy-dom + Testing Library
 - **リンティング**: ESLint + typescript-eslint + better-tailwindcss
-- **フォーマット**: Prettier
 - **バリデーション**: Valibot + @conform-to
 - **UI コンポーネント**: react-aria-components
 - **最適化計算**: yalps (整数線形計画ライブラリ)
@@ -145,13 +144,6 @@ npm run generate:relic-data  # 遺物データの自動生成（relicCategories,
 - Tailwind CSS utilities を使用
 - カスタム CSS は `app.css` の適切なレイヤーに追加
 - `better-tailwindcss` プラグインでクラス検証
-
-### フォーマット設定 (Prettier)
-
-- セミコロンなし (`semi: false`)
-- シングルクォート (`singleQuote: true`)
-- 行幅 120文字 (`printWidth: 120`)
-- インデント 2スペース (`tabWidth: 2`)
 
 ## テスト戦略
 

@@ -81,7 +81,7 @@ describe.skip('Performance Regression Tests', () => {
     // 絶対時間でも念のためチェック（中央値使用で安定化）
     expect(testMetrics.median).toBeLessThan(THRESHOLDS.medium)
 
-    console.log(`Performance comparison (100 vs 10 relics):`)
+    console.log('Performance comparison (100 vs 10 relics):')
     console.log(
       `  Baseline: avg=${baselineMetrics.average.toFixed(2)}ms, median=${baselineMetrics.median.toFixed(2)}ms`,
     )
@@ -120,7 +120,7 @@ describe.skip('Performance Regression Tests', () => {
     const improvement = noFilterMetrics.median / filteredMetrics.median
     expect(improvement).toBeGreaterThan(1.5) // 最低50%の改善を期待
 
-    console.log(`Filtering effect measurement:`)
+    console.log('Filtering effect measurement:')
     console.log(`  No filter (100% relevant): median=${noFilterMetrics.median.toFixed(2)}ms`)
     console.log(`  Filtered (10% relevant): median=${filteredMetrics.median.toFixed(2)}ms`)
     console.log(`  Improvement: ${improvement.toFixed(2)}x faster`)

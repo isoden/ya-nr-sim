@@ -20,13 +20,13 @@ export type Args = {
 
 export type Result =
   | {
-      success: true
-      data: Build[]
-    }
+    success: true
+    data: Build[]
+  }
   | {
-      success: false
-      error: Error
-    }
+    success: false
+    error: Error
+  }
 
 export type RequiredEffects = {
   effectIds: number[]

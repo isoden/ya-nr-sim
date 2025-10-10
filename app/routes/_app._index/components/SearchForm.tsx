@@ -40,10 +40,14 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 
         <div className="flex min-h-0 flex-col gap-y-5">
           <div className="flex flex-wrap gap-x-3">
-            <label htmlFor={fields.charId.id} className={`text-[15px] text-accent-light`}>
+            <label htmlFor={fields.charId.id} className={`
+              text-[15px] text-accent-light
+            `}>
               キャラクター(献器)
             </label>
-            <select {...getSelectProps(fields.charId)} className={`rounded border border-zinc-600 p-1`}>
+            <select {...getSelectProps(fields.charId)} className={`
+              rounded border border-zinc-600 p-1
+            `}>
               {characterItems.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.name}
