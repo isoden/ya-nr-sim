@@ -1,24 +1,35 @@
 import { useId, useState } from 'react'
 import { Button } from '~/components/forms/Button'
-import { createUserDataStorageService } from '~/services/storage'
+import { parseStringifiedRelicsSchema } from '~/schema/StringifiedRelicsSchema'
+import { useRelicsStore } from '~/store/relics'
 
 export default function Page() {
   const id = useId()
-  const storageService = createUserDataStorageService()
+  const relics = useRelicsStore((state) => state.relics)
+  const setRelics = useRelicsStore((state) => state.setRelics)
 
   const [jsonAsText, setJsonAsText] = useState(() => {
-    return JSON.stringify(storageService.getRelics(), null, 4)
+    return JSON.stringify(relics, null, 2)
   })
 
   const importRelics = () => {
-    storageService.saveRelics(JSON.parse(jsonAsText))
+    try {
+      parseStringifiedRelicsSchema(jsonAsText)
+
+      setRelics(JSON.parse(jsonAsText))
+    } catch {
+      alert('不正なデータです。')
+    }
   }
 
   return (
     <main className="overflow-auto">
-      <h2 id={id} className={`
+      <h2
+        id={id}
+        className={`
         border-b border-zinc-600 pb-3 text-lg font-semibold
-      `}>
+      `}
+      >
         遺物管理
       </h2>
       <div>

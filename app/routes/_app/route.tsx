@@ -1,18 +1,11 @@
 import { NavLink, Outlet } from 'react-router'
-import { createUserDataStorageService } from '~/services/storage'
-import type { Route } from './+types/route'
+import { useRelicsStore } from '~/store/relics'
 
-export function clientLoader() {
-  const storageService = createUserDataStorageService()
-  const relics = storageService.getRelics()
-
-  return { relicsCount: relics.length }
-}
-
-export default function Layout({ loaderData }: Route.ComponentProps) {
+export default function Layout() {
+  const relicsCount = useRelicsStore((state) => state.relics.length)
   const navLinks = [
     { href: '/', label: 'シミュレーター' },
-    { href: '/manage-relics', label: `遺物管理 (${loaderData.relicsCount})` },
+    { href: '/manage-relics', label: `遺物管理 (${relicsCount})` },
   ]
 
   return (

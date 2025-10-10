@@ -1,6 +1,6 @@
 import type { Route } from './+types/route'
 import { vesselsByCharacterMap } from '~/data/vessels'
-import { createUserDataStorageService } from '~/services/storage'
+import { useRelicsStore } from '~/store/relics'
 import { BuildList } from './components/BuildList'
 import { SearchForm } from './components/SearchForm'
 import { parseQuerySchema } from './schema/QuerySchema'
@@ -14,8 +14,7 @@ export const clientLoader = async ({ request }: Route.ClientLoaderArgs) => {
   const url = new URL(request.url)
   const params = parseQuerySchema(url.search.slice(1))
 
-  const storageService = createUserDataStorageService()
-  const relics = storageService.getRelics()
+  const relics = useRelicsStore.getState().relics
 
   if (!params) return { params: undefined, result: undefined }
 
