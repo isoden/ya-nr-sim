@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import type { FieldMetadata } from '@conform-to/react'
 import { ChevronRight, TextSearch, CircleXIcon } from 'lucide-react'
 import { set } from 'es-toolkit/compat'
@@ -64,12 +64,33 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
     return isForceVisible ? true : visible
   }
 
-  // フィルタリング判定関数
-  const shouldHideItem = (item: { id: string; name: string }) => {
-    const isUnselectedInShowMode = showSelectedOnly && effectCountMap[item.id] == null
+  const shouldHideItem = (item: { id: string; name: string; children?: { id: string; name: string }[] }) => {
+    // 子要素がある場合、子要素のいずれかが選択されているかチェック
+    const hasSelectedChild = item.children?.some((child) => effectCountMap[child.id] != null)
+
+    // 選択モードの場合、自身または子要素が選択されていなければ非表示
+    const isUnselectedInShowMode = showSelectedOnly && effectCountMap[item.id] == null && !hasSelectedChild
+
+    // 検索モードの場合、名前が一致しなければ非表示
     const isFilteredOut = filterText !== '' && !item.name.includes(filterText)
+
     return isUnselectedInShowMode || isFilteredOut
   }
+
+  const categoriesWithVisibility = relicCategories.map(({ category, children }) => {
+    const flattenChildren = children.flatMap((item) => item.children)
+    const visibleItems = flattenChildren.filter((item) => !shouldHideItem(item))
+
+    return {
+      category,
+      children,
+      flattenChildren,
+      visibleCount: visibleItems.length,
+      invisible: visibleItems.length === 0,
+    }
+  })
+
+  const visibleItemsCount = categoriesWithVisibility.reduce((sum, cat) => sum + cat.visibleCount, 0)
 
   return (
     <fieldset className="flex h-full min-h-0 flex-col">
@@ -97,11 +118,19 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
           border-zinc-700
         `}
       >
-        {relicCategories.map(({ category, children }) => {
-          const flattenChildren = children.flatMap((item) => item.children)
-          const hiddenItems = flattenChildren.filter(shouldHideItem)
-          const invisible = hiddenItems.length === flattenChildren.length
-
+        {visibleItemsCount === 0 && (
+          <div
+            className={`
+              flex flex-col items-center justify-center gap-2 py-12
+              text-zinc-500
+            `}
+          >
+            <TextSearch className="size-12" />
+            <p className="text-sm">該当する効果が見つかりませんでした</p>
+            <p className="text-xs text-zinc-600">検索ワード: &quot;{filterText}&quot;</p>
+          </div>
+        )}
+        {categoriesWithVisibility.map(({ category, children, invisible }) => {
           return (
             <Toggle.Root
               key={category}
@@ -123,7 +152,6 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                     className={`
                       sticky top-0 z-10 flex w-full items-center bg-inherit px-4
                       py-2 leading-0 shadow-[0_1px_0_0_theme(colors.zinc.700)]
-
                     `}
                   >
                     <span className="text-sm font-bold" aria-hidden="true">
@@ -132,12 +160,7 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                     <ChevronRight
                       role="img"
                       aria-label={`${category}の詳細指定を${isCategoryOpen ? '閉じる' : '開く'}`}
-                      className={twMerge(
-                        `
-                        ml-auto transition-transform duration-200
-                      `,
-                        isCategoryOpen && `rotate-90`,
-                      )}
+                      className={twMerge(`ml-auto transition-transform duration-200`, isCategoryOpen && `rotate-90`)}
                     />
                   </Toggle.Button>
                   <Toggle.Content className={`flex flex-col bg-zinc-700/20`}>
@@ -160,10 +183,7 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                                   shadow-[0_1px_0_0_theme(colors.zinc.700)]
                                   disabled:text-current/60
                                 `,
-                                children.filter(shouldHideItem).length === children.length &&
-                                  `
-                                  collapse-fallback
-                                `,
+                                children.filter(shouldHideItem).length === children.length && `collapse-fallback`,
                               )}
                               disabled={
                                 category === characterUniqueEffect &&
@@ -185,10 +205,7 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
 
                             <Toggle.Content
                               className={twMerge(
-                                children.filter(shouldHideItem).length === children.length &&
-                                  `
-                                  collapse-fallback
-                                `,
+                                children.filter(shouldHideItem).length === children.length && `collapse-fallback`,
                               )}
                             >
                               {
@@ -206,10 +223,7 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                                           not-first-of-type:border-t
                                         `,
                                         !item.children && 'pr-8',
-                                        shouldHideItem(item) &&
-                                          `
-                                          collapse-fallback
-                                        `,
+                                        shouldHideItem(item) && `collapse-fallback`,
                                       )}
                                     >
                                       <Toggle.Root
@@ -249,12 +263,7 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                                               )}
                                             </div>
 
-                                            <Toggle.Content
-                                              key={item.id}
-                                              className={`
-                                              flex flex-col
-                                            `}
-                                            >
+                                            <Toggle.Content key={item.id} className={`flex flex-col`}>
                                               <ul
                                                 className={`
                                                   border-t border-zinc-700
@@ -377,13 +386,35 @@ type SearchInputProps = {
  */
 const SearchInput: React.FC<SearchInputProps> = (props) => {
   const [value, setValue] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
   const isComposingRef = useRef(false)
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    window.addEventListener(
+      'keydown',
+      (event) => {
+        if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) return
+        if (event.key === '/') {
+          event.preventDefault()
+          inputRef.current?.focus()
+        }
+      },
+      { signal: controller.signal },
+    )
+
+    return () => {
+      controller.abort()
+    }
+  }, [])
 
   return (
     <label className="relative flex items-center gap-2">
       <TextSearch aria-label="効果名で絞り込む" />
 
       <input
+        ref={inputRef}
         type="text"
         className="rounded border border-white/50 px-2 py-1"
         placeholder="効果名で絞り込む"
@@ -410,9 +441,7 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
             setValue('')
             props.setValue('')
           }}
-          className={`
-            absolute top-1/2 right-2 -translate-y-1/2 transform
-          `}
+          className={`absolute top-1/2 right-2 -translate-y-1/2 transform`}
         >
           <CircleXIcon className="size-4" />
         </button>

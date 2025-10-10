@@ -163,6 +163,31 @@ npm run generate:relic-data  # 遺物データの自動生成（relicCategories,
 - **セットアップ**: `setupTests.ts`
 - **カバレッジ**: `app/**` ディレクトリが対象
 
+### テスト記述規約
+
+- **AAAパターン**: すべてのテストは Arrange-Act-Assert パターンに則って記述
+
+```ts
+test('テスト名', async () => {
+  // arrange: テストの準備
+  const { user } = setup()
+
+  // act: 実行するアクション
+  await user.click(button)
+
+  // assert: 期待される結果の検証
+  expect(result).toBe(expected)
+})
+```
+
+- **ファイルルートの`describe`は不要**: ファイル自体がコンポーネント/モジュールのスコープを表すため、ルートレベルの`describe`ブロックは原則不要
+  - ❌ 不要: `describe('BuildCriteria', () => { test(...) })`
+  - ✅ 推奨: `test('機能の説明', () => { ... })`
+- **ネストした`describe`**: 複数の関連するテストをグループ化する場合のみ使用
+- **コメントの明確化**: 各セクション（arrange/act/assert）にコメントを追加
+  - コードで自明な場合は `// act` のみでOK
+  - 複雑な処理の場合は日本語で補足説明を追加（例: `// act: 検索ボックスに入力`）
+
 ## 重要なファイル
 
 - `vite.config.ts` - Vite設定（Worker対応、TailwindCSS、Vitest）
@@ -212,10 +237,10 @@ npm run generate:relic-data  # 遺物データの自動生成（relicCategories,
 - **Tailwind CSS v4** + **react-aria-components**
 - **Grid レイアウト**: 2カラム構成
 
-
 ## 開発環境
 
 ### セットアップ
+
 ```bash
 # Node.js 24.x（mise推奨）
 mise install
@@ -223,10 +248,12 @@ npm ci
 ```
 
 ### エラーハンドリング
+
 - **ErrorBoundary**: `app/root.tsx` でアプリケーション全体をカバー
 - **非同期エラー**: `Suspense` + `Await` の `errorElement` で処理
 
 ### パフォーマンス
+
 - **Web Workers**: 重いシミュレーション計算をメインスレッド外で実行
 - **ベンチマーク**: `npm run bench` でパフォーマンス測定
 
@@ -275,6 +302,7 @@ npm run build      # プロダクションビルド
 ```
 
 ### よくある問題
+
 - **React Router型エラー**: `.react-router/types/` の自動生成型を確認
 - **Web Worker**: Vite設定の `worker.plugins` を確認
 - **localStorage**: `StringifiedRelicsSchema` でのパース失敗
