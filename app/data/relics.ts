@@ -168,7 +168,7 @@ export class Relic {
      * TODO: private にして、 Relic.type を参照する
      */
     public dn: boolean,
-  ) {}
+  ) { }
 }
 
 // 遺物カラーのベース定義
@@ -213,7 +213,7 @@ export function normalizeEffectId(id: number): number {
   )
 }
 
-const uniqItemNameMap: Record<number, string> = {
+export const uniqItemNameMap: Record<number, string> = {
   10001: '薄汚れたフレーム',
   15002: '黒爪の首飾り',
   18000: '祝福された花',

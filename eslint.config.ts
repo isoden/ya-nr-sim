@@ -13,12 +13,13 @@ const gitignorePath = fileURLToPath(new URL('.gitignore', import.meta.url))
 
 export default defineConfig([
   includeIgnoreFile(gitignorePath, 'Imported .gitignore patterns'),
+  stylistic.configs.customize({
+    arrowParens: true,
+    braceStyle: '1tbs',
+  }),
   {
     files: ['**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    plugins: {
-      js,
-      '@stylistic': stylistic,
-    },
+    plugins: { js, '@stylistic': stylistic },
     extends: ['js/recommended'],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
     settings: {
