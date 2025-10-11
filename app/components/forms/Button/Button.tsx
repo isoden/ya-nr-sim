@@ -1,29 +1,59 @@
 import { Button as AriaButton } from 'react-aria-components'
-import { twMerge } from 'tailwind-merge'
+import { cn, tv } from 'tailwind-variants'
 
 type AriaButtonProps = React.ComponentProps<typeof AriaButton>
 
 type Props = React.PropsWithChildren<{
-  variant: 'primary' | 'secondary'
+  variant?: 'primary' | 'secondary' | 'outline' | 'danger'
+  size?: 'sm' | 'md'
   className?: string
-}> &
-  Omit<AriaButtonProps, 'className'>
+}>
+& Omit<AriaButtonProps, 'className'>
 
-const variants = {
-  primary: [
-    'bg-pink-600 text-white rounded-xs px-4 py-2',
-    'not-[:disabled]:hover:bg-pink-700',
-    'focus-visible:ring-pink-400 focus-visible:ring-3 focus-visible:ring-offset-black focus-visible:ring-offset-2 focus:outline-none',
-    'disabled:text-zinc-300 disabled:bg-pink-900 disabled:cursor-not-allowed',
-  ].join(' '),
-  secondary: [
-    'bg-gray-500 text-white px-4 py-2 rounded-xs',
-    'not-[:disabled]:hover:bg-gray-600',
-    'focus-visible:ring-gray-400 focus-visible:ring-3 focus-visible:ring-offset-black focus-visible:ring-offset-2 focus:outline-none',
-    'disabled:text-zinc-400 disabled:bg-gray-700 disabled:cursor-not-allowed',
-  ].join(' '),
-}
+const button = tv({
+  base: `
+    rounded-sm text-white
+    focus:outline-none
+    focus-visible:ring-3 focus-visible:ring-offset-2
+    focus-visible:ring-offset-black
+  `,
+  variants: {
+    variant: {
+      primary: `
+        bg-pink-600
+        not-[:disabled]:hover:bg-pink-700
+        focus-visible:ring-pink-400
+        disabled:bg-pink-900 disabled:text-zinc-300
+      `,
+      secondary: `
+        bg-gray-500
+        not-[:disabled]:hover:bg-gray-600
+        focus-visible:ring-gray-400
+        disabled:bg-gray-700 disabled:text-zinc-400
+      `,
+      outline: `
+        border border-gray-500
+        not-[:disabled]:hover:border-gray-600
+        focus-visible:ring-gray-400
+        disabled:bg-gray-700 disabled:text-zinc-400
+      `,
+      danger: `
+        bg-red-500
+        not-[:disabled]:hover:bg-red-600
+        focus-visible:ring-red-400
+        disabled:bg-red-700 disabled:text-zinc-400
+      `,
+    },
+    size: {
+      sm: 'px-2 py-1 text-sm',
+      md: 'px-4 py-2',
+    },
+    isDisabled: {
+      true: 'cursor-not-allowed',
+    },
+  },
+})
 
-export const Button: React.FC<Props> = ({ variant, className, ...buttonProps }) => {
-  return <AriaButton className={twMerge(variants[variant], className)} {...buttonProps} />
+export const Button: React.FC<Props> = ({ variant = 'primary', size = 'md', className, isDisabled, ...buttonProps }) => {
+  return <AriaButton className={cn(button({ variant, size, isDisabled }), className)({ twMerge: true })} isDisabled={isDisabled} {...buttonProps} />
 }

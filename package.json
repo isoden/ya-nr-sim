@@ -32,6 +32,7 @@
     "react-dom": "^19.2.0",
     "react-router": "^7.9.1",
     "tailwind-merge": "^3.3.1",
+    "tailwind-variants": "^3.1.1",
     "tslib": "^2.8.1",
     "valibot": "^1.1.0",
     "yalps": "^0.5.6",
