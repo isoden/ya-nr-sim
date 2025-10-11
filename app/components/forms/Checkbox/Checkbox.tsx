@@ -17,9 +17,12 @@ export const Checkbox: React.FC<Props> = ({ children, onChange, className, ...pr
 
   return (
     <label className={twMerge('inline-flex items-center gap-2', className)}>
-      <input {...props} type="checkbox" onChange={handleChange} className={`
-        size-3.5 accent-pink-600
-      `} />
+      <input
+        {...props}
+        type="checkbox"
+        onChange={handleChange}
+        className="size-3.5 accent-accent-light"
+      />
       {children}
     </label>
   )
