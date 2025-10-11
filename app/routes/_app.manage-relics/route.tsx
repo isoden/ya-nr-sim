@@ -17,6 +17,7 @@ export default function Page() {
   const relics = useMemo(() => rawRelics.map((r) => Relic.new(r)), [rawRelics])
   const ignoredEffectIds = useMemo(() => Object.keys(ignoredEffectIdsMap).filter((id) => ignoredEffectIdsMap[id]).map(Number), [ignoredEffectIdsMap])
   const redundantRelicsMap = useMemo(() => findRedundantRelics(relics, { ignoredRelicIds, ignoredEffectIds }), [relics, ignoredRelicIds, ignoredEffectIds])
+  const ignoredEffectIdsOrder = useMemo(() => Object.keys(ignoredEffectIdsMap).filter((id) => ignoredEffectIdsMap[id]).map(Number), [ignoredEffectIdsMap])
 
   const handleToggleEffect = (effectId: string, checked: boolean) => {
     setIgnoredEffectIdsMap((ids) => ({ ...ids, [effectId]: checked }))
@@ -68,19 +69,38 @@ export default function Page() {
 
         {redundantRelicsMap.size > 0 && (
           <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-zinc-200">冗長な遺物</h4>
-            <div className="space-y-4">
-              {Array.from(redundantRelicsMap).map(([redundantRelic, superiorRelics]) => (
-                <RedundantRelicCard
-                  key={redundantRelic.id}
-                  redundantRelic={redundantRelic}
-                  superiorRelics={superiorRelics}
-                  ignoredEffectIds={ignoredEffectIds}
-                  onRemove={handleRemoveRelic}
-                  onIgnore={handleIgnoreRelic}
-                />
-              ))}
-            </div>
+            {
+              Array.from(redundantRelicsMap)
+                .toSorted(([relicA], [relicB]) => {
+                  // ignoredEffectIdsOrder の順序に基づいてソート
+                  const normalizedEffectsA = extractNormalizedEffects(relicA.effects)
+                  const normalizedEffectsB = extractNormalizedEffects(relicB.effects)
+
+                  // 各遺物が ignoredEffectIdsOrder のどの位置に最初にマッチするかを取得
+                  const indexA = ignoredEffectIdsOrder.findIndex((effectId) => normalizedEffectsA.includes(effectId))
+                  const indexB = ignoredEffectIdsOrder.findIndex((effectId) => normalizedEffectsB.includes(effectId))
+
+                  // どちらも無効な効果を持たない場合は順序を変えない
+                  if (indexA === -1 && indexB === -1) return 0
+
+                  // 片方だけが無効な効果を持つ場合、持つ方を優先
+                  if (indexA === -1) return 1
+                  if (indexB === -1) return -1
+
+                  // 両方が無効な効果を持つ場合、ignoredEffectIdsOrder の順序に従う
+                  return indexA - indexB
+                })
+                .map(([redundantRelic, superiorRelics]) => (
+                  <RedundantRelicCard
+                    key={redundantRelic.id}
+                    redundantRelic={redundantRelic}
+                    superiorRelics={superiorRelics}
+                    ignoredEffectIds={ignoredEffectIds}
+                    onRemove={handleRemoveRelic}
+                    onIgnore={handleIgnoreRelic}
+                  />
+                ))
+            }
           </div>
         )}
       </section>

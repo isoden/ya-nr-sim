@@ -33,7 +33,7 @@ export const RedundantRelicCard: React.FC<{
           variant="danger"
           size="sm"
           type="button"
-          onClick={() => onRemove(redundantRelic.id)}
+          onClick={() => window.confirm('Are you sure?') && onRemove(redundantRelic.id)}
         >
           削除
         </Button>
@@ -41,7 +41,7 @@ export const RedundantRelicCard: React.FC<{
           variant="secondary"
           size="sm"
           type="button"
-          onClick={() => onIgnore(redundantRelic.id)}
+          onClick={() => window.confirm('Are you sure?') && onIgnore(redundantRelic.id)}
         >
           除外
         </Button>
