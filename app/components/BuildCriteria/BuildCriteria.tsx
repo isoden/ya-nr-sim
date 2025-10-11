@@ -93,7 +93,7 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
   const visibleItemsCount = categoriesWithVisibility.reduce((sum, cat) => sum + cat.visibleCount, 0)
 
   return (
-    <fieldset className="flex h-full min-h-0 flex-col">
+    <fieldset className="flex min-h-0 flex-col">
       <legend className="text-[15px] text-accent-light">遺物効果</legend>
 
       <div className="flex items-end justify-between">
@@ -113,10 +113,7 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
       </div>
 
       <div
-        className={`
-          mt-3 flex min-h-0 flex-col overflow-y-auto rounded-md border
-          border-zinc-700
-        `}
+        className="mt-3 overflow-y-auto rounded-md border border-zinc-700"
       >
         {visibleItemsCount === 0 && (
           <div
@@ -127,7 +124,11 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
           >
             <TextSearch className="size-12" />
             <p className="text-sm">該当する効果が見つかりませんでした</p>
-            <p className="text-xs text-zinc-600">検索ワード: &quot;{filterText}&quot;</p>
+            <p className="text-xs text-zinc-600">
+              検索ワード: &quot;
+              {filterText}
+              &quot;
+            </p>
           </div>
         )}
         {categoriesWithVisibility.map(({ category, children, invisible }) => {
@@ -150,8 +151,9 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                 >
                   <Toggle.Button
                     className={`
-                      sticky top-0 z-10 flex w-full items-center bg-inherit px-4
-                      py-2 leading-0 shadow-[0_1px_0_0_theme(colors.zinc.700)]
+                      sticky top-0 z-10 flex w-full items-center bg-inherit py-2
+                      pr-2 pl-4 leading-0
+                      shadow-[0_1px_0_0_theme(colors.zinc.700)]
                     `}
                   >
                     <span className="text-sm font-bold" aria-hidden="true">
@@ -165,7 +167,7 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                       `, isCategoryOpen && 'rotate-90')}
                     />
                   </Toggle.Button>
-                  <Toggle.Content className={'flex flex-col bg-zinc-700/20'}>
+                  <Toggle.Content className="flex flex-col bg-zinc-700/20">
                     {children.map(({ category: subCategory, children }) => (
                       <Toggle.Root
                         key={subCategory}
@@ -181,7 +183,7 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                                 `
                                   sticky top-10 z-20 flex items-center gap-4
                                   border-t border-t-zinc-700 bg-zinc-800 py-2
-                                  pr-4 pl-6
+                                  pr-2 pl-6
                                   shadow-[0_1px_0_0_theme(colors.zinc.700)]
                                   disabled:text-current/60
                                 `,
@@ -190,8 +192,8 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                                 `,
                               )}
                               disabled={
-                                category === characterUniqueEffect &&
-                                characterMap[selectedCharId as keyof typeof characterMap]?.name !== subCategory
+                                category === characterUniqueEffect
+                                && characterMap[selectedCharId as keyof typeof characterMap]?.name !== subCategory
                               }
                             >
                               <span className="flex-1 text-left text-sm" aria-hidden="true">
@@ -214,97 +216,95 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                                 `,
                               )}
                             >
-                              {
-                                <ul
-                                  className={`
-                                    flex flex-col border-t border-zinc-700
-                                  `}
-                                >
-                                  {children.map((item) => (
-                                    <li
-                                      key={item.id}
-                                      className={twMerge(
-                                        `
-                                          ml-6 border-zinc-700
-                                          not-first-of-type:border-t
-                                        `,
-                                        !item.children && 'pr-8',
-                                        shouldHideItem(item) && `
-                                          collapse-fallback
-                                        `,
-                                      )}
+                              <ul
+                                className={`
+                                  flex flex-col border-t border-zinc-700
+                                `}
+                              >
+                                {children.map((item) => (
+                                  <li
+                                    key={item.id}
+                                    className={twMerge(
+                                      `
+                                        ml-6 border-zinc-700
+                                        not-first-of-type:border-t
+                                      `,
+                                      !item.children && 'pr-8',
+                                      shouldHideItem(item) && `
+                                        collapse-fallback
+                                      `,
+                                    )}
+                                  >
+                                    <Toggle.Root
+                                      open={getVisibility(toggleState[item.id])}
+                                      onOpenChange={(open) =>
+                                        setToggleState((prevState) => ({ ...prevState, [item.id]: open }))}
                                     >
-                                      <Toggle.Root
-                                        open={getVisibility(toggleState[item.id])}
-                                        onOpenChange={(open) =>
-                                          setToggleState((prevState) => ({ ...prevState, [item.id]: open }))
-                                        }
-                                      >
-                                        {({ open: isOpen }) => (
-                                          <>
-                                            <div
+                                      {({ open: isOpen }) => (
+                                        <>
+                                          <div
+                                            className={`
+                                              flex items-center py-2 pr-2 pl-4
+                                            `}
+                                          >
+                                            <EffectItem
+                                              item={item}
+                                              effectCountMap={effectCountMap}
+                                              setEffectCountMap={setEffectCountMap}
+                                            />
+
+                                            {item.children && (
+                                              <Toggle.Button className="ml-2">
+                                                <ChevronRight
+                                                  role="img"
+                                                  aria-label={`${item.name}の詳細指定を${isOpen ? '閉じる' : '開く'}`}
+                                                  className={twMerge(
+                                                    `
+                                                      ml-auto
+                                                      transition-transform
+                                                      duration-200
+                                                    `,
+                                                    isOpen && 'rotate-90',
+                                                  )}
+                                                />
+                                              </Toggle.Button>
+                                            )}
+                                          </div>
+
+                                          <Toggle.Content
+                                            key={item.id}
+                                            className="flex flex-col"
+                                          >
+                                            <ul
                                               className={`
-                                                flex items-center px-4 py-2
+                                                border-t border-zinc-700
                                               `}
                                             >
-                                              <EffectItem
-                                                item={item}
-                                                effectCountMap={effectCountMap}
-                                                setEffectCountMap={setEffectCountMap}
-                                              />
-
-                                              {item.children && (
-                                                <Toggle.Button className="ml-2">
-                                                  <ChevronRight
-                                                    role="img"
-                                                    aria-label={`${item.name}の詳細指定を${isOpen ? '閉じる' : '開く'}`}
-                                                    className={twMerge(
-                                                      `
-                                                        ml-auto
-                                                        transition-transform
-                                                        duration-200
-                                                      `,
-                                                      isOpen && 'rotate-90',
-                                                    )}
+                                              {item.children?.map((item) => (
+                                                <li
+                                                  key={item.id}
+                                                  className={`
+                                                    ml-6 flex items-center
+                                                    border-zinc-700 py-2 pr-10
+                                                    pl-4
+                                                    not-first-of-type:border-t
+                                                  `}
+                                                >
+                                                  <EffectItem
+                                                    item={item}
+                                                    effectCountMap={effectCountMap}
+                                                    setEffectCountMap={setEffectCountMap}
                                                   />
-                                                </Toggle.Button>
-                                              )}
-                                            </div>
-
-                                            <Toggle.Content key={item.id} className={`
-                                              flex flex-col
-                                            `}>
-                                              <ul
-                                                className={`
-                                                  border-t border-zinc-700
-                                                `}
-                                              >
-                                                {item.children?.map((item) => (
-                                                  <li
-                                                    key={item.id}
-                                                    className={`
-                                                      ml-6 flex items-center
-                                                      border-zinc-700 py-2 pr-12
-                                                      pl-4
-                                                      not-first-of-type:border-t
-                                                    `}
-                                                  >
-                                                    <EffectItem
-                                                      item={item}
-                                                      effectCountMap={effectCountMap}
-                                                      setEffectCountMap={setEffectCountMap}
-                                                    />
-                                                  </li>
-                                                ))}
-                                              </ul>
-                                            </Toggle.Content>
-                                          </>
-                                        )}
-                                      </Toggle.Root>
-                                    </li>
-                                  ))}
-                                </ul>
-                              }
+                                                </li>
+                                              ))}
+                                            </ul>
+                                          </Toggle.Content>
+                                        </>
+                                      )}
+                                    </Toggle.Root>
+                                  </li>
+                                ))}
+                              </ul>
                             </Toggle.Content>
                           </>
                         )}
@@ -342,28 +342,30 @@ const EffectItem: React.FC<{
       >
         <span className="text-sm">{item.name}</span>
       </Checkbox>
-      {isShowingCount ? (
-        <input
-          type="number"
-          name={`effects.${item.id}.count`}
-          className={`
-            ml-auto rounded border border-zinc-600 text-right
-            disabled:border-zinc-800 disabled:text-gray-500/50
-          `}
-          aria-label={`${item.name}の必要効果数`}
-          disabled={!effectCountMap[item.id] || hasChildEffectSelected}
-          min={1}
-          max={item.maxStacks}
-          value={effectCountMap[item.id]?.count ?? 1}
-          onChange={(event) => {
-            const value = event.target.valueAsNumber
+      {isShowingCount
+        ? (
+            <input
+              type="number"
+              name={`effects.${item.id}.count`}
+              className={`
+                ml-auto rounded border border-zinc-600 text-right
+                disabled:border-zinc-800 disabled:text-gray-500/50
+              `}
+              aria-label={`${item.name}の必要効果数`}
+              disabled={!effectCountMap[item.id] || hasChildEffectSelected}
+              min={1}
+              max={item.maxStacks}
+              value={effectCountMap[item.id]?.count ?? 1}
+              onChange={(event) => {
+                const value = event.target.valueAsNumber
 
-            setEffectCountMap((prev) => (prev[item.id] == null ? prev : { ...prev, [item.id]: { count: value } }))
-          }}
-        />
-      ) : (
-        <input type="hidden" name={`effects.${item.id}.count`} value="1" disabled={effectCountMap[item.id] == null} />
-      )}
+                setEffectCountMap((prev) => (prev[item.id] == null ? prev : { ...prev, [item.id]: { count: value } }))
+              }}
+            />
+          )
+        : (
+            <input type="hidden" name={`effects.${item.id}.count`} value="1" disabled={effectCountMap[item.id] == null} />
+          )}
     </>
   )
 }
@@ -451,7 +453,7 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
             setValue('')
             props.setValue('')
           }}
-          className={'absolute top-1/2 right-2 -translate-y-1/2 transform'}
+          className="absolute top-1/2 right-2 -translate-y-1/2 transform"
         >
           <CircleXIcon className="size-4" />
         </button>

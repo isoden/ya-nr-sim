@@ -33,21 +33,23 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
             setTimeout(() => submit(form, { replace: true, method: 'GET' }), 0)
           }
         }}
-        className="flex h-full min-h-0 flex-col gap-6"
+        className="flex h-full flex-col gap-6"
         {...getFormProps(form)}
       >
         <h2 className="text-lg font-semibold text-accent-light">条件選択</h2>
 
-        <div className="flex min-h-0 flex-col gap-y-5">
+        <div className="flex h-full min-h-0 flex-col gap-y-5">
           <div className="flex flex-wrap gap-x-3">
-            <label htmlFor={fields.charId.id} className={`
-              text-[15px] text-accent-light
-            `}>
+            <label
+              htmlFor={fields.charId.id}
+              className="text-[15px] text-accent-light"
+            >
               キャラクター(献器)
             </label>
-            <select {...getSelectProps(fields.charId)} className={`
-              rounded border border-zinc-600 p-1
-            `}>
+            <select
+              {...getSelectProps(fields.charId)}
+              className="rounded border border-zinc-600 p-1"
+            >
               {characterItems.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.name}
@@ -73,15 +75,15 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
             深層の遺物を含む
           </Checkbox>
           <Button
-            variant="secondary"
+            variant="outline"
             type="button"
             // TODO: フォームのリセットボタンを押したときの処理を実装する
             // type="submit"
             // formMethod="POST"
             // {...form.reset.getButtonProps()}
             // onPress={() => {
-            // 	// フォームのリセットボタンを押したときの処理
-            // 	submit(new FormData(), { replace: true, method: 'GET' })
+            //   // フォームのリセットボタンを押したときの処理
+            //   submit(new FormData(), { replace: true, method: 'GET' })
             // }}
             onPress={() => location.assign('/')}
           >
