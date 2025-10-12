@@ -8,15 +8,16 @@ export const RelicEffectsList: React.FC<{
   ignoredEffectIds?: number[]
 }> = ({ relic, ignoredEffectIds = [] }) => {
   return (
-    <ul className="list-disc space-y-1 pl-6">
+    <ul className="flex flex-col gap-y-2">
       {relic.pairedEffects.map(([mainEffect, subEffects], index) => (
-        <li key={`${mainEffect.id}.${index}`}>
+        <li key={`${mainEffect.id}.${index}`} className="mt-1">
           <span className={ignoredEffectIds.includes(mainEffect.id)
             ? `text-zinc-200/50`
             : `text-zinc-200`}
           >
             {mainEffect.name}
           </span>
+
           {subEffects.length > 0 && (
             <ul className="mt-1 space-y-0.5 text-sm text-red-400">
               {subEffects.map((effect, subIndex) => (

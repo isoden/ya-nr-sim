@@ -18,8 +18,8 @@
     "generate:relic-data": "tsx scripts/generate-relic-data.ts"
   },
   "dependencies": {
-    "@conform-to/react": "^1.10.1",
-    "@conform-to/valibot": "^1.10.1",
+    "@conform-to/react": "^1.12.0",
+    "@conform-to/valibot": "^1.12.0",
     "@react-router/fs-routes": "^7.9.1",
     "@react-router/node": "^7.9.1",
     "@react-router/serve": "^7.9.1",

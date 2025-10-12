@@ -1,7 +1,7 @@
 import { useState } from 'react'
+import { RelicEffectsList } from '~/components/RelicEffectsList/RelicEffectsList'
 import { Button } from '~/components/forms/Button'
 import type { Relic } from '~/data/relics'
-import { RelicEffectsList } from '../RelicEffectsList/RelicEffectsList'
 
 /**
  * 冗長な遺物を表示するカードコンポーネント

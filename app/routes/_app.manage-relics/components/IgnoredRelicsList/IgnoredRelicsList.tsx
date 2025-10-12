@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { ChevronRight } from 'lucide-react'
 import { twMerge } from 'tailwind-merge'
+import { RelicEffectsList } from '~/components/RelicEffectsList/RelicEffectsList'
 import { Button } from '~/components/forms/Button'
 import { Toggle } from '~/components/Toggle'
 import type { Relic } from '~/data/relics'
-import { RelicEffectsList } from '../RelicEffectsList/RelicEffectsList'
 
 /**
  * 除外済み遺物のリスト表示コンポーネント

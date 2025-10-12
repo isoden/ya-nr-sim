@@ -1,4 +1,6 @@
-import { RelicColorExtended, type Relic } from '~/data/relics'
+import { type Relic } from '~/data/relics'
+import { RelicEffectsList } from '~/components/RelicEffectsList/RelicEffectsList'
+import { RelicIcon } from '../RelicIcon/RelicIcon'
 
 type Props = {
   relic: Relic
@@ -6,42 +8,17 @@ type Props = {
 
 export const RelicInfo: React.FC<Props> = ({ relic }) => {
   return (
-    <div>
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-bold">{relic.name}</span>
-        <span
-          className={`
-            relative size-5
-            ${bgColorMap[relic.colorExtended]}
-          `}
-        />
-      </div>
-      <ul className="mt-2 flex flex-col gap-y-2 text-sm">
-        {relic.pairedEffects.map(([effect, demeritEffects], i) => (
-          <li key={`${effect.id}.${i}`} className="mt-1">
-            {effect.name}
+    <section className="rounded-sm border border-zinc-800 p-4 text-sm">
+      <header className={`
+        mb-2 flex items-center justify-between gap-2 border-b border-zinc-800
+        pb-2
+      `}
+      >
+        <h4>{relic.name}</h4>
+        <RelicIcon relic={relic} />
+      </header>
 
-            {demeritEffects.length > 0 && (
-              <ul className="mt-1 text-xs text-red-400">
-                {demeritEffects.map((effect) => (
-                  <li key={effect.id}>{effect.name}</li>
-                ))}
-              </ul>
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
+      <RelicEffectsList relic={relic} />
+    </section>
   )
-}
-
-const bgColorMap = {
-  [RelicColorExtended.Red]: 'bg-red-500',
-  [RelicColorExtended.Blue]: 'bg-blue-500',
-  [RelicColorExtended.Green]: 'bg-green-500',
-  [RelicColorExtended.Yellow]: 'bg-yellow-500',
-  [RelicColorExtended.DeepRed]: 'bg-red-800',
-  [RelicColorExtended.DeepBlue]: 'bg-blue-800',
-  [RelicColorExtended.DeepGreen]: 'bg-green-800',
-  [RelicColorExtended.DeepYellow]: 'bg-yellow-800',
 }

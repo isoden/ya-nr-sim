@@ -30,14 +30,17 @@ export const BuildList: React.FC<Props> = ({ resultKey, result }) => {
         <Suspense key={resultKey} fallback={<p>検索中...</p>}>
           <Await resolve={result} errorElement={<Failure>検索中にエラーが発生しました</Failure>}>
             {(result) =>
-              !result ? (
-                <Idle />
-              ) : result.success ? (
-                <Success builds={result.data} />
-              ) : (
-                <Failure>{result.error.message}</Failure>
-              )
-            }
+              !result
+                ? (
+                    <Idle />
+                  )
+                : result.success
+                  ? (
+                      <Success builds={result.data} />
+                    )
+                  : (
+                      <Failure>{result.error.message}</Failure>
+                    )}
           </Await>
         </Suspense>
       </div>
@@ -71,7 +74,12 @@ function Success({ builds }: { builds: Build[] }) {
       >
         <header className="flex items-center gap-2">
           <h3 className="font-bold">
-            #{i + 1} - {item.vessel.name}
+            #
+            {i + 1}
+            {' '}
+            -
+            {' '}
+            {item.vessel.name}
           </h3>
           <ul className="flex gap-2">
             {item.vessel.slots.map((slot, i) => {
@@ -90,16 +98,44 @@ function Success({ builds }: { builds: Build[] }) {
           </ul>
         </header>
 
-        <ul className="mt-4 grid grid-cols-3 grid-rows-2 gap-4">
-          {item.vessel.slots.map((_, index) => {
+        <ul className="mt-4 grid grid-cols-3 gap-4">
+          {item.vessel.slots.map((slot, index) => {
             const relic = item.relics.find((r) => item.relicsIndexes[r.id] === index)
 
-            return <li key={index}>{relic ? <RelicInfo relic={relic} /> : null}</li>
+            return (
+              <li key={index} className="contents">
+                {relic
+                  ? <RelicInfo relic={relic} />
+                  : (
+                      <EmptySlot color={slot} />
+                    )}
+              </li>
+            )
           })}
         </ul>
       </div>
     )
   })
+}
+
+function EmptySlot({ color }: { color: SlotColor }) {
+  return (
+    <div className={`
+      grid place-items-center rounded-sm border border-dashed border-zinc-800
+      text-sm text-zinc-400
+    `}
+    >
+      <div className="flex items-center gap-2">
+        空きスロット
+        <div className={`
+          size-4
+          ${bgColorMap[color]}
+        `}
+        />
+
+      </div>
+    </div>
+  )
 }
 
 /**
