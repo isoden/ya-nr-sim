@@ -1,24 +1,30 @@
 import React, { useEffect, useRef, useState } from 'react'
-import type { FieldMetadata } from '@conform-to/react'
+import { getInputProps, type FieldMetadata } from '@conform-to/react'
 import { ChevronRight, TextSearch, CircleXIcon } from 'lucide-react'
-import { set } from 'es-toolkit/compat'
 import { twMerge } from 'tailwind-merge'
+import { Checkbox } from '~/components/forms/Checkbox'
+import { Toggle } from '~/components/Toggle'
 import { usePersistedState } from '~/hooks/usePersistedState'
 import { characterList, characterMap } from '~/data/characters'
-import { Checkbox } from '../forms/Checkbox'
-import { Toggle } from '../Toggle'
 import { relicCategories } from './data'
+import type { CheckedEffects } from '../types/forms'
 
-type EffectCountState<Type extends string | number> = {
-  [effectIds: string]: { count: Type }
+type EffectCountState = {
+  [effectIds: string]: { count: number }
 }
 
 type Props = {
   // conform のメタデータ
-  meta: FieldMetadata<EffectCountState<number>>
+  meta: FieldMetadata<EffectCountState>
 
   // 選択中のキャラクター ID
   selectedCharId: string | undefined
+
+  // 選択中の効果
+  checkedEffects: CheckedEffects
+
+  // 選択中の効果を更新する関数
+  setCheckedEffects: React.Dispatch<React.SetStateAction<CheckedEffects>>
 }
 
 const characterUniqueEffect = '特定キャラクターのみ'
@@ -32,15 +38,11 @@ const characterNames = characterList.reduce<Record<string, boolean>>(
  *
  * @param props - {@link Props}
  */
-export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
+export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId, checkedEffects, setCheckedEffects }) => {
+  const fieldSet = meta.getFieldset()
+
   const [filterText, setFilterText] = useState('')
   const [showSelectedOnly, setShowSelectedOnly] = useState(false)
-  const [effectCountMap, setEffectCountMap] = useState(() => {
-    return Object.entries((meta.value || {}) as EffectCountState<string>).reduce<EffectCountState<number>>(
-      (acc, [key, { count }]) => set(acc, key, { count: Number(count) }),
-      {},
-    )
-  })
   const [toggleState, setToggleState] = usePersistedState<Record<string, boolean>>('build-criteria-toggle-state', () =>
     Object.fromEntries(
       relicCategories.flatMap<[string, boolean][]>(({ category, children }) => [
@@ -66,10 +68,10 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
 
   const shouldHideItem = (item: { id: string; name: string; children?: { id: string; name: string }[] }) => {
     // 子要素がある場合、子要素のいずれかが選択されているかチェック
-    const hasSelectedChild = item.children?.some((child) => effectCountMap[child.id] != null)
+    const hasSelectedChild = item.children?.some((child) => fieldSet[child.id]?.value != null)
 
     // 選択モードの場合、自身または子要素が選択されていなければ非表示
-    const isUnselectedInShowMode = showSelectedOnly && effectCountMap[item.id] == null && !hasSelectedChild
+    const isUnselectedInShowMode = showSelectedOnly && fieldSet[item.id]?.value == null && !hasSelectedChild
 
     // 検索モードの場合、名前が一致しなければ非表示
     const isFilteredOut = filterText !== '' && !item.name.includes(filterText)
@@ -98,7 +100,7 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
 
       <div className="flex items-end justify-between">
         <Checkbox
-          disabled={!showSelectedOnly && !Object.keys(effectCountMap).length}
+          disabled={!showSelectedOnly && !Object.values(checkedEffects).filter(Boolean).length}
           checked={showSelectedOnly}
           onChange={setShowSelectedOnly}
           className={`
@@ -249,8 +251,9 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                                           >
                                             <EffectItem
                                               item={item}
-                                              effectCountMap={effectCountMap}
-                                              setEffectCountMap={setEffectCountMap}
+                                              fieldSet={fieldSet}
+                                              checkedEffects={checkedEffects}
+                                              setCheckedEffects={setCheckedEffects}
                                             />
 
                                             {item.children && (
@@ -292,8 +295,9 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
                                                 >
                                                   <EffectItem
                                                     item={item}
-                                                    effectCountMap={effectCountMap}
-                                                    setEffectCountMap={setEffectCountMap}
+                                                    fieldSet={fieldSet}
+                                                    checkedEffects={checkedEffects}
+                                                    setCheckedEffects={setCheckedEffects}
                                                   />
                                                 </li>
                                               ))}
@@ -323,10 +327,13 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId }) => {
 
 const EffectItem: React.FC<{
   item: (typeof relicCategories)[number]['children'][number]['children'][number]
-  effectCountMap: EffectCountState<number>
-  setEffectCountMap: React.Dispatch<React.SetStateAction<EffectCountState<number>>>
-}> = ({ item, effectCountMap, setEffectCountMap }) => {
-  const hasChildEffectSelected = item.children?.some((child) => !!effectCountMap[child.id])
+  fieldSet: { [effectIds: string]: FieldMetadata<{ count: number } | undefined> }
+  checkedEffects: CheckedEffects
+  setCheckedEffects: React.Dispatch<React.SetStateAction<CheckedEffects>>
+}> = ({ item, fieldSet, checkedEffects, setCheckedEffects,
+}) => {
+  const effect = fieldSet[item.id].getFieldset()
+  const hasChildEffectSelected = item.children?.some((child) => !!fieldSet[child.id]?.value)
   const isShowingCount = item.maxStacks > 1 || item.children?.some((child) => child.maxStacks > 1)
 
   return (
@@ -334,9 +341,9 @@ const EffectItem: React.FC<{
       <Checkbox
         value={item.id}
         className="flex-1"
-        checked={!!effectCountMap[item.id]}
-        onChange={() => {
-          setEffectCountMap((prev) => toggleRecord(prev, item.id, { count: 1 }))
+        checked={checkedEffects[item.id] ?? false}
+        onChange={(toBeEnabled) => {
+          setCheckedEffects((prev) => ({ ...prev, [item.id]: toBeEnabled }))
         }}
         disabled={hasChildEffectSelected}
       >
@@ -345,43 +352,23 @@ const EffectItem: React.FC<{
       {isShowingCount
         ? (
             <input
-              type="number"
-              name={`effects.${item.id}.count`}
               className={`
                 ml-auto rounded border border-zinc-600 text-right
                 disabled:border-zinc-800 disabled:text-gray-500/50
               `}
+              defaultValue={1}
+              {...getInputProps(effect.count, { type: 'number' })}
               aria-label={`${item.name}の必要効果数`}
-              disabled={!effectCountMap[item.id] || hasChildEffectSelected}
+              disabled={!checkedEffects[item.id] || hasChildEffectSelected}
               min={1}
               max={item.maxStacks}
-              value={effectCountMap[item.id]?.count ?? 1}
-              onChange={(event) => {
-                const value = event.target.valueAsNumber
-
-                setEffectCountMap((prev) => (prev[item.id] == null ? prev : { ...prev, [item.id]: { count: value } }))
-              }}
             />
           )
         : (
-            <input type="hidden" name={`effects.${item.id}.count`} value="1" disabled={effectCountMap[item.id] == null} />
+            <input {...getInputProps(effect.count, { type: 'hidden', value: false })} value="1" disabled={checkedEffects[item.id] == null} />
           )}
     </>
   )
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function toggleRecord<Key extends keyof any, Value>(
-  obj: Record<Key, Value>,
-  key: Key,
-  value: Value,
-): Record<Key, Value> {
-  if (obj[key]) {
-    const { [key]: _, ...rest } = obj
-    return rest as Record<Key, Value>
-  } else {
-    return { ...obj, [key]: value }
-  }
 }
 
 type SearchInputProps = {

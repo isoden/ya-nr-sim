@@ -1,12 +1,14 @@
+import { useState } from 'react'
 import { getFormProps, getSelectProps, useForm } from '@conform-to/react'
 import { parseWithValibot } from '@conform-to/valibot'
 import { Form, useSubmit } from 'react-router'
-import { BuildCriteria } from '~/components/BuildCriteria'
 import { Checkbox } from '~/components/forms/Checkbox'
 import { Button } from '~/components/forms/Button'
 import { characterMap } from '~/data/characters'
 import { usePersistedState } from '~/hooks/usePersistedState'
 import { FormSchema } from '../schema/FormSchema'
+import { BuildCriteria } from './BuildCriteria'
+import type { CheckedEffects } from './types/forms'
 
 type Props = {
   defaultValues?: FormSchema
@@ -19,6 +21,11 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
     onValidate: ({ formData }) => parseWithValibot(formData, { schema: FormSchema }),
   })
   const [isAutoSearchEnabled, setIsAutoSearchEnabled] = usePersistedState('SearchForm.isAutoSearchEnabled', false)
+  const [checkedEffects, setCheckedEffects] = useState(() => Object.entries((fields.effects.value || {})).reduce<CheckedEffects>(
+    (acc, [key]) => ({ ...acc, [key]: true }),
+    {},
+  ),
+  )
 
   return (
     <section className="min-h-0">
@@ -59,7 +66,12 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
             {fields.charId.errors && <p className="w-full text-orange-700">{fields.charId.errors[0]}</p>}
           </div>
 
-          <BuildCriteria meta={fields.effects} selectedCharId={fields.charId.value} />
+          <BuildCriteria
+            meta={fields.effects}
+            selectedCharId={fields.charId.value}
+            checkedEffects={checkedEffects}
+            setCheckedEffects={setCheckedEffects}
+          />
 
           {fields.effects.errors?.length ? <p className="text-orange-700">{fields.effects.errors[0]}</p> : null}
         </div>
@@ -76,16 +88,16 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
           </Checkbox>
           <Button
             variant="outline"
-            type="button"
-            // TODO: フォームのリセットボタンを押したときの処理を実装する
-            // type="submit"
-            // formMethod="POST"
-            // {...form.reset.getButtonProps()}
-            // onPress={() => {
-            //   // フォームのリセットボタンを押したときの処理
-            //   submit(new FormData(), { replace: true, method: 'GET' })
-            // }}
-            onPress={() => location.assign('/')}
+            type="submit"
+            formMethod="GET"
+            {...form.reset.getButtonProps()}
+            onPress={() => {
+              // 遺物効果の選択状態をリセット
+              setCheckedEffects({})
+
+              // URL のクエリパラメータをクリア
+              submit(new FormData(), { replace: true, method: 'GET' })
+            }}
           >
             リセット
           </Button>

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { expect, test } from 'vitest'
@@ -6,6 +7,7 @@ import { parseWithValibot } from '@conform-to/valibot'
 import { FormSchema } from '~/routes/_app._index/schema/FormSchema'
 import { characterMap } from '~/data/characters'
 import { BuildCriteria } from './BuildCriteria'
+import type { CheckedEffects } from '../types/forms'
 
 test('smoke test', async () => {
   // arrange
@@ -95,8 +97,9 @@ function setup() {
     const [, fields] = useForm({
       onValidate: ({ formData }) => parseWithValibot(formData, { schema: FormSchema }),
     })
+    const [checkedEffects, setCheckedEffects] = useState<CheckedEffects>({})
 
-    return <BuildCriteria meta={fields.effects} selectedCharId={characterMap.wylder.id} />
+    return <BuildCriteria meta={fields.effects} selectedCharId={characterMap.wylder.id} checkedEffects={checkedEffects} setCheckedEffects={setCheckedEffects} />
   }
 
   const view = render(<TestComponent />)
