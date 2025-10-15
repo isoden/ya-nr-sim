@@ -365,7 +365,7 @@ const EffectItem: React.FC<{
             />
           )
         : (
-            <input {...getInputProps(effect.count, { type: 'hidden', value: false })} value="1" disabled={checkedEffects[item.id] == null} />
+            <input {...getInputProps(effect.count, { type: 'hidden', value: false })} value="1" disabled={!checkedEffects[item.id]} />
           )}
     </>
   )
