@@ -13,34 +13,32 @@ type Props = React.PropsWithChildren<{
 const button = tv({
   base: `
     rounded-sm text-white
-    focus:outline-none
-    focus-visible:ring-3 focus-visible:ring-offset-2
-    focus-visible:ring-offset-black
+    focus:ring-3 focus:ring-offset-2 focus:ring-offset-black focus:outline-none
   `,
   variants: {
     variant: {
       primary: `
         bg-pink-600
-        not-[:disabled]:hover:bg-pink-700
-        focus-visible:ring-pink-400
+        not-disabled:hover:bg-pink-700
+        focus:ring-pink-400
         disabled:bg-pink-900 disabled:text-zinc-300
       `,
       secondary: `
         bg-gray-500
-        not-[:disabled]:hover:bg-gray-600
-        focus-visible:ring-gray-400
+        not-disabled:hover:bg-gray-600
+        focus:ring-gray-400
         disabled:bg-gray-700 disabled:text-zinc-400
       `,
       outline: `
         border border-gray-500
-        not-[:disabled]:hover:border-gray-600
-        focus-visible:ring-gray-400
+        not-disabled:hover:border-gray-600
+        focus:ring-gray-400
         disabled:bg-gray-700 disabled:text-zinc-400
       `,
       danger: `
         bg-red-500
-        not-[:disabled]:hover:bg-red-600
-        focus-visible:ring-red-400
+        not-disabled:hover:bg-red-600
+        focus:ring-red-400
         disabled:bg-red-700 disabled:text-zinc-400
       `,
     },

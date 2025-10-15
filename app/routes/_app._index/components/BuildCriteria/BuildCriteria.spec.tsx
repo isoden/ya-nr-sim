@@ -17,7 +17,9 @@ test('smoke test', async () => {
   expect(container.firstElementChild).toBeInTheDocument()
 })
 
-test('SearchInput で絞り込みができる', async () => {
+test('SearchInput で絞り込みができる', {
+  timeout: import.meta.env.CI ? 10_000 : undefined,
+}, async () => {
   // arrange
   const { user } = setup()
 
@@ -30,7 +32,9 @@ test('SearchInput で絞り込みができる', async () => {
   expect(attackPowerElements.length).toBeGreaterThan(0)
 })
 
-test('SearchInput で絞り込み結果が0件の場合、メッセージが表示される', async () => {
+test('SearchInput で絞り込み結果が0件の場合、メッセージが表示される', {
+  timeout: import.meta.env.CI ? 10_000 : undefined,
+}, async () => {
   // arrange
   const { user } = setup()
 
