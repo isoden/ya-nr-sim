@@ -18,8 +18,8 @@ export type Args = {
   volume?: number
 }
 
-export type Result =
-  | {
+export type Result
+  = | {
     success: true
     data: Build[]
   }
@@ -31,7 +31,7 @@ export type Result =
 export type RequiredEffects = {
   effectIds: number[]
   count: number
-  weights?: number[]  // effectIds に対応する重み（降順: 高効果 > 低効果）
+  weights?: number[] // effectIds に対応する重み（降順: 高効果 > 低効果）
 }[]
 
 // 後方互換性のため

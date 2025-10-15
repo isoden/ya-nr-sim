@@ -68,11 +68,11 @@ export function consolidateRelicEffectGroups(requiredEffects: RequiredEffects): 
 
         const totalCount = requiredEffects
           .filter((re) =>
-            re.effectIds.some((id) => stackableGroupEffectIds.includes(id)) &&
-            re.effectIds.every((id) => {
+            re.effectIds.some((id) => stackableGroupEffectIds.includes(id))
+            && re.effectIds.every((id) => {
               const effect = relicEffectMap[id]
               return effect && effect.stacksWithSelf
-            })
+            }),
           )
           .reduce((sum, re) => sum + re.count, 0)
 
