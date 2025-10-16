@@ -125,7 +125,7 @@ function EmptySlot({ color }: { color: SlotColor }) {
       text-sm text-zinc-400
     `}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex min-h-20 items-center gap-2">
         空きスロット
         <div className={`
           size-4
