@@ -18,7 +18,7 @@ type Props = {
   meta: FieldMetadata<EffectCountState>
 
   // 選択中のキャラクター ID
-  selectedCharId: string | undefined
+  selectedCharId: string
 
   // 選択中の効果
   checkedEffects: CheckedEffects

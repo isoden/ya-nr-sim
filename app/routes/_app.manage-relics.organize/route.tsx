@@ -31,6 +31,36 @@ export default function Page() {
     setIgnoredRelicIds((ids) => ids.filter((id) => id !== relicId))
   }
 
+  const groupedRedundantRelics = useMemo(() => {
+    const grouped = Object.groupBy(Array.from(redundantRelicsMap), ([relic]) => relic.colorExtended)
+
+    if (ignoredEffectIds.length > 0) {
+      for (const relics of Object.values(grouped)) {
+        relics.sort(([relicA], [relicB]) => {
+        // ignoredEffectIdsOrder の順序に基づいてソート
+          const normalizedEffectsA = extractNormalizedEffects(relicA.effects)
+          const normalizedEffectsB = extractNormalizedEffects(relicB.effects)
+
+          // 各遺物が ignoredEffectIdsOrder のどの位置に最初にマッチするかを取得
+          const indexA = ignoredEffectIdsOrder.findIndex((effectId) => normalizedEffectsA.includes(effectId))
+          const indexB = ignoredEffectIdsOrder.findIndex((effectId) => normalizedEffectsB.includes(effectId))
+
+          // どちらも無効な効果を持たない場合は順序を変えない
+          if (indexA === -1 && indexB === -1) return 0
+
+          // 片方だけが無効な効果を持つ場合、持つ方を優先
+          if (indexA === -1) return 1
+          if (indexB === -1) return -1
+
+          // 両方が無効な効果を持つ場合、ignoredEffectIdsOrder の順序に従う
+          return indexA - indexB
+        })
+      }
+    }
+
+    return Object.entries(grouped)
+  }, [ignoredEffectIds.length, ignoredEffectIdsOrder, redundantRelicsMap])
+
   return (
     <section
       aria-labelledby={id}
@@ -57,38 +87,29 @@ export default function Page() {
         />
       </div>
 
-      {redundantRelicsMap.size > 0 && (
+      {groupedRedundantRelics.length > 0 && (
         <div className="space-y-4">
           {
-            Array.from(redundantRelicsMap)
-              .toSorted(([relicA], [relicB]) => {
-              // ignoredEffectIdsOrder の順序に基づいてソート
-                const normalizedEffectsA = extractNormalizedEffects(relicA.effects)
-                const normalizedEffectsB = extractNormalizedEffects(relicB.effects)
-
-                // 各遺物が ignoredEffectIdsOrder のどの位置に最初にマッチするかを取得
-                const indexA = ignoredEffectIdsOrder.findIndex((effectId) => normalizedEffectsA.includes(effectId))
-                const indexB = ignoredEffectIdsOrder.findIndex((effectId) => normalizedEffectsB.includes(effectId))
-
-                // どちらも無効な効果を持たない場合は順序を変えない
-                if (indexA === -1 && indexB === -1) return 0
-
-                // 片方だけが無効な効果を持つ場合、持つ方を優先
-                if (indexA === -1) return 1
-                if (indexB === -1) return -1
-
-                // 両方が無効な効果を持つ場合、ignoredEffectIdsOrder の順序に従う
-                return indexA - indexB
-              })
-              .map(([redundantRelic, superiorRelics]) => (
-                <RedundantRelicCard
-                  key={redundantRelic.id}
-                  redundantRelic={redundantRelic}
-                  superiorRelics={superiorRelics}
-                  ignoredEffectIds={ignoredEffectIds}
-                  onRemove={handleRemoveRelic}
-                  onIgnore={handleIgnoreRelic}
-                />
+            groupedRedundantRelics
+              .map(([colorExtended, relics]) => (
+                <div key={colorExtended} className="space-y-4">
+                  <h4 className="mb-2 text-lg font-semibold text-zinc-200">
+                    {(colorExtended)}
+                    の重複遺物
+                  </h4>
+                  <div className="grid grid-cols-4 gap-4">
+                    {relics.map(([redundantRelic, superiorRelics]) => (
+                      <RedundantRelicCard
+                        key={redundantRelic.id}
+                        redundantRelic={redundantRelic}
+                        superiorRelics={superiorRelics}
+                        ignoredEffectIds={ignoredEffectIds}
+                        onRemove={handleRemoveRelic}
+                        onIgnore={handleIgnoreRelic}
+                      />
+                    ))}
+                  </div>
+                </div>
               ))
           }
         </div>
