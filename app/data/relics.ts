@@ -9,8 +9,8 @@ export type RelicJSON = RelicSchema
 export class Relic {
   static MAX_EFFECTS = 6
 
-  static new({ dn = false, ...options }: RelicJSON): Relic {
-    return new Relic(options.id, options.color, options.effects, options.itemId, dn)
+  static new({ dn = false, unsellable = false, ...options }: RelicJSON): Relic {
+    return new Relic(options.id, options.color, options.effects, options.itemId, dn, unsellable)
   }
 
   get size(): 'small' | 'medium' | 'large' {
@@ -168,6 +168,9 @@ export class Relic {
      * TODO: private にして、 Relic.type を参照する
      */
     public dn: boolean,
+
+    /** 売却不可フラグ */
+    public unsellable: boolean,
   ) { }
 }
 

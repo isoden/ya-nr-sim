@@ -1,18 +1,25 @@
 import { useState } from 'react'
 import { RelicEffectsList } from '~/components/RelicEffectsList/RelicEffectsList'
+import { RelicInfo } from '~/components/RelicInfo/RelicInfo'
 import { Button } from '~/components/forms/Button'
 import type { Relic } from '~/data/relics'
 
-/**
- * 冗長な遺物を表示するカードコンポーネント
- */
-export const RedundantRelicCard: React.FC<{
+type Props = {
   redundantRelic: Relic
   superiorRelics: Relic[]
   ignoredEffectIds: number[]
   onRemove: (relicId: string) => void
-  onIgnore: (relicId: string) => void
-}> = ({ redundantRelic, superiorRelics, ignoredEffectIds, onRemove, onIgnore }) => {
+}
+
+/**
+ * 冗長な遺物を表示するカードコンポーネント
+ */
+export const RedundantRelicCard: React.FC<Props> = ({
+  redundantRelic,
+  superiorRelics,
+  ignoredEffectIds,
+  onRemove,
+}) => {
   const threshold = 2
   const [truncated, setTruncated] = useState(superiorRelics.length > threshold)
 
@@ -37,17 +44,9 @@ export const RedundantRelicCard: React.FC<{
         >
           削除
         </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          type="button"
-          onClick={() => window.confirm('Are you sure?') && onIgnore(redundantRelic.id)}
-        >
-          除外
-        </Button>
       </header>
 
-      <RelicEffectsList relic={redundantRelic} ignoredEffectIds={ignoredEffectIds} />
+      <RelicEffectsList className="text-sm" relic={redundantRelic} ignoredEffectIds={ignoredEffectIds} />
 
       <div className="mt-4 space-y-3">
         <h5 className="text-sm font-medium text-zinc-400">
@@ -56,20 +55,7 @@ export const RedundantRelicCard: React.FC<{
           )
         </h5>
         {superiorRelics.slice(0, truncated ? threshold : superiorRelics.length).map((superiorRelic) => (
-          <div
-            key={superiorRelic.id}
-            className="rounded border border-zinc-700 bg-zinc-900/50 p-3"
-          >
-            <h6 className="mb-2 font-medium text-zinc-200">
-              {superiorRelic.name}
-              <span className="text-sm text-zinc-400">
-                (
-                {superiorRelic.colorExtended}
-                )
-              </span>
-            </h6>
-            <RelicEffectsList relic={superiorRelic} ignoredEffectIds={ignoredEffectIds} />
-          </div>
+          <RelicInfo key={superiorRelic.id} relic={superiorRelic} />
         ))}
         {truncated && (
           <div className="flex justify-center">

@@ -1,35 +1,69 @@
-import { useId, useMemo } from 'react'
-import { demeritDepthsRelicEffectMap, normalizeEffectId, Relic, RelicColorBase, uniqItemNameMap } from '~/data/relics'
+import { useCallback, useId, useMemo } from 'react'
+import { demeritDepthsRelicEffectMap, normalizeEffectId, Relic, RelicColorBase, RelicColorExtended } from '~/data/relics'
 import { usePersistedState } from '~/hooks/usePersistedState'
 import { useRelicsStore } from '~/store/relics'
-import { EffectFilterPanel, IgnoredRelicsList, RedundantRelicCard } from './components'
+import { EffectFilterPanel, RedundantRelicCard } from './components'
+
+/** 重複遺物のエントリー型 */
+type RedundantRelicEntry = [redundantRelic: Relic, superiorRelics: Relic[]]
+
+/** 色別にグループ化された重複遺物の型 */
+type GroupedRedundantRelics = [colorExtended: RelicColorExtended, entries: RedundantRelicEntry[]][]
 
 export default function Page() {
   const id = useId()
   const { relics: rawRelics, setRelics } = useRelicsStore()
   const [ignoredEffectIdsMap, setIgnoredEffectIdsMap] = usePersistedState<Record<string, boolean>>(`_app.manage-relics/ignored_effect_ids`, {})
-  const [ignoredRelicIds, setIgnoredRelicIds] = usePersistedState<string[]>(`_app.manage-relics/ignored_relic_ids`, [])
 
   const relics = useMemo(() => rawRelics.map((r) => Relic.new(r)), [rawRelics])
-  const ignoredEffectIds = useMemo(() => Object.keys(ignoredEffectIdsMap).filter((id) => ignoredEffectIdsMap[id]).map(Number), [ignoredEffectIdsMap])
-  const redundantRelicsMap = useMemo(() => findRedundantRelics(relics, { ignoredRelicIds, ignoredEffectIds }), [relics, ignoredRelicIds, ignoredEffectIds])
-  const ignoredEffectIdsOrder = useMemo(() => Object.keys(ignoredEffectIdsMap).filter((id) => ignoredEffectIdsMap[id]).map(Number), [ignoredEffectIdsMap])
+  const ignoredEffectIds = useMemo(
+    () => Object.entries(ignoredEffectIdsMap)
+      .filter(([, checked]) => checked)
+      .map(([id]) => Number(id)),
+    [ignoredEffectIdsMap],
+  )
+  const redundantRelicsMap = useMemo(
+    () => findRedundantRelics(relics, { ignoredEffectIds }),
+    [relics, ignoredEffectIds],
+  )
 
-  const handleToggleEffect = (effectId: string, checked: boolean) => {
+  const handleToggleEffect = useCallback((effectId: string, checked: boolean) => {
     setIgnoredEffectIdsMap((ids) => ({ ...ids, [effectId]: checked }))
-  }
+  }, [setIgnoredEffectIdsMap])
 
-  const handleRemoveRelic = (relicId: string) => {
+  const handleRemoveRelic = useCallback((relicId: string) => {
     setRelics(rawRelics.filter((r) => r.id !== relicId))
-  }
+  }, [rawRelics, setRelics])
 
-  const handleIgnoreRelic = (relicId: string) => {
-    setIgnoredRelicIds((ids) => [...ids, relicId])
-  }
+  const groupedRedundantRelics = useMemo<GroupedRedundantRelics>(() => {
+    const grouped = Object.groupBy(
+      Array.from(redundantRelicsMap),
+      ([relic]) => relic.colorExtended,
+    )
 
-  const handleUnignoreRelic = (relicId: string) => {
-    setIgnoredRelicIds((ids) => ids.filter((id) => id !== relicId))
-  }
+    if (ignoredEffectIds.length > 0) {
+      for (const entries of Object.values(grouped)) {
+        entries?.sort((entryA, entryB) =>
+          compareRedundantRelics(entryA[0], entryB[0], ignoredEffectIds),
+        )
+      }
+    }
+
+    return [
+      RelicColorExtended.Red,
+      RelicColorExtended.Blue,
+      RelicColorExtended.Yellow,
+      RelicColorExtended.Green,
+      RelicColorExtended.DeepRed,
+      RelicColorExtended.DeepBlue,
+      RelicColorExtended.DeepYellow,
+      RelicColorExtended.DeepGreen,
+    ]
+      .reduce<GroupedRedundantRelics>((acc, color) => {
+        const value = grouped[color]
+        return (value == null || value.length === 0) ? acc : [...acc, [color, value]]
+      }, [])
+  }, [ignoredEffectIds, redundantRelicsMap])
 
   return (
     <section
@@ -49,46 +83,30 @@ export default function Page() {
           ignoredEffectIds={ignoredEffectIdsMap}
           onToggleEffect={handleToggleEffect}
         />
-
-        <IgnoredRelicsList
-          ignoredRelicIds={ignoredRelicIds}
-          relics={relics}
-          onUnignore={handleUnignoreRelic}
-        />
       </div>
 
-      {redundantRelicsMap.size > 0 && (
+      {groupedRedundantRelics.length > 0 && (
         <div className="space-y-4">
           {
-            Array.from(redundantRelicsMap)
-              .toSorted(([relicA], [relicB]) => {
-              // ignoredEffectIdsOrder の順序に基づいてソート
-                const normalizedEffectsA = extractNormalizedEffects(relicA.effects)
-                const normalizedEffectsB = extractNormalizedEffects(relicB.effects)
-
-                // 各遺物が ignoredEffectIdsOrder のどの位置に最初にマッチするかを取得
-                const indexA = ignoredEffectIdsOrder.findIndex((effectId) => normalizedEffectsA.includes(effectId))
-                const indexB = ignoredEffectIdsOrder.findIndex((effectId) => normalizedEffectsB.includes(effectId))
-
-                // どちらも無効な効果を持たない場合は順序を変えない
-                if (indexA === -1 && indexB === -1) return 0
-
-                // 片方だけが無効な効果を持つ場合、持つ方を優先
-                if (indexA === -1) return 1
-                if (indexB === -1) return -1
-
-                // 両方が無効な効果を持つ場合、ignoredEffectIdsOrder の順序に従う
-                return indexA - indexB
-              })
-              .map(([redundantRelic, superiorRelics]) => (
-                <RedundantRelicCard
-                  key={redundantRelic.id}
-                  redundantRelic={redundantRelic}
-                  superiorRelics={superiorRelics}
-                  ignoredEffectIds={ignoredEffectIds}
-                  onRemove={handleRemoveRelic}
-                  onIgnore={handleIgnoreRelic}
-                />
+            groupedRedundantRelics
+              .map(([colorExtended, relics]) => (
+                <div key={colorExtended} className="space-y-4">
+                  <h4 className="mb-2 text-lg font-semibold text-zinc-200">
+                    {(colorExtended)}
+                    の重複遺物
+                  </h4>
+                  <div className="grid grid-cols-4 gap-4">
+                    {relics.map(([redundantRelic, superiorRelics]) => (
+                      <RedundantRelicCard
+                        key={redundantRelic.id}
+                        redundantRelic={redundantRelic}
+                        superiorRelics={superiorRelics}
+                        ignoredEffectIds={ignoredEffectIds}
+                        onRemove={handleRemoveRelic}
+                      />
+                    ))}
+                  </div>
+                </div>
               ))
           }
         </div>
@@ -97,50 +115,115 @@ export default function Page() {
   )
 }
 
-const uniqueItemNames = Object.entries(uniqItemNameMap).reduce<Record<string, true>>((acc, [, name]) => {
-  acc[name] = true
-  return acc
-}, {})
+/**
+ * 遺物の効果IDリストから正規化された効果を抽出する
+ *
+ * @param effects - 遺物の効果IDリスト
+ * @returns デメリット効果を除外した正規化済み効果IDリスト
+ */
+function extractNormalizedEffects(effects: number[]): number[] {
+  return effects
+    .map(normalizeEffectId)
+    .filter((effectId) => demeritDepthsRelicEffectMap[effectId] == null)
+}
 
-function findRedundantRelics(relics: Relic[], options: {
-  ignoredRelicIds: string[]
-  ignoredEffectIds: number[]
-}) {
-  const ignoredRelicIdsSet = new Set(options.ignoredRelicIds)
+/**
+ * 遺物を比較してソート順を決定する
+ *
+ * ソート優先順位:
+ * 1. 効果数が少ない順（デメリット効果を除く）
+ * 2. 無視された効果の順序
+ *
+ * @param relicA - 比較対象の遺物A
+ * @param relicB - 比較対象の遺物B
+ * @param ignoredEffectIds - 無視する効果IDのリスト（順序を保持）
+ * @returns ソート用の比較値
+ */
+function compareRedundantRelics(
+  relicA: Relic,
+  relicB: Relic,
+  ignoredEffectIds: number[],
+): number {
+  const normalizedEffectsA = extractNormalizedEffects(relicA.effects)
+  const normalizedEffectsB = extractNormalizedEffects(relicB.effects)
+
+  // 1. 効果数が少ない順（デメリット効果を除く）
+  const effectCountDiff = normalizedEffectsA.length - normalizedEffectsB.length
+  if (effectCountDiff !== 0) return effectCountDiff
+
+  // 2. 各遺物が ignoredEffectIds のどの位置に最初にマッチするかを取得
+  const indexA = ignoredEffectIds.findIndex((effectId) => normalizedEffectsA.includes(effectId))
+  const indexB = ignoredEffectIds.findIndex((effectId) => normalizedEffectsB.includes(effectId))
+
+  // どちらも無効な効果を持たない場合は順序を変えない
+  if (indexA === -1 && indexB === -1) return 0
+
+  // 片方だけが無効な効果を持つ場合、持つ方を優先
+  if (indexA === -1) return 1
+  if (indexB === -1) return -1
+
+  // 両方が無効な効果を持つ場合、ignoredEffectIds の順序に従う
+  return indexA - indexB
+}
+
+/**
+ * 重複する遺物を検出する
+ *
+ * ある遺物の効果が、別の遺物の効果に完全に含まれている場合、
+ * その遺物を「重複」として扱う。
+ *
+ * @param relics - 検査対象の遺物リスト
+ * @param options - 検出オプション
+ * @param options.ignoredRelicIds - 検出から除外する遺物IDのリスト
+ * @param options.ignoredEffectIds - 比較時に無視する効果IDのリスト
+ * @returns 重複遺物とそれらの上位互換遺物のマップ
+ */
+function findRedundantRelics(
+  relics: Relic[],
+  options: {
+    ignoredEffectIds: number[]
+  },
+): Map<Relic, Relic[]> {
   const ignoredEffectIdsSet = new Set(options.ignoredEffectIds)
 
-  const redundantRelicsMap: Map<Relic, Relic[]> = new Map()
-  const relicsByColor: Record<Relic['color'], Relic[]> = {
-    [RelicColorBase.Red]: [],
-    [RelicColorBase.Blue]: [],
-    [RelicColorBase.Green]: [],
-    [RelicColorBase.Yellow]: [],
+  const redundantRelicsMap = new Map<Relic, Relic[]>()
+  const relicsByColorAndType: Record<Relic['color'], Record<Relic['type'], Relic[]>> = {
+    [RelicColorBase.Red]: { normal: [], depths: [] },
+    [RelicColorBase.Blue]: { normal: [], depths: [] },
+    [RelicColorBase.Green]: { normal: [], depths: [] },
+    [RelicColorBase.Yellow]: { normal: [], depths: [] },
   }
   const relicEffectsCache = new Map<Relic['id'], number[]>()
 
-  // prepare
+  // 前処理: 遺物を色とタイプで分類し、効果をキャッシュ
   for (const relic of relics) {
-    relicsByColor[relic.color].push(relic)
-
+    relicsByColorAndType[relic.color][relic.type].push(relic)
     relicEffectsCache.set(relic.id, extractNormalizedEffects(relic.effects))
   }
 
+  // 各遺物について重複をチェック
   for (const checkingRelic of relics) {
-    // ユニークアイテムは売却できないため比較対象外
-    // 除外するIDの遺物は除外
-    if (uniqueItemNames[checkingRelic.name] || ignoredRelicIdsSet.has(checkingRelic.id)) continue
+    // 売却できない遺物は比較対象外
+    if (checkingRelic.unsellable) {
+      continue
+    }
 
-    const checkingEffects = relicEffectsCache.get(checkingRelic.id)!.filter((id) => !ignoredEffectIdsSet.has(id))
+    const checkingEffects = relicEffectsCache
+      .get(checkingRelic.id)!
+      .filter((id) => !ignoredEffectIdsSet.has(id))
     const superiorRelics: Relic[] = []
 
-    for (const comparedRelic of relicsByColor[checkingRelic.color]) {
-      // 異なるIDの遺物同士で行う
+    // 同じ色かつ同じタイプの遺物と比較
+    for (const comparedRelic of relicsByColorAndType[checkingRelic.color][checkingRelic.type]) {
+      // 異なるIDの遺物同士で比較
       if (checkingRelic.id === comparedRelic.id) continue
 
       const comparedEffects = relicEffectsCache.get(comparedRelic.id)!
 
+      // 比較対象の効果が少ない場合はスキップ
       if (checkingEffects.length > comparedEffects.length) continue
 
+      // チェック中の遺物の効果が、比較対象の遺物に全て含まれる場合
       if (checkingEffects.every((effect) => comparedEffects.includes(effect))) {
         superiorRelics.push(comparedRelic)
       }
@@ -152,8 +235,4 @@ function findRedundantRelics(relics: Relic[], options: {
   }
 
   return redundantRelicsMap
-}
-
-function extractNormalizedEffects(relic: number[]) {
-  return relic.map(normalizeEffectId).filter((effectId) => demeritDepthsRelicEffectMap[effectId] == null)
 }

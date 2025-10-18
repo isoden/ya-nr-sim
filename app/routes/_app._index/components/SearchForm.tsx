@@ -4,7 +4,7 @@ import { parseWithValibot } from '@conform-to/valibot'
 import { Form, useSubmit } from 'react-router'
 import { Checkbox } from '~/components/forms/Checkbox'
 import { Button } from '~/components/forms/Button'
-import { characterMap } from '~/data/characters'
+import { characterList } from '~/data/characters'
 import { usePersistedState } from '~/hooks/usePersistedState'
 import { FormSchema } from '../schema/FormSchema'
 import { BuildCriteria } from './BuildCriteria'
@@ -24,8 +24,7 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
   const [checkedEffects, setCheckedEffects] = useState(() => Object.entries((fields.effects.value || {})).reduce<CheckedEffects>(
     (acc, [key]) => ({ ...acc, [key]: true }),
     {},
-  ),
-  )
+  ))
 
   return (
     <section className="min-h-0">
@@ -57,7 +56,7 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
               {...getSelectProps(fields.charId)}
               className="rounded border border-zinc-600 p-1"
             >
-              {characterItems.map((item) => (
+              {characterList.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.name}
                 </option>
@@ -68,7 +67,7 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
 
           <BuildCriteria
             meta={fields.effects}
-            selectedCharId={fields.charId.value}
+            selectedCharId={fields.charId.value ?? characterList[0].id}
             checkedEffects={checkedEffects}
             setCheckedEffects={setCheckedEffects}
           />
@@ -106,8 +105,3 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
     </section>
   )
 }
-
-const characterItems = Object.entries(characterMap).map(([id, { name }]) => ({
-  id,
-  name,
-}))

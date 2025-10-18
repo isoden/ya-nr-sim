@@ -1,31 +1,54 @@
+import { twMerge } from 'tailwind-merge'
 import { RelicColorExtended, uniqItemNameMap, type Relic } from '~/data/relics'
 
 type Props = {
   relic: Relic
+  className?: string
 }
 
-export const RelicIcon: React.FC<Props> = ({ relic }) => {
+export const RelicIcon: React.FC<Props> = ({ relic, className }) => {
+  const color = colorMap[relic.colorExtended]
+
   if (relic.itemId in uniqItemNameMap) {
     // TODO: ユニークアイテムのアイコンを表示する
+    return (
+      <span
+        className={twMerge(
+          className,
+          color,
+          'size-5 rounded-full',
+        )}
+      />
+    )
   }
 
-  const bgColor = {
-    [RelicColorExtended.Red]: 'bg-red-500',
-    [RelicColorExtended.Blue]: 'bg-blue-500',
-    [RelicColorExtended.Green]: 'bg-green-500',
-    [RelicColorExtended.Yellow]: 'bg-yellow-500',
-    [RelicColorExtended.DeepRed]: 'bg-red-800',
-    [RelicColorExtended.DeepBlue]: 'bg-blue-800',
-    [RelicColorExtended.DeepGreen]: 'bg-green-800',
-    [RelicColorExtended.DeepYellow]: 'bg-yellow-800',
-  }[relic.colorExtended]
-
   return (
-    <span
-      className={`
-        relative size-5
-        ${bgColor}
-      `}
-    />
+    <Icon className={className} color={color} />
   )
+}
+
+const Icon = ({ color: colorClassName, className }: { color: string; className?: string }) => {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+    >
+      <path d="M4.9397 8.91202V2L10.0085 3.2288L17.5349 13.52L17.9957 18.2817L16.2158 18.8961H13.5413L7.39731 13.0592L4.9397 8.91202Z" className={colorClassName} />
+      <path d="M4.9397 2V8.91202M4.9397 2L10.0085 3.2288M4.9397 2L6.0149 3.84321L7.0901 5.68641M4.9397 8.91202L7.0901 5.68641M4.9397 8.91202L9.39411 11.8304M4.9397 8.91202L7.39731 13.0592L13.5413 18.8961H16.2158M10.0085 3.2288L17.5349 13.52M10.0085 3.2288L9.83571 5.99361M10.0085 3.2288L8.54931 4.45761L7.0901 5.68641M17.5349 13.52L17.9957 18.2817M17.5349 13.52L14.6165 11.6768M17.9957 18.2817L12.2357 11.8304M17.9957 18.2817L16.2158 18.8961M17.9957 18.2817L14.6165 11.6768M7.0901 5.68641L9.66291 8.75842M12.2357 11.8304H9.39411M12.2357 11.8304L9.66291 8.75842M16.2158 18.8961L9.39411 11.8304M9.66291 8.75842L9.83571 5.99361M9.83571 5.99361L14.6165 11.6768" stroke="#B9C6E9" />
+      <path d="M14.9203 19.1334C14.9203 19.1334 15.0358 16.8743 15.0936 15.9062L15 13.5L14.4003 7.99965L15.0936 5.74064C15.3825 6.11714 16.1336 7.0315 16.1336 7.0315L16.5 9L19.6004 5.902L19.7737 7.67693L18.907 9.77459H21.1604L19.0804 13.1631L20.8138 12.437L22 12.1143L21.8538 13.1631L21.3338 14.938L20.8138 16.3903L17.875 19.1334L16.827 21.7151H14.4003H11.0475L6.34918 20.7754L4.52001 18.972L6.34918 18.4262L4 16.3903L5.56004 16.0676L4.17334 13.3245L6.25339 12.8404L12.6669 18.0038L14.9203 19.1334Z" fill="#B9C6E9" />
+      <path d="M16.827 21.7151L14.9203 19.1334M16.827 21.7151L17.875 19.1334M16.827 21.7151H14.4003H11.0475M16.827 21.7151L9.1682 17.9564M14.9203 19.1334C14.9203 19.1334 15.0358 16.8743 15.0936 15.9062M14.9203 19.1334L12.6669 18.0038M15.0936 15.9062L17.875 19.1334M15.0936 15.9062L15 13.5M15.0936 15.9062L18.3004 11.7109M17.875 19.1334L20.8138 16.3903L21.3338 14.938L21.8538 13.1631L22 12.1143L20.8138 12.437L19.0804 13.1631M17.875 19.1334L18.3004 15.9062L19.0804 13.1631M19.0804 13.1631L18.6904 12.437L18.3004 11.7109M19.0804 13.1631L21.1604 9.77459H18.907M18.3004 11.7109L18.907 9.77459M18.907 9.77459L19.7737 7.67693L19.6004 5.902L16.5 9M16.5 9L16.1336 7.0315C16.1336 7.0315 15.3825 6.11714 15.0936 5.74064L14.4003 7.99965L15 13.5M16.5 9L15 13.5M12.6669 18.0038L6.25339 12.8404L4.17334 13.3245L5.56004 16.0676M12.6669 18.0038L9.1682 17.9564M5.56004 16.0676L4 16.3903L6.34918 18.4262M5.56004 16.0676L9.1682 17.9564M6.34918 18.4262L4.52001 18.972L6.34918 20.7754L11.0475 21.7151M6.34918 18.4262L11.0475 21.7151M6.34918 18.4262L9.1682 17.9564" stroke="#0A0E1A" />
+    </svg>
+  )
+}
+
+const colorMap: Record<RelicColorExtended, string> = {
+  [RelicColorExtended.Red]: 'fill-red-500 bg-red-500',
+  [RelicColorExtended.Blue]: 'fill-blue-500 bg-blue-500',
+  [RelicColorExtended.Green]: 'fill-green-500 bg-green-500',
+  [RelicColorExtended.Yellow]: 'fill-yellow-500 bg-yellow-500',
+  [RelicColorExtended.DeepRed]: 'fill-red-800 bg-red-800',
+  [RelicColorExtended.DeepBlue]: 'fill-blue-800 bg-blue-800',
+  [RelicColorExtended.DeepGreen]: 'fill-green-800 bg-green-800',
+  [RelicColorExtended.DeepYellow]: 'fill-yellow-800 bg-yellow-800',
 }

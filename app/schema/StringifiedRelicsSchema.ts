@@ -17,6 +17,9 @@ const RelicSchema = v.object({
 
   /** 深層の遺物フラグ */
   dn: v.optional(v.boolean(), false),
+
+  /** 売却不可フラグ */
+  unsellable: v.optional(v.boolean(), false),
 })
 
 export const StringifiedRelicsSchema = v.union([
