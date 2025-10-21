@@ -7,6 +7,9 @@ import type { Build, Result } from '../services/simulator/types'
 type Props = {
   resultKey: string
 
+  /** 深層の遺物を除外した場合に true */
+  excludeDepthsRelics?: boolean
+
   /** 検索結果 */
   result: Promise<Result> | undefined
 }
@@ -16,7 +19,7 @@ type Props = {
  *
  * @param props - {@link Props}
  */
-export const BuildList: React.FC<Props> = ({ resultKey, result }) => {
+export const BuildList: React.FC<Props> = ({ resultKey, excludeDepthsRelics, result }) => {
   return (
     <section
       className={`
@@ -36,7 +39,7 @@ export const BuildList: React.FC<Props> = ({ resultKey, result }) => {
                   )
                 : result.success
                   ? (
-                      <Success builds={result.data} />
+                      <Success builds={result.data} excludeDepthsRelics={excludeDepthsRelics} />
                     )
                   : (
                       <Failure>{result.error.message}</Failure>
@@ -60,7 +63,10 @@ function Idle() {
  *
  * @param props
  */
-function Success({ builds }: { builds: Build[] }) {
+function Success({ builds, excludeDepthsRelics }: { builds: Build[]; excludeDepthsRelics?: boolean }) {
+  // 深層の遺物を除外する場合遺物を最大3つまでしか装備できないため、 スロット表示も3つまでに制限する
+  const sliceEnd = excludeDepthsRelics ? 3 : 6
+
   return builds.map((item, i) => {
     return (
       <div
@@ -82,7 +88,7 @@ function Success({ builds }: { builds: Build[] }) {
             {item.vessel.name}
           </h3>
           <ul className="flex gap-2">
-            {item.vessel.slots.map((slot, i) => {
+            {item.vessel.slots.slice(0, sliceEnd).map((slot, i) => {
               return (
                 <li
                   key={`${slot}.${i}`}
@@ -99,7 +105,7 @@ function Success({ builds }: { builds: Build[] }) {
         </header>
 
         <ul className="mt-4 grid grid-cols-3 gap-4">
-          {item.vessel.slots.map((slot, index) => {
+          {item.vessel.slots.slice(0, sliceEnd).map((slot, index) => {
             const relic = item.relics.find((r) => item.relicsIndexes[r.id] === index)
 
             return (

@@ -15,6 +15,7 @@ describe('Simulator Performance Benchmarks', () => {
       vessels,
       relics,
       requiredEffects: [{ effectIds: [7000300], count: 1 }],
+      excludeDepthsRelics: false,
       volume: 5,
     })
   })
@@ -33,6 +34,7 @@ describe('Simulator Performance Benchmarks', () => {
         { effectIds: [7000300, 7000301], count: 2 },
         { effectIds: [7000400], count: 1 },
       ],
+      excludeDepthsRelics: false,
       volume: 10,
     })
   })
@@ -52,6 +54,7 @@ describe('Simulator Performance Benchmarks', () => {
         { effectIds: [7000400], count: 2 },
         { effectIds: [7000500], count: 1 },
       ],
+      excludeDepthsRelics: false,
       volume: 20,
     })
   })
@@ -67,6 +70,7 @@ describe('Simulator Performance Benchmarks', () => {
       vessels,
       relics,
       requiredEffects: [{ effectIds: [7000300], count: 1 }],
+      excludeDepthsRelics: false,
       volume: 5,
     })
   })
@@ -85,6 +89,7 @@ describe('Simulator Performance Benchmarks', () => {
         { effectIds: [7000300, 7000301, 7000302], count: 2 },
         { effectIds: [7000400, 7000401], count: 1 },
       ],
+      excludeDepthsRelics: false,
       volume: 15,
     })
   })

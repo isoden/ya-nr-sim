@@ -17,6 +17,7 @@ export const FormSchema = v.object(
       ),
       v.check((value) => Object.keys(value).length > 0, EffectsRequired),
     ),
+    excludeDepthsRelics: v.boolean(),
   },
   (issue) => (issue.expected === '"effects"' && issue.received === 'undefined' ? EffectsRequired : issue.message),
 )

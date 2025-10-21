@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { getFormProps, getSelectProps, useForm } from '@conform-to/react'
+import { getFormProps, getInputProps, getSelectProps, useForm } from '@conform-to/react'
 import { parseWithValibot } from '@conform-to/valibot'
 import { Form, useSubmit } from 'react-router'
 import { Checkbox } from '~/components/forms/Checkbox'
@@ -82,8 +82,8 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
           <Checkbox className="mr-auto text-sm" checked={isAutoSearchEnabled} onChange={setIsAutoSearchEnabled}>
             自動検索をON
           </Checkbox>
-          <Checkbox className="text-sm" checked readOnly>
-            深層の遺物を含む
+          <Checkbox className="text-sm" {...getInputProps(fields.excludeDepthsRelics, { type: 'checkbox' })}>
+            深層の遺物を除外する
           </Checkbox>
           <Button
             variant="outline"

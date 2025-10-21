@@ -20,6 +20,7 @@ describe('マッチするパターン', () => {
           count: 1,
         },
       ],
+      excludeDepthsRelics: false,
       volume: 1,
     })
 
@@ -54,6 +55,7 @@ describe('マッチするパターン', () => {
           count: 3,
         },
       ],
+      excludeDepthsRelics: false,
     })
 
     expect(result).toEqual({
@@ -85,6 +87,7 @@ describe('マッチするパターン', () => {
         vessels,
         relics,
         requiredEffects: [{ effectIds: [7126000], count: 3 }],
+        excludeDepthsRelics: false,
       })
 
       // assert: 献器の色スロットの順番に並べ替える
@@ -115,6 +118,7 @@ describe('マッチするパターン', () => {
         vessels,
         relics,
         requiredEffects: [{ effectIds: [7126000], count: 3 }],
+        excludeDepthsRelics: false,
       })
 
       // assert: 自由枠は最後に並べ替える
@@ -145,6 +149,7 @@ describe('マッチするパターン', () => {
         vessels,
         relics,
         requiredEffects: [{ effectIds: [7126000], count: 3 }],
+        excludeDepthsRelics: false,
       })
 
       // assert: 遺物をID順に並べ替える
@@ -177,6 +182,7 @@ describe('効果の重複ルール', () => {
       vessels,
       relics,
       requiredEffects: [{ effectIds: [7000300, 7000301], count: 2 }],
+      excludeDepthsRelics: false,
     })
 
     // assert: stacksWithSelfの効果は重複可能
@@ -205,6 +211,7 @@ describe('効果の重複ルール', () => {
       vessels,
       relics,
       requiredEffects: [{ effectIds: [7090000], count: 2 }],
+      excludeDepthsRelics: false,
     })
 
     // assert: 同じ効果IDは1つまでしか装備できない
@@ -221,6 +228,7 @@ describe('効果の重複ルール', () => {
       vessels,
       relics,
       requiredEffects: [{ effectIds: [10001], count: 2 }],
+      excludeDepthsRelics: false,
     })
 
     // assert: 重複不可の効果は1つまでしか装備できない
@@ -235,6 +243,7 @@ describe('マッチしないパターン', () => {
       vessels,
       relics,
       requiredEffects: [{ effectIds: [effectId], count }],
+      excludeDepthsRelics: false,
     })
 
     expect(result.success).toBe(false)
@@ -268,6 +277,7 @@ test('深層の遺物はフリースロットに装備できない', async () =>
     vessels,
     relics,
     requiredEffects: [{ effectIds: [7126000], count: 1 }],
+    excludeDepthsRelics: false,
   })
 
   // assert: 深層の遺物はフリースロットに装備できないため失敗する
@@ -294,6 +304,7 @@ test('通常の遺物はフリースロットに装備できる', async () => {
     vessels,
     relics,
     requiredEffects: [{ effectIds: [7126000], count: 1 }],
+    excludeDepthsRelics: false,
   })
 
   // assert: 通常の遺物はフリースロットに装備できる
@@ -326,6 +337,7 @@ describe('stacksAcrossLevels統合テスト', () => {
         { effectIds: [7090000], count: 1 },
         { effectIds: [6090000], count: 1 },
       ],
+      excludeDepthsRelics: false,
       volume: 1,
     })
 
@@ -334,6 +346,7 @@ describe('stacksAcrossLevels統合テスト', () => {
       vessels,
       relics,
       requiredEffects: [{ effectIds: [7090000, 6090000], count: 2 }],
+      excludeDepthsRelics: false,
       volume: 1,
     })
 
@@ -361,6 +374,7 @@ describe('stacksAcrossLevels統合テスト', () => {
         { effectIds: [7000300], count: 1 },
         { effectIds: [7000301], count: 1 },
       ],
+      excludeDepthsRelics: false,
       volume: 1,
     })
 
@@ -394,6 +408,7 @@ describe('リグレッションテスト', () => {
           count: 2,
         },
       ],
+      excludeDepthsRelics: false,
       volume: 1,
     })
 
@@ -429,6 +444,7 @@ describe('リグレッションテスト', () => {
           count: 1,
         },
       ],
+      excludeDepthsRelics: false,
       volume: 1,
     })
 

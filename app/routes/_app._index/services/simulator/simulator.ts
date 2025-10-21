@@ -22,9 +22,11 @@ import type { Args, Result, Build } from './types'
  * @param requiredEffects - 必要な効果とその数
  * @param [volume=5] - 検索するビルド数
  */
-export async function simulate({ vessels, relics: relicsJSON, requiredEffects, volume = 5 }: Args): Promise<Result> {
+export async function simulate({ vessels, relics: relicsJSON, requiredEffects, excludeDepthsRelics, volume = 5 }: Args): Promise<Result> {
   try {
-    const relics = relicsJSON.map((relic) => Relic.new(relic))
+    const relics = relicsJSON.reduce<Relic[]>((acc, r) => {
+      return (excludeDepthsRelics && r.dn) ? acc : acc.concat(Relic.new(r))
+    }, [])
     const consolidatedRequiredEffects = consolidateRelicEffectGroups(requiredEffects)
     const variables = createVariables(vessels, relics, consolidatedRequiredEffects)
     const constraints = createConstraints(vessels, relics, consolidatedRequiredEffects)

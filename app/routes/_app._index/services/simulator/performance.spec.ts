@@ -54,6 +54,7 @@ describe.skip('Performance Regression Tests', () => {
         vessels,
         relics: smallRelics,
         requiredEffects: [{ effectIds: [7000300], count: 1 }],
+        excludeDepthsRelics: false,
         volume: 5,
       })
       expect(result.success).toBe(true)
@@ -69,6 +70,7 @@ describe.skip('Performance Regression Tests', () => {
           { effectIds: [7000300, 7000301], count: 2 },
           { effectIds: [7000400], count: 1 },
         ],
+        excludeDepthsRelics: false,
         volume: 10,
       })
       expect(result.success).toBe(true)
@@ -99,6 +101,7 @@ describe.skip('Performance Regression Tests', () => {
         vessels,
         relics: allRelevantRelics,
         requiredEffects: [{ effectIds: [7000300], count: 1 }],
+        excludeDepthsRelics: false,
         volume: 5,
       })
       expect(result.success).toBe(true)
@@ -111,6 +114,7 @@ describe.skip('Performance Regression Tests', () => {
         vessels,
         relics: filteredRelics,
         requiredEffects: [{ effectIds: [7000300], count: 1 }],
+        excludeDepthsRelics: false,
         volume: 5,
       })
       expect(result.success).toBe(true)

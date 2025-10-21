@@ -18,8 +18,10 @@ export const clientLoader = async ({ request }: Route.ClientLoaderArgs) => {
 
   if (!params) return { params: undefined, result: undefined }
 
-  const vessels = vesselsByCharacterMap[params.charId]
-  const requiredEffects = Object.entries(params.effects).map(([id, { count }]) => ({
+  const { charId, effects, excludeDepthsRelics } = params
+
+  const vessels = vesselsByCharacterMap[charId]
+  const requiredEffects = Object.entries(effects).map(([id, { count }]) => ({
     effectIds: id.split(',').map(Number),
     count,
     weights: id.split(',').map((_, i) => i ** 2 + 1),
@@ -29,6 +31,7 @@ export const clientLoader = async ({ request }: Route.ClientLoaderArgs) => {
     vessels,
     relics,
     requiredEffects,
+    excludeDepthsRelics,
     volume: 50,
   })
 
@@ -39,7 +42,7 @@ export default function Home({ loaderData: { params, result } }: Route.Component
   return (
     <main className="grid min-h-0 grid-cols-2 gap-6">
       <SearchForm defaultValues={params} />
-      <BuildList resultKey={JSON.stringify(params)} result={result} />
+      <BuildList resultKey={JSON.stringify(params)} excludeDepthsRelics={params?.excludeDepthsRelics} result={result} />
     </main>
   )
 }
