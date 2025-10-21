@@ -103,7 +103,7 @@ function setup() {
     })
     const [checkedEffects, setCheckedEffects] = useState<CheckedEffects>({})
 
-    return <BuildCriteria meta={fields.effects} selectedCharId={characterMap.wylder.id} checkedEffects={checkedEffects} setCheckedEffects={setCheckedEffects} />
+    return <BuildCriteria effectsMeta={fields.effects} notEffectsMeta={fields.notEffects} selectedCharId={characterMap.wylder.id} checkedEffects={checkedEffects} setCheckedEffects={setCheckedEffects} />
   }
 
   const view = render(<TestComponent />)

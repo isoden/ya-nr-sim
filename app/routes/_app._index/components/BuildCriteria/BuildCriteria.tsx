@@ -13,9 +13,16 @@ type EffectCountState = {
   [effectIds: string]: number
 }
 
+type NotEffectCountState = {
+  [effectIds: string]: string
+}
+
 type Props = {
   // conform のメタデータ
-  meta: FieldMetadata<EffectCountState>
+  effectsMeta: FieldMetadata<EffectCountState>
+
+  // conform のメタデータ
+  notEffectsMeta: FieldMetadata<NotEffectCountState>
 
   // 選択中のキャラクター ID
   selectedCharId: string
@@ -38,8 +45,9 @@ const characterNames = characterList.reduce<Record<string, boolean>>(
  *
  * @param props - {@link Props}
  */
-export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId, checkedEffects, setCheckedEffects }) => {
-  const fieldSet = meta.getFieldset()
+export const BuildCriteria: React.FC<Props> = ({ effectsMeta, notEffectsMeta, selectedCharId, checkedEffects, setCheckedEffects }) => {
+  const effects = effectsMeta.getFieldset()
+  const notEffects = notEffectsMeta.getFieldset()
 
   const [filterText, setFilterText] = useState('')
   const [showSelectedOnly, setShowSelectedOnly] = useState(false)
@@ -68,10 +76,10 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId, checkedEf
 
   const shouldHideItem = (item: { id: string; name: string; children?: { id: string; name: string }[] }) => {
     // 子要素がある場合、子要素のいずれかが選択されているかチェック
-    const hasSelectedChild = item.children?.some((child) => fieldSet[child.id]?.value != null)
+    const hasSelectedChild = item.children?.some((child) => effects[child.id]?.value != null)
 
     // 選択モードの場合、自身または子要素が選択されていなければ非表示
-    const isUnselectedInShowMode = showSelectedOnly && fieldSet[item.id]?.value == null && !hasSelectedChild
+    const isUnselectedInShowMode = showSelectedOnly && effects[item.id]?.value == null && !hasSelectedChild
 
     // 検索モードの場合、名前が一致しなければ非表示
     const isFilteredOut = filterText !== '' && !item.name.includes(filterText)
@@ -251,7 +259,8 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId, checkedEf
                                           >
                                             <EffectItem
                                               item={item}
-                                              fieldSet={fieldSet}
+                                              effects={effects}
+                                              notEffects={notEffects}
                                               checkedEffects={checkedEffects}
                                               setCheckedEffects={setCheckedEffects}
                                             />
@@ -295,7 +304,8 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId, checkedEf
                                                 >
                                                   <EffectItem
                                                     item={item}
-                                                    fieldSet={fieldSet}
+                                                    effects={effects}
+                                                    notEffects={notEffects}
                                                     checkedEffects={checkedEffects}
                                                     setCheckedEffects={setCheckedEffects}
                                                   />
@@ -327,12 +337,13 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId, checkedEf
 
 const EffectItem: React.FC<{
   item: (typeof relicCategories)[number]['children'][number]['children'][number]
-  fieldSet: { [effectIds: string]: FieldMetadata<number | undefined> }
+  effects: { [effectIds: string]: FieldMetadata<number | undefined> }
+  notEffects: { [effectIds: string]: FieldMetadata<string | undefined> }
   checkedEffects: CheckedEffects
   setCheckedEffects: React.Dispatch<React.SetStateAction<CheckedEffects>>
-}> = ({ item, fieldSet, checkedEffects, setCheckedEffects,
+}> = ({ item, effects, notEffects, checkedEffects, setCheckedEffects,
 }) => {
-  const hasChildEffectSelected = item.children?.some((child) => !!fieldSet[child.id]?.value)
+  const hasChildEffectSelected = item.children?.some((child) => checkedEffects[child.id] === 'checked')
   const isShowingCount = item.maxStacks > 1 || item.children?.some((child) => child.maxStacks > 1)
 
   return (
@@ -340,14 +351,32 @@ const EffectItem: React.FC<{
       <Checkbox
         value={item.id}
         className="flex-1"
-        checked={checkedEffects[item.id] ?? false}
-        onChange={(toBeEnabled) => {
-          setCheckedEffects((prev) => ({ ...prev, [item.id]: toBeEnabled }))
+        checked={checkedEffects[item.id] === 'checked'}
+        indeterminate={checkedEffects[item.id] === 'indeterminate'}
+        onChange={() => {
+          setCheckedEffects((prev) => {
+            const next = () => {
+              switch (prev[item.id]) {
+                case 'checked':
+                  return 'indeterminate'
+                case 'indeterminate':
+                  return 'unchecked'
+                case 'unchecked':
+                default:
+                  return 'checked'
+              }
+            }
+            return ({ ...prev, [item.id]: next() })
+          })
         }}
         disabled={hasChildEffectSelected}
       >
         <span className="text-sm">{item.name}</span>
       </Checkbox>
+
+      {/* indeterminate 状態の時に notEffects を設定 */}
+      <input {...getInputProps(notEffects[item.id], { type: 'hidden', value: false })} value="1" disabled={checkedEffects[item.id] !== 'indeterminate'} />
+
       {isShowingCount
         ? (
             <input
@@ -356,15 +385,15 @@ const EffectItem: React.FC<{
                 disabled:border-zinc-800 disabled:text-gray-500/50
               `}
               defaultValue={1}
-              {...getInputProps(fieldSet[item.id], { type: 'number' })}
+              {...getInputProps(effects[item.id], { type: 'number' })}
               aria-label={`${item.name}の必要効果数`}
-              disabled={!checkedEffects[item.id] || hasChildEffectSelected}
+              disabled={checkedEffects[item.id] !== 'checked' || hasChildEffectSelected}
               min={1}
               max={item.maxStacks}
             />
           )
         : (
-            <input {...getInputProps(fieldSet[item.id], { type: 'hidden', value: false })} value="1" disabled={!checkedEffects[item.id]} />
+            <input {...getInputProps(effects[item.id], { type: 'hidden', value: false })} value="1" disabled={checkedEffects[item.id] !== 'checked'} />
           )}
     </>
   )

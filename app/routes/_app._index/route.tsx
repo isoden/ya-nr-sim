@@ -26,11 +26,13 @@ export const clientLoader = async ({ request }: Route.ClientLoaderArgs) => {
     count,
     weights: id.split(',').map((_, i) => i ** 2 + 1),
   }))
+  const notEffects = Object.entries(params.notEffects).flatMap(([ids]) => (ids.split(',').map(Number)))
 
   const resultPromise = simulate({
     vessels,
     relics,
     requiredEffects,
+    notEffects,
     excludeDepthsRelics,
     volume: 50,
   })

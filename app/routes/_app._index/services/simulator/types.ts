@@ -14,6 +14,8 @@ export type Args = {
   relics: RelicJSON[]
   /** 必要効果 */
   requiredEffects: RequiredEffects
+  /** 除外効果 */
+  notEffects: number[]
   /** シミュレーションから深層の遺物を除外するかどうか */
   excludeDepthsRelics: boolean
   /** ビルド数 */

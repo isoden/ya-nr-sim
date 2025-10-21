@@ -15,6 +15,13 @@ export const FormSchema = v.object(
       ),
       v.check((value) => Object.keys(value).length > 0, EffectsRequired),
     ),
+    notEffects: v.optional(
+      v.record(
+        v.string(),
+        v.pipe(v.string(), v.literal('1')),
+      ),
+      {},
+    ),
     excludeDepthsRelics: v.boolean(),
   },
   (issue) => (issue.expected === '"effects"' && issue.received === 'undefined' ? EffectsRequired : issue.message),

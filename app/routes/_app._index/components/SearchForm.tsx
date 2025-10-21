@@ -21,10 +21,20 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
     onValidate: ({ formData }) => parseWithValibot(formData, { schema: FormSchema }),
   })
   const [isAutoSearchEnabled, setIsAutoSearchEnabled] = usePersistedState('SearchForm.isAutoSearchEnabled', false)
-  const [checkedEffects, setCheckedEffects] = useState(() => Object.entries((fields.effects.value || {})).reduce<CheckedEffects>(
-    (acc, [key]) => ({ ...acc, [key]: true }),
-    {},
-  ))
+  const [checkedEffects, setCheckedEffects] = useState(() => {
+    const effects = fields.effects.value || {}
+    const notEffects = Object.keys(fields.notEffects.value || {})
+
+    const state = Object.entries(effects).reduce<CheckedEffects>(
+      (acc, [key]) => ({ ...acc, [key]: 'checked' }),
+      {},
+    )
+
+    return notEffects.reduce<CheckedEffects>(
+      (acc, key) => ({ ...acc, [key]: 'indeterminate' }),
+      state,
+    )
+  })
 
   return (
     <section className="min-h-0">
@@ -66,7 +76,8 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
           </div>
 
           <BuildCriteria
-            meta={fields.effects}
+            effectsMeta={fields.effects}
+            notEffectsMeta={fields.notEffects}
             selectedCharId={fields.charId.value ?? characterList[0].id}
             checkedEffects={checkedEffects}
             setCheckedEffects={setCheckedEffects}

@@ -13,6 +13,7 @@ test.each([
         7126000: 2,
         7082600: 1,
       },
+      notEffects: {},
       excludeDepthsRelics: false,
     },
   ],
@@ -23,6 +24,7 @@ test.each([
       effects: {
         '7126000,7082600': 1,
       },
+      notEffects: {},
       excludeDepthsRelics: true,
     },
   ],

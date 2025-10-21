@@ -20,12 +20,17 @@ import type { Args, Result, Build } from './types'
  * @param vessels - 器の一覧
  * @param relics - 所持遺物一覧（JSON形式）
  * @param requiredEffects - 必要な効果とその数
+ * @param notEffects - 装備したくない効果のID一覧
+ * @param excludeDepthsRelics - 深層遺物を除外するかどうか
  * @param [volume=5] - 検索するビルド数
  */
-export async function simulate({ vessels, relics: relicsJSON, requiredEffects, excludeDepthsRelics, volume = 5 }: Args): Promise<Result> {
+export async function simulate({ vessels, relics: relicsJSON, requiredEffects, notEffects, excludeDepthsRelics, volume = 5 }: Args): Promise<Result> {
   try {
     const relics = relicsJSON.reduce<Relic[]>((acc, r) => {
-      return (excludeDepthsRelics && r.dn) ? acc : acc.concat(Relic.new(r))
+      const relic = Relic.new(r)
+      const hasNotEffect = relic.normalizedEffectIds.some((effectId) => notEffects.includes(effectId))
+
+      return (hasNotEffect || (excludeDepthsRelics && r.dn)) ? acc : acc.concat(relic)
     }, [])
     const consolidatedRequiredEffects = consolidateRelicEffectGroups(requiredEffects)
     const variables = createVariables(vessels, relics, consolidatedRequiredEffects)

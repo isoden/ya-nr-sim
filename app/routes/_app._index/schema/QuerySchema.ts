@@ -25,6 +25,13 @@ const QuerySchema = v.object({
       v.maxValue(Relic.MAX_EFFECTS),
     ),
   ),
+  notEffects: v.optional(
+    v.record(
+      v.string(),
+      v.literal('1'),
+    ),
+    {},
+  ),
   excludeDepthsRelics: v.pipe(
     /**
      * 厳密には `'on' | undefined` だが、 `v.optional(v.literal('on'), v.transform(...))` とすると optional の場合に transform が呼ばれないため literal チェックを外す
