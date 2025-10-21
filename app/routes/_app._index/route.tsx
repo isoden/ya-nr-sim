@@ -21,7 +21,7 @@ export const clientLoader = async ({ request }: Route.ClientLoaderArgs) => {
   const { charId, effects, excludeDepthsRelics } = params
 
   const vessels = vesselsByCharacterMap[charId]
-  const requiredEffects = Object.entries(effects).map(([id, { count }]) => ({
+  const requiredEffects = Object.entries(effects).map(([id, count]) => ({
     effectIds: id.split(',').map(Number),
     count,
     weights: id.split(',').map((_, i) => i ** 2 + 1),

@@ -16,16 +16,14 @@ const QuerySchema = v.object({
   ]),
   effects: v.record(
     v.string(),
-    v.object({
-      count: v.pipe(
-        v.string(),
-        v.transform(Number),
-        v.number(),
-        v.integer(),
-        v.minValue(1),
-        v.maxValue(Relic.MAX_EFFECTS),
-      ),
-    }),
+    v.pipe(
+      v.string(),
+      v.transform(Number),
+      v.number(),
+      v.integer(),
+      v.minValue(1),
+      v.maxValue(Relic.MAX_EFFECTS),
+    ),
   ),
   excludeDepthsRelics: v.pipe(
     /**

@@ -11,9 +11,7 @@ export const FormSchema = v.object(
     effects: v.pipe(
       v.record(
         v.string(),
-        v.object({
-          count: v.pipe(v.string(), v.transform(Number), v.integer(), v.minValue(1), v.maxValue(Relic.MAX_EFFECTS)),
-        }),
+        v.pipe(v.string(), v.transform(Number), v.integer(), v.minValue(1), v.maxValue(Relic.MAX_EFFECTS)),
       ),
       v.check((value) => Object.keys(value).length > 0, EffectsRequired),
     ),

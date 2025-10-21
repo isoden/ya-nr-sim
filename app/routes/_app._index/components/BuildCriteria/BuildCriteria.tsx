@@ -10,7 +10,7 @@ import { relicCategories } from './data'
 import type { CheckedEffects } from '../types/forms'
 
 type EffectCountState = {
-  [effectIds: string]: { count: number }
+  [effectIds: string]: number
 }
 
 type Props = {
@@ -327,12 +327,11 @@ export const BuildCriteria: React.FC<Props> = ({ meta, selectedCharId, checkedEf
 
 const EffectItem: React.FC<{
   item: (typeof relicCategories)[number]['children'][number]['children'][number]
-  fieldSet: { [effectIds: string]: FieldMetadata<{ count: number } | undefined> }
+  fieldSet: { [effectIds: string]: FieldMetadata<number | undefined> }
   checkedEffects: CheckedEffects
   setCheckedEffects: React.Dispatch<React.SetStateAction<CheckedEffects>>
 }> = ({ item, fieldSet, checkedEffects, setCheckedEffects,
 }) => {
-  const effect = fieldSet[item.id].getFieldset()
   const hasChildEffectSelected = item.children?.some((child) => !!fieldSet[child.id]?.value)
   const isShowingCount = item.maxStacks > 1 || item.children?.some((child) => child.maxStacks > 1)
 
@@ -357,7 +356,7 @@ const EffectItem: React.FC<{
                 disabled:border-zinc-800 disabled:text-gray-500/50
               `}
               defaultValue={1}
-              {...getInputProps(effect.count, { type: 'number' })}
+              {...getInputProps(fieldSet[item.id], { type: 'number' })}
               aria-label={`${item.name}の必要効果数`}
               disabled={!checkedEffects[item.id] || hasChildEffectSelected}
               min={1}
@@ -365,7 +364,7 @@ const EffectItem: React.FC<{
             />
           )
         : (
-            <input {...getInputProps(effect.count, { type: 'hidden', value: false })} value="1" disabled={!checkedEffects[item.id]} />
+            <input {...getInputProps(fieldSet[item.id], { type: 'hidden', value: false })} value="1" disabled={!checkedEffects[item.id]} />
           )}
     </>
   )
