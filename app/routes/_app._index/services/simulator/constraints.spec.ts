@@ -1,110 +1,92 @@
 import { describe, expect, test } from 'vitest'
-import { consolidateRelicEffectGroups } from './constraints'
+import { normalizeRequiredEffects } from './constraints'
 import type { RequiredEffects } from './types'
 
-describe('consolidateRelicEffectGroups', () => {
+describe('normalizeRequiredEffects', () => {
   describe('stacksWithSelf: false の効果を含む場合', () => {
-    test('stacksWithSelf: false の効果は統合されずに個別に処理される', () => {
+    test('effectIds 内に異なる stacksWithSelf が混在する場合、分離される', () => {
       // 7040201 は stacksWithSelf: false
       // 7040200 は stacksWithSelf: true
-      // 両方とも同じグループに属している
       const requiredEffects: RequiredEffects = [
-        { effectIds: [7040201], count: 1 },
-        { effectIds: [7040200], count: 2 },
+        { effectIds: [7040200, 7040201], count: 4 },
       ]
 
-      const result = consolidateRelicEffectGroups(requiredEffects)
+      const result = normalizeRequiredEffects(requiredEffects)
 
       const expectedEffects = [
-        { effectIds: [7040201], count: 1 },
-        { effectIds: [7040200], count: 2 },
+        { effectIds: [7040201], count: 1, weights: undefined },
+        { effectIds: [7040200], count: 3, weights: undefined },
       ]
 
-      expectSameMembers(result, expectedEffects)
+      expect(result).toEqual(expectedEffects)
     })
 
-    test('stacksWithSelf: false の効果が複数ある場合はそれぞれ個別に処理される', () => {
+    test('stacksWithSelf: false のみの場合はそのまま返される', () => {
       const requiredEffects: RequiredEffects = [
-        { effectIds: [7040201], count: 1 }, // stacksWithSelf: false
-        { effectIds: [7040201], count: 1 }, // 重複して選択された場合
+        { effectIds: [7040201], count: 1 },
       ]
 
-      const result = consolidateRelicEffectGroups(requiredEffects)
+      const result = normalizeRequiredEffects(requiredEffects)
 
-      // 重複排除されて1つだけになる
-      expect(result).toEqual([{ effectIds: [7040201], count: 1 }])
-      expect(result).toHaveLength(1)
+      expect(result).toEqual([{ effectIds: [7040201], count: 1, weights: undefined }])
+    })
+
+    test('複数の stacksWithSelf: false の効果がある場合、それぞれ個別に分離される', () => {
+      // 7090000, 6090000 はどちらも stacksWithSelf: false
+      const requiredEffects: RequiredEffects = [
+        { effectIds: [7090000, 6090000], count: 2 },
+      ]
+
+      const result = normalizeRequiredEffects(requiredEffects)
+
+      expect(result).toEqual([
+        { effectIds: [7090000], count: 1, weights: undefined },
+        { effectIds: [6090000], count: 1, weights: undefined },
+      ])
     })
   })
 
   describe('stacksWithSelf: true の効果のみの場合', () => {
-    test('同じグループの効果は統合される', () => {
+    test('そのまま返される（統合されない）', () => {
       const requiredEffects: RequiredEffects = [
-        { effectIds: [7040200], count: 1 }, // stacksWithSelf: true
-        { effectIds: [7040200], count: 2 }, // stacksWithSelf: true
-      ]
-
-      const result = consolidateRelicEffectGroups(requiredEffects)
-
-      // 統合されて合計3個になる
-      expectSameMembers(result, [{ effectIds: [7040200], count: 3 }])
-    })
-  })
-
-  describe('グループに属さない効果の場合', () => {
-    test('そのまま個別に処理される', () => {
-      const requiredEffects: RequiredEffects = [
-        { effectIds: [1000001], count: 1 }, // グループに属さない効果（仮定）
-        { effectIds: [1000002], count: 2 }, // グループに属さない効果（仮定）
-      ]
-
-      const result = consolidateRelicEffectGroups(requiredEffects)
-
-      // そのまま保持される
-      expectSameMembers(result, requiredEffects)
-    })
-  })
-
-  describe('混合ケース', () => {
-    test('stacksWithSelf: false、stacksWithSelf: true、グループ外効果が混在する場合', () => {
-      const requiredEffects: RequiredEffects = [
-        { effectIds: [7040201], count: 1 }, // stacksWithSelf: false
-        { effectIds: [7040200], count: 2 }, // stacksWithSelf: true (同じグループ)
-        { effectIds: [1000001], count: 1 }, // グループ外効果（仮定）
-      ]
-
-      const result = consolidateRelicEffectGroups(requiredEffects)
-
-      const expectedEffects = [
-        { effectIds: [7040201], count: 1 },
         { effectIds: [7040200], count: 2 },
-        { effectIds: [1000001], count: 1 },
       ]
 
-      expectSameMembers(result, expectedEffects)
+      const result = normalizeRequiredEffects(requiredEffects)
+
+      expect(result).toEqual([{ effectIds: [7040200], count: 2, weights: undefined }])
+    })
+  })
+
+  describe('weights の処理', () => {
+    test('weights が指定されている場合、分離後も保持される', () => {
+      const requiredEffects: RequiredEffects = [
+        { effectIds: [7040200, 7040201], count: 4, weights: [10, 5] },
+      ]
+
+      const result = normalizeRequiredEffects(requiredEffects)
+
+      expect(result).toEqual([
+        { effectIds: [7040201], count: 1, weights: [5] },
+        { effectIds: [7040200], count: 3, weights: [10] },
+      ])
     })
   })
 
   describe('エッジケース', () => {
     test('空の配列の場合は空の配列を返す', () => {
-      const result = consolidateRelicEffectGroups([])
+      const result = normalizeRequiredEffects([])
       expect(result).toEqual([])
     })
 
-    test('存在しない効果IDの場合はそのまま処理される', () => {
+    test('count が 1 で stacksWithSelf: false のみの場合、そのまま返される', () => {
       const requiredEffects: RequiredEffects = [
-        { effectIds: [9999999], count: 1 }, // 存在しない効果ID
+        { effectIds: [7040201], count: 1 },
       ]
 
-      const result = consolidateRelicEffectGroups(requiredEffects)
+      const result = normalizeRequiredEffects(requiredEffects)
 
-      expectSameMembers(result, requiredEffects)
+      expect(result).toEqual([{ effectIds: [7040201], count: 1, weights: undefined }])
     })
   })
 })
-
-function expectSameMembers<T>(actual: T[], expected: T[]) {
-  // @ts-expect-error Vitest の arrayContaining のジェネリック型エラーを回避
-  expect(actual).toEqual(expect.arrayContaining(expected))
-  expect(actual).toHaveLength(expected.length)
-}

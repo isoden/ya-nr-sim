@@ -1,7 +1,7 @@
 import { solve, type Coefficients, type Constraint } from 'yalps'
 import { Relic } from '~/data/relics'
 import { type Vessel } from '~/data/vessels'
-import { createExclusionConstraints, createConstraints, consolidateRelicEffectGroups } from './constraints'
+import { createExclusionConstraints, createConstraints, normalizeRequiredEffects } from './constraints'
 import { createExclusionVariables, createVariables } from './variables'
 import { createBuild } from './createBuild'
 import type { Args, Result, Build } from './types'
@@ -11,7 +11,7 @@ import type { Args, Result, Build } from './types'
  *
  * 整数線形計画法を使用して、以下の制約を満たすビルドを見つける：
  * - 器は1つだけ選択
- * - 遺物は最大3つまで装備
+ * - 遺物は3-6つまで装備
  * - 遺物は器のスロットの色と一致するか、Freeスロットに装備
  * - 指定された効果を指定された数以上持つ遺物を装備
  * - 同じ遺物は1つしか装備できない
@@ -32,9 +32,9 @@ export async function simulate({ vessels, relics: relicsJSON, requiredEffects, n
 
       return (hasNotEffect || (excludeDepthsRelics && r.dn)) ? acc : acc.concat(relic)
     }, [])
-    const consolidatedRequiredEffects = consolidateRelicEffectGroups(requiredEffects)
-    const variables = createVariables(vessels, relics, consolidatedRequiredEffects)
-    const constraints = createConstraints(vessels, relics, consolidatedRequiredEffects)
+    const normalizedRequiredEffects = normalizeRequiredEffects(requiredEffects)
+    const variables = createVariables(vessels, relics, normalizedRequiredEffects)
+    const constraints = createConstraints(vessels, relics, normalizedRequiredEffects)
     const builds = solveRecursively({
       remaining: volume,
       variables,

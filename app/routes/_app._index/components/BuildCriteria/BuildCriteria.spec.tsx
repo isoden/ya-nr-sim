@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { expect, test } from 'vitest'
+import { expect, test, type TestOptions } from 'vitest'
 import { useForm } from '@conform-to/react'
 import { parseWithValibot } from '@conform-to/valibot'
 import { FormSchema } from '~/routes/_app._index/schema/FormSchema'
@@ -9,7 +9,12 @@ import { characterMap } from '~/data/characters'
 import { BuildCriteria } from './BuildCriteria'
 import type { CheckedEffects } from '../types/forms'
 
-test('smoke test', async () => {
+const testOptions: TestOptions = {
+  // 描画量が多くタイムアウトしやすいため、 CI 環境ではタイムアウト時間を延長する
+  timeout: import.meta.env.CI ? 10_000 : undefined,
+}
+
+test('smoke test', testOptions, async () => {
   // arrange
   const { container } = setup()
 
@@ -17,9 +22,7 @@ test('smoke test', async () => {
   expect(container.firstElementChild).toBeInTheDocument()
 })
 
-test('SearchInput で絞り込みができる', {
-  timeout: import.meta.env.CI ? 10_000 : undefined,
-}, async () => {
+test('SearchInput で絞り込みができる', testOptions, async () => {
   // arrange
   const { user } = setup()
 
@@ -32,9 +35,7 @@ test('SearchInput で絞り込みができる', {
   expect(attackPowerElements.length).toBeGreaterThan(0)
 })
 
-test('SearchInput で絞り込み結果が0件の場合、メッセージが表示される', {
-  timeout: import.meta.env.CI ? 10_000 : undefined,
-}, async () => {
+test('SearchInput で絞り込み結果が0件の場合、メッセージが表示される', testOptions, async () => {
   // arrange
   const { user } = setup()
 
@@ -47,7 +48,7 @@ test('SearchInput で絞り込み結果が0件の場合、メッセージが表�
   expect(screen.getByText(/検索ワード.*存在しない効果名XXX/)).toBeInTheDocument()
 })
 
-test('SearchInput のクリアボタンで絞り込みが解除される', async () => {
+test('SearchInput のクリアボタンで絞り込みが解除される', testOptions, async () => {
   // arrange: 検索ボックスに入力してメッセージを表示
   const { user } = setup()
   const searchInput = screen.getByPlaceholderText('効果名で絞り込む')
@@ -61,7 +62,7 @@ test('SearchInput のクリアボタンで絞り込みが解除される', async
   expect(screen.queryByText('該当する効果が見つかりませんでした')).not.toBeInTheDocument()
 })
 
-test('子要素を選択した状態で「選択した効果のみ表示」にした場合、親要素も表示される', async () => {
+test('子要素を選択した状態で「選択した効果のみ表示」にした場合、親要素も表示される', testOptions, async () => {
   // arrange: コンポーネントをレンダリングして子要素を見つける
   const { user } = setup()
 

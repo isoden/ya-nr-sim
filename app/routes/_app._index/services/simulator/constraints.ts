@@ -1,100 +1,64 @@
 import { type Constraint, equalTo, lessEq } from 'yalps'
 import { type Relic, type RelicJSON, RelicColorExtended, relicEffectMap } from '~/data/relics'
 import { type Vessel, SlotColor } from '~/data/vessels'
-import { relicEffectGroups } from '~/data/generated/relicEffectGroups'
 import type { RequiredEffects } from './types'
 
 /**
- * relicEffectGroupsの効果を統合する
+ * stacksWithSelf: false の効果を分離する
  *
- * 個別選択された効果でも、同じrelicEffectGroupsに属する場合は
- * 統合して一つのrequiredEffectとして扱う
- * ただし、stacksWithSelf: false の効果は統合対象から除外し、個別に処理する
+ * effectIds 内に stacksWithSelf: false の効果が含まれる場合：
+ * - stacksWithSelf: false の効果は最大1個の制約として分離
+ * - 残りのカウントを stacksWithSelf: true の効果のみで構成
  *
- * @param requiredEffects - 統合前の必要効果リスト
+ * 例: effects.7040200,7040201=4 の場合
+ * - 7040201 (stacksWithSelf: false) → 最大1個
+ * - 7040200 (stacksWithSelf: true) → 残り3個
+ *
+ * @param requiredEffects - 必要効果リスト
  */
-export function consolidateRelicEffectGroups(requiredEffects: RequiredEffects): RequiredEffects {
-  // 統合処理
-  const consolidatedEffects: RequiredEffects = []
-  const processedEffectIds = new Set<number>()
-  const processedGroups = new Set<number>()
+export function normalizeRequiredEffects(requiredEffects: RequiredEffects): RequiredEffects {
+  const result: RequiredEffects = []
 
-  // まず stacksWithSelf: false の効果を個別に処理
-  for (const requiredEffect of requiredEffects) {
-    const { effectIds } = requiredEffect
-
-    const hasNonStackableEffect = effectIds.some((id) => {
+  for (const { effectIds, count, weights } of requiredEffects) {
+    // stacksWithSelf: false の効果IDを抽出
+    const nonStackableEffectIds = effectIds.filter((id) => {
       const effect = relicEffectMap[id]
       return effect && !effect.stacksWithSelf
     })
 
-    if (hasNonStackableEffect) {
-      if (!effectIds.some((id) => processedEffectIds.has(id))) {
-        consolidatedEffects.push(requiredEffect)
-        effectIds.forEach((id) => processedEffectIds.add(id))
-      }
-    }
-  }
-
-  // 次に stacksWithSelf: true の効果をグループ単位で統合
-  for (const requiredEffect of requiredEffects) {
-    const { effectIds } = requiredEffect
-
-    // stacksWithSelf: false の効果が含まれている場合はスキップ（既に処理済み）
-    const hasNonStackableEffect = effectIds.some((id) => {
+    // stacksWithSelf: true の効果IDを抽出
+    const stackableEffectIds = effectIds.filter((id) => {
       const effect = relicEffectMap[id]
-      return effect && !effect.stacksWithSelf
+      return effect && effect.stacksWithSelf
     })
 
-    if (hasNonStackableEffect) {
+    // 両方とも空の場合（存在しない効果IDなど）は、そのまま返す
+    if (nonStackableEffectIds.length === 0 && stackableEffectIds.length === 0) {
+      result.push({ effectIds, count, weights })
       continue
     }
 
-    // このrequiredEffectがrelicEffectGroupsに属するかチェック
-    const groupIndex = relicEffectGroups.findIndex((groupEffectIds) =>
-      effectIds.some((id) => groupEffectIds.includes(id)),
-    )
+    // stacksWithSelf: false の効果は、それぞれ個別に count: 1 で分離
+    for (const effectId of nonStackableEffectIds) {
+      result.push({
+        effectIds: [effectId],
+        count: 1,
+        weights: weights ? [weights[effectIds.indexOf(effectId)]] : undefined,
+      })
+    }
 
-    if (groupIndex !== -1) {
-      // グループに属する場合、まだ処理されていなければ統合
-      if (!processedGroups.has(groupIndex)) {
-        const groupEffectIds = relicEffectGroups[groupIndex]
-
-        // このグループのstacksWithSelf: true の効果のみを対象とする
-        const stackableGroupEffectIds = groupEffectIds.filter((id) => {
-          const effect = relicEffectMap[id]
-          return effect && effect.stacksWithSelf
-        })
-
-        const totalCount = requiredEffects
-          .filter((re) =>
-            re.effectIds.some((id) => stackableGroupEffectIds.includes(id))
-            && re.effectIds.every((id) => {
-              const effect = relicEffectMap[id]
-              return effect && effect.stacksWithSelf
-            }),
-          )
-          .reduce((sum, re) => sum + re.count, 0)
-
-        if (stackableGroupEffectIds.length > 0 && totalCount > 0) {
-          consolidatedEffects.push({
-            effectIds: stackableGroupEffectIds,
-            count: totalCount,
-          })
-        }
-
-        processedGroups.add(groupIndex)
-      }
-    } else {
-      // グループに属さない場合はそのまま追加
-      if (!effectIds.some((id) => processedEffectIds.has(id))) {
-        consolidatedEffects.push(requiredEffect)
-        effectIds.forEach((id) => processedEffectIds.add(id))
-      }
+    // 残りのカウントを stacksWithSelf: true の効果で構成
+    const remainingCount = count - nonStackableEffectIds.length
+    if (stackableEffectIds.length > 0 && remainingCount > 0) {
+      result.push({
+        effectIds: stackableEffectIds,
+        count: remainingCount,
+        weights: weights ? stackableEffectIds.map((id) => weights[effectIds.indexOf(id)]) : undefined,
+      })
     }
   }
 
-  return consolidatedEffects
+  return result
 }
 
 /**

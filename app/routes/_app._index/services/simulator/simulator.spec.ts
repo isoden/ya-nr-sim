@@ -221,13 +221,17 @@ describe('効果の重複ルール', () => {
       excludeDepthsRelics: false,
     })
 
-    // assert: 同じ効果IDは1つまでしか装備できない
-    expect(result.success).toBe(false)
+    // assert: stacksAcrossLevels=true なので同じ効果IDは1つまで
+    // 2つのビルドが見つかるが、どちらも1つの遺物のみ
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.every((build) => build.relics.length === 1)).toBe(true)
+    }
   })
 
-  test('重複不可の効果は1つまで', async () => {
+  test('重複不可の効果(stacksWithSelf: false)は制約で1個に制限される', async () => {
     const vessels = vesselsByCharacterMap['revenant']
-    const relic1 = fakeRelic.red({ effects: [10001] }) // 攻撃を受けると攻撃力上昇 (stacksWithSelf: false, stacksAcrossLevels: undefined)
+    const relic1 = fakeRelic.red({ effects: [10001] }) // 攻撃を受けると攻撃力上昇 (stacksWithSelf: false)
     const relic2 = fakeRelic.blue({ effects: [10001] }) // 同じ効果ID
     const relics = [relic1, relic2]
 
@@ -239,8 +243,11 @@ describe('効果の重複ルール', () => {
       excludeDepthsRelics: false,
     })
 
-    // assert: 重複不可の効果は1つまでしか装備できない
-    expect(result.success).toBe(false)
+    // assert: 制約により1つまでしか装備できない
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.every((build) => build.relics.length === 1)).toBe(true)
+    }
   })
 })
 
@@ -334,42 +341,28 @@ test('通常の遺物はフリースロットに装備できる', async () => {
 })
 
 describe('stacksAcrossLevels統合テスト', () => {
-  test('個別選択と中カテゴリ選択で同じ結果になる', async () => {
+  test('カンマ区切りで複数効果を指定した場合、どれでもマッチする', async () => {
     const vessels = vesselsByCharacterMap['revenant']
-    const relic1 = fakeRelic.red({ effects: [7090000] }) // 敵を倒した時のアーツゲージ蓄積増加+0
-    const relic2 = fakeRelic.blue({ effects: [6090000] }) // 敵を倒した時のアーツゲージ蓄積増加+1
+    const relic1 = fakeRelic.red({ effects: [7000300] }) // 筋力+1 (stacksWithSelf: true)
+    const relic2 = fakeRelic.blue({ effects: [7000301] }) // 筋力+2 (stacksWithSelf: true)
     const relics = [relic1, relic2]
 
-    // 個別選択パターン
-    const individualResult = await simulate({
+    // カンマ区切りで複数効果を指定（count: 2なので両方必要）
+    const result = await simulate({
       vessels,
       relics,
       requiredEffects: [
-        { effectIds: [7090000], count: 1 },
-        { effectIds: [6090000], count: 1 },
+        { effectIds: [7000300, 7000301, 7000302], count: 2 },
       ],
       notEffects: [],
       excludeDepthsRelics: false,
       volume: 1,
     })
 
-    // 中カテゴリ選択パターン
-    const groupResult = await simulate({
-      vessels,
-      relics,
-      requiredEffects: [{ effectIds: [7090000, 6090000], count: 2 }],
-      notEffects: [],
-      excludeDepthsRelics: false,
-      volume: 1,
-    })
-
-    // 両方とも成功し、同じ結果になることを確認
-    expect(individualResult.success).toBe(true)
-    expect(groupResult.success).toBe(true)
-
-    if (individualResult.success && groupResult.success) {
-      expect(individualResult.data[0]?.relics.length).toBe(groupResult.data[0]?.relics.length)
-      expect(individualResult.data[0]?.relics.length).toBe(2) // 2つの遺物が選択される
+    // 両方の遺物が選択される
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data[0]?.relics.length).toBe(2)
     }
   })
 
