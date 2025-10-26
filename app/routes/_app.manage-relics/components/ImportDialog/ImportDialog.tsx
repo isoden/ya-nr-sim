@@ -1,6 +1,7 @@
 import { ImportIcon } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Button } from '~/components/forms/Button'
+import { queue } from '~/components/Toast'
 import { parseStringifiedRelicsSchema } from '~/schema/StringifiedRelicsSchema'
 import { useRelicsStore } from '~/store/relics'
 
@@ -17,7 +18,14 @@ export const ImportDialog: React.FC = () => {
     try {
       parseStringifiedRelicsSchema(jsonAsText)
 
-      setRelics(JSON.parse(jsonAsText))
+      const results = JSON.parse(jsonAsText)
+
+      setRelics(results)
+      dialogRef.current?.close()
+      queue.add(
+        { title: `遺物を「${results.length}」件インポートしました。` },
+        { timeout: 3000 },
+      )
     } catch {
       alert('不正なデータです。')
     }

@@ -16,7 +16,7 @@ export const RelicIcon: React.FC<Props> = ({ relic, className }) => {
         className={twMerge(
           className,
           color,
-          'size-5 rounded-full',
+          'm-1 size-6 rounded-full',
         )}
       />
     )

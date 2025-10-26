@@ -2,6 +2,7 @@ import './app.css'
 
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router'
 import type { Route } from './+types/root'
+import { ToastContainer } from './components/Toast'
 
 export function HydrateFallback() {
   // TODO: refactor
@@ -18,6 +19,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
+        <ToastContainer />
         {children}
         <ScrollRestoration />
         <Scripts />
