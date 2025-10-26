@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Minus } from 'lucide-react'
 import { RelicEffectsList } from '~/components/RelicEffectsList/RelicEffectsList'
 import { RelicInfo } from '~/components/RelicInfo/RelicInfo'
 import { Button } from '~/components/forms/Button'
@@ -38,11 +39,11 @@ export const RedundantRelicCard: React.FC<Props> = ({
         <Button
           className="ml-auto"
           variant="danger"
-          size="sm"
+          size="square-sm"
           type="button"
           onClick={() => window.confirm('Are you sure?') && onRemove(redundantRelic.id)}
         >
-          削除
+          <Minus className="size-4 fill-white" />
         </Button>
       </header>
 

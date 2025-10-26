@@ -4,24 +4,25 @@ import { RelicIcon } from '../RelicIcon/RelicIcon'
 
 type Props = {
   relic: Relic
+  actionNode?: React.ReactNode
 }
 
-export const RelicInfo: React.FC<Props> = ({ relic }) => {
+export const RelicInfo: React.FC<Props> = ({ relic, actionNode }) => {
   return (
-    <section className="rounded-sm border border-zinc-800 p-4 text-sm">
+    <section className="rounded-sm border border-zinc-800 text-sm">
       <header className={`
-        relative mb-2 flex items-center justify-between gap-2 border-b
-        border-zinc-800 pb-2
+        relative flex items-center gap-2 border-b border-zinc-800 px-3 py-2
       `}
       >
-        <h4>{relic.name}</h4>
         <RelicIcon
           relic={relic}
-          className="absolute top-1/2 right-0 size-8 -translate-y-2/3"
+          className="size-8 shrink-0"
         />
+        <h4 className="mr-auto truncate">{relic.name}</h4>
+        {actionNode}
       </header>
 
-      <RelicEffectsList relic={relic} />
+      <RelicEffectsList relic={relic} className="p-3" />
 
     </section>
   )

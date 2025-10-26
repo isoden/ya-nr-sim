@@ -1,8 +1,9 @@
 import { useCallback, useId, useMemo } from 'react'
+import { EffectSelectionPanel } from '~/components/EffectSelectionPanel/EffectSelectionPanel'
 import { demeritDepthsRelicEffectMap, normalizeEffectId, Relic, RelicColorBase, RelicColorExtended } from '~/data/relics'
 import { usePersistedState } from '~/hooks/usePersistedState'
 import { useRelicsStore } from '~/store/relics'
-import { EffectFilterPanel, RedundantRelicCard } from './components'
+import { RedundantRelicCard } from './components'
 
 /** 重複遺物のエントリー型 */
 type RedundantRelicEntry = [redundantRelic: Relic, superiorRelics: Relic[]]
@@ -13,23 +14,18 @@ type GroupedRedundantRelics = [colorExtended: RelicColorExtended, entries: Redun
 export default function Page() {
   const id = useId()
   const { relics: rawRelics, setRelics } = useRelicsStore()
-  const [ignoredEffectIdsMap, setIgnoredEffectIdsMap] = usePersistedState<Record<string, boolean>>(`_app.manage-relics/ignored_effect_ids`, {})
+  const [effectIdsList, setEffectIdsList] = usePersistedState<string[]>(`_app.manage-relics/ignored_effect_ids.1`, [])
 
+  const flattenEffectIds = useMemo(() => effectIdsList.flatMap((ids) => ids.split(',').map((id) => Number(id))), [effectIdsList])
   const relics = useMemo(() => rawRelics.map((r) => Relic.new(r)), [rawRelics])
-  const ignoredEffectIds = useMemo(
-    () => Object.entries(ignoredEffectIdsMap)
-      .filter(([, checked]) => checked)
-      .map(([id]) => Number(id)),
-    [ignoredEffectIdsMap],
-  )
   const redundantRelicsMap = useMemo(
-    () => findRedundantRelics(relics, { ignoredEffectIds }),
-    [relics, ignoredEffectIds],
+    () => findRedundantRelics(relics, { ignoredEffectIds: flattenEffectIds }),
+    [relics, flattenEffectIds],
   )
 
-  const handleToggleEffect = useCallback((effectId: string, checked: boolean) => {
-    setIgnoredEffectIdsMap((ids) => ({ ...ids, [effectId]: checked }))
-  }, [setIgnoredEffectIdsMap])
+  const handleToggleEffect = useCallback((payload: { effectIds: string; checked: boolean }) => {
+    setEffectIdsList((prev) => toggle(prev, payload.effectIds, () => payload.checked))
+  }, [setEffectIdsList])
 
   const handleRemoveRelic = useCallback((relicId: string) => {
     setRelics(rawRelics.filter((r) => r.id !== relicId))
@@ -41,10 +37,10 @@ export default function Page() {
       ([relic]) => relic.colorExtended,
     )
 
-    if (ignoredEffectIds.length > 0) {
+    if (flattenEffectIds.length > 0) {
       for (const entries of Object.values(grouped)) {
         entries?.sort((entryA, entryB) =>
-          compareRedundantRelics(entryA[0], entryB[0], ignoredEffectIds),
+          compareRedundantRelics(entryA[0], entryB[0], flattenEffectIds),
         )
       }
     }
@@ -63,7 +59,7 @@ export default function Page() {
         const value = grouped[color]
         return (value == null || value.length === 0) ? acc : [...acc, [color, value]]
       }, [])
-  }, [ignoredEffectIds, redundantRelicsMap])
+  }, [flattenEffectIds, redundantRelicsMap])
 
   return (
     <section
@@ -79,9 +75,9 @@ export default function Page() {
       </p>
 
       <div className="grid max-h-[50vh] grid-cols-2 items-start gap-6">
-        <EffectFilterPanel
-          ignoredEffectIds={ignoredEffectIdsMap}
-          onToggleEffect={handleToggleEffect}
+        <EffectSelectionPanel
+          effectIds={effectIdsList}
+          onChange={handleToggleEffect}
         />
       </div>
 
@@ -101,7 +97,7 @@ export default function Page() {
                         key={redundantRelic.id}
                         redundantRelic={redundantRelic}
                         superiorRelics={superiorRelics}
-                        ignoredEffectIds={ignoredEffectIds}
+                        ignoredEffectIds={flattenEffectIds}
                         onRemove={handleRemoveRelic}
                       />
                     ))}
@@ -235,4 +231,12 @@ function findRedundantRelics(
   }
 
   return redundantRelicsMap
+}
+
+function toggle<T>(array: T[], value: T, cond: () => boolean): T[] {
+  if (cond()) {
+    return [...array, value]
+  } else {
+    return array.filter((v) => v !== value)
+  }
 }

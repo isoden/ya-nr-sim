@@ -5,7 +5,7 @@ type AriaButtonProps = React.ComponentProps<typeof AriaButton>
 
 type Props = React.PropsWithChildren<{
   variant?: 'primary' | 'secondary' | 'outline' | 'danger'
-  size?: 'sm' | 'md'
+  size?: 'square-sm' | 'sm' | 'md'
   className?: string
 }>
 & Omit<AriaButtonProps, 'className'>
@@ -43,8 +43,9 @@ const button = tv({
       `,
     },
     size: {
-      sm: 'px-2 py-1 text-sm',
-      md: 'px-4 py-2',
+      'square-sm': 'p-1.5 text-sm',
+      'sm': 'px-2 py-1 text-sm',
+      'md': 'px-4 py-2',
     },
     isDisabled: {
       true: 'cursor-not-allowed',

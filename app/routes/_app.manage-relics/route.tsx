@@ -14,28 +14,28 @@ const childRoutes = [
 export default function Page() {
   return (
     <main className="flex min-h-0 flex-col">
-      <header className={`
-        flex items-end justify-between border-b border-zinc-600 pb-4
-      `}
-      >
-        <h2 className="text-lg font-semibold text-accent-light">
-          遺物管理
-        </h2>
+      <header className="flex items-end border-b border-zinc-600 pb-4">
+        <div className="mr-auto flex items-center gap-4">
+          <h2 className="text-lg font-semibold text-accent-light">
+            遺物管理
+          </h2>
+          /
+          <div className="flex gap-4">
+            {childRoutes.map(({ path, label }) => (
+              <NavLink
+                key={path}
+                to={path}
+                className="nav-link text-accent-light"
+                end
+              >
+                {label}
+              </NavLink>
+            ))}
+          </div>
+        </div>
+
         <ImportDialog />
       </header>
-
-      <div className="flex gap-4 pt-4">
-        {childRoutes.map(({ path, label }) => (
-          <NavLink
-            key={path}
-            to={path}
-            className="nav-link text-lg text-accent-light"
-            end
-          >
-            {label}
-          </NavLink>
-        ))}
-      </div>
 
       <Outlet />
     </main>
