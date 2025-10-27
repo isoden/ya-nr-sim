@@ -32,7 +32,7 @@ export const EffectSelectionPanel: React.FC<Props> = ({ effectIds, onChange }) =
         // eslint-disable-next-line react/no-unknown-property
         closedby="any"
         className={`
-          fixed inset-0 m-auto max-h-[40vh] w-full max-w-2xl overflow-y-auto
+          fixed inset-0 m-auto max-h-[60vh] w-full max-w-2xl overflow-y-auto
           rounded border border-zinc-800 bg-primary-dark p-6 text-white
           shadow-lg
           backdrop:backdrop-blur-xs
@@ -49,7 +49,8 @@ export const EffectSelectionPanel: React.FC<Props> = ({ effectIds, onChange }) =
                     return (
                       <li key={id}>
                         <Checkbox
-                          name={id}
+                          name="effectIds"
+                          value={id}
                           checked={effectIds.includes(id)}
                           onChange={(checked) => onChange({ effectIds: id, checked })}
                         >
@@ -64,7 +65,8 @@ export const EffectSelectionPanel: React.FC<Props> = ({ effectIds, onChange }) =
                               return (
                                 <li key={childId}>
                                   <Checkbox
-                                    name={childId}
+                                    name="effectIds"
+                                    value={childId}
                                     checked={effectIds.includes(childId)}
                                     onChange={(checked) => onChange({ effectIds: childId, checked })}
                                   >

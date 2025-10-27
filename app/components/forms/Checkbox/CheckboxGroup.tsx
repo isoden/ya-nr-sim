@@ -1,9 +1,9 @@
-import { RadioButton } from './RadioButton'
+import { Checkbox } from './Checkbox'
 
 type Props = {
   label: string
   name: string
-  value: string
+  value: Set<string>
   onChange: (value: string) => void
   items: {
     label: string
@@ -11,21 +11,21 @@ type Props = {
   }[]
 }
 
-export const RadioGroup: React.FC<Props> = ({ label, items, name, value: selectedValue, onChange }) => {
+export const CheckboxGroup: React.FC<Props> = ({ label, items, name, value: valueSet, onChange }) => {
   return (
     <fieldset>
       <legend>{label}</legend>
       <div className="mt-0.5 flex gap-3">
         {items.map(({ label, value }) => (
-          <RadioButton
+          <Checkbox
             key={value}
             name={name}
             value={value}
-            checked={selectedValue === value}
+            checked={valueSet.has(value)}
             onChange={() => onChange(value)}
           >
             {label}
-          </RadioButton>
+          </Checkbox>
         ))}
       </div>
     </fieldset>

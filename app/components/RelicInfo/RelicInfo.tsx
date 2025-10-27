@@ -1,13 +1,14 @@
 import { type Relic } from '~/data/relics'
-import { RelicEffectsList } from '~/components/RelicEffectsList/RelicEffectsList'
+import { RelicEffectsList, type RenderEffect } from '~/components/RelicEffectsList/RelicEffectsList'
 import { RelicIcon } from '../RelicIcon/RelicIcon'
 
 type Props = {
   relic: Relic
   actionNode?: React.ReactNode
+  renderEffectItem?: RenderEffect
 }
 
-export const RelicInfo: React.FC<Props> = ({ relic, actionNode }) => {
+export const RelicInfo: React.FC<Props> = ({ relic, actionNode, renderEffectItem }) => {
   return (
     <section className="rounded-sm border border-zinc-800 text-sm">
       <header className={`
@@ -22,7 +23,7 @@ export const RelicInfo: React.FC<Props> = ({ relic, actionNode }) => {
         {actionNode}
       </header>
 
-      <RelicEffectsList relic={relic} className="p-3" />
+      <RelicEffectsList relic={relic} className="p-3" renderEffect={renderEffectItem} />
 
     </section>
   )
