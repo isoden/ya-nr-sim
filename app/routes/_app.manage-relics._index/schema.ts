@@ -6,6 +6,7 @@ export const LoaderSchema = v.object({
   type: v.array(v.picklist(['normal', 'depths'])),
   size: v.array(v.picklist(['small', 'medium', 'large'])),
   effectIds: v.array(v.string()),
+  page: v.nullable(v.pipe(v.string(), v.transform(Number), v.integer(), v.minValue(1)), '1'),
 })
 
 export const parseLoaderSchema = (data: unknown) => {

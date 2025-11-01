@@ -3,15 +3,14 @@ import { Checkbox } from './Checkbox'
 type Props = {
   label: string
   name: string
-  value: Set<string>
-  onChange: (value: string) => void
+  defaultValue?: string[]
   items: {
     label: string
     value: string
   }[]
 }
 
-export const CheckboxGroup: React.FC<Props> = ({ label, items, name, value: valueSet, onChange }) => {
+export const CheckboxGroup: React.FC<Props> = ({ label, items, name, defaultValue }) => {
   return (
     <fieldset>
       <legend>{label}</legend>
@@ -21,8 +20,7 @@ export const CheckboxGroup: React.FC<Props> = ({ label, items, name, value: valu
             key={value}
             name={name}
             value={value}
-            checked={valueSet.has(value)}
-            onChange={() => onChange(value)}
+            checked={defaultValue?.includes(value)}
           >
             {label}
           </Checkbox>

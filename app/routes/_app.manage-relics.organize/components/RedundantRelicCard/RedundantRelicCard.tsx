@@ -21,15 +21,15 @@ export const RedundantRelicCard: React.FC<Props> = ({
   ignoredEffectIds,
   onRemove,
 }) => {
-  const threshold = 2
+  const threshold = 1
   const [truncated, setTruncated] = useState(superiorRelics.length > threshold)
 
   return (
-    <div className="rounded-lg border border-zinc-700 bg-zinc-800/50 p-4">
+    <div className="rounded-lg border border-zinc-700 bg-zinc-800/50 p-3">
       <header className="mb-3 flex items-center gap-2">
-        <h4 className="font-semibold text-zinc-100">
+        <h4 className="text-sm font-semibold text-zinc-100">
           {redundantRelic.name}
-          <span className="text-sm text-zinc-400">
+          <span className="text-zinc-400">
             (
             {redundantRelic.colorExtended}
             )
@@ -63,6 +63,8 @@ export const RedundantRelicCard: React.FC<Props> = ({
             <Button
               variant="outline"
               type="button"
+              size="sm"
+              className="w-full"
               onClick={() => setTruncated(false)}
             >
               もっと見る

@@ -26,6 +26,7 @@ export const BuildList: React.FC<Props> = ({ resultKey, excludeDepthsRelics, res
         overflow-y-scroll rounded-lg border border-gray-400/10 bg-zinc-950/20
         p-6 shadow
       `}
+      tabIndex={0}
     >
       <h2 className="text-lg font-semibold text-accent-light">検索結果</h2>
 

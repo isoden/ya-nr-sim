@@ -23,8 +23,8 @@ export default function Page() {
     [relics, flattenEffectIds],
   )
 
-  const handleToggleEffect = useCallback((payload: { effectIds: string; checked: boolean }) => {
-    setEffectIdsList((prev) => toggle(prev, payload.effectIds, () => payload.checked))
+  const handleToggleEffect = useCallback((effectIds: string[]) => {
+    setEffectIdsList(effectIds)
   }, [setEffectIdsList])
 
   const handleRemoveRelic = useCallback((relicId: string) => {
@@ -76,7 +76,7 @@ export default function Page() {
 
       <div className="grid max-h-[50vh] grid-cols-2 items-start gap-6">
         <EffectSelectionPanel
-          effectIds={effectIdsList}
+          defaultValue={effectIdsList}
           onChange={handleToggleEffect}
         />
       </div>
@@ -91,7 +91,7 @@ export default function Page() {
                     {(colorExtended)}
                     の重複遺物
                   </h4>
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-5 gap-3">
                     {relics.map(([redundantRelic, superiorRelics]) => (
                       <RedundantRelicCard
                         key={redundantRelic.id}
@@ -231,12 +231,4 @@ function findRedundantRelics(
   }
 
   return redundantRelicsMap
-}
-
-function toggle<T>(array: T[], value: T, cond: () => boolean): T[] {
-  if (cond()) {
-    return [...array, value]
-  } else {
-    return array.filter((v) => v !== value)
-  }
 }

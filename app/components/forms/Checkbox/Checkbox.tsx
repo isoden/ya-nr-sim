@@ -30,7 +30,7 @@ export const Checkbox: React.FC<Props> = ({ children, onChange, className, indet
         {...props}
         type="checkbox"
         onChange={handleChange}
-        className="size-3.5 accent-accent-light"
+        className="size-4 accent-accent-light"
       />
       {children}
     </label>

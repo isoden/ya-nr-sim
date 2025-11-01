@@ -1,8 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-  --color-accent-light: #B9C6E9;
-  --color-primary-dark: #0A0E1A;
+  --color-brand-light-100: #EEF2FB;
+  --color-brand-light-200: #E0E7F8;
+  --color-brand-light-300: #D2DCF4;
+  --color-brand-light-400: #C4D0EF;
+  --color-brand-light-500: #B9C6E9;
+  --color-brand-light-600: #9FB1E1;
+  --color-brand-light-700: #8296D6;
+  --color-brand-light-800: #667BCB;
+  --color-brand-light-900: #4B61BE;
+
+  --color-brand-dark: #0A0E1A;
+
+  --color-brand-dark-100: color-mix(in srgb, var(--color-brand-dark), white 2%);
+  --color-brand-dark-200: color-mix(in srgb, var(--color-brand-dark), white 4%);
+  --color-brand-dark-300: var(--color-brand-dark);
+
+  --color-accent-light: var(--color-brand-light-500);
+  --color-primary-dark: var(--color-brand-dark-300);
 }
 
 @layer base {

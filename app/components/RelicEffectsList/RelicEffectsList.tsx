@@ -26,7 +26,10 @@ export const RelicEffectsList: React.FC<Props> = ({ relic, ignoredEffectIds = []
           </div>
 
           {subEffects.length > 0 && (
-            <ul className="mt-1 space-y-0.5 text-sm text-red-400">
+            <ul className={`
+              mt-1 space-y-0.5 text-sm text-accent-light text-shadow-2xs
+            `}
+            >
               {subEffects.map((effect, subIndex) => (
                 <li key={`${effect.id}.${subIndex}`}>{effect.name}</li>
               ))}

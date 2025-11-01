@@ -23,7 +23,7 @@ export const RadioButton: React.FC<Props> = ({ children, onChange, className, ..
         {...props}
         type="radio"
         onChange={handleChange}
-        className="size-3.5 accent-accent-light"
+        className="size-4 accent-accent-light"
       />
       {children}
     </label>

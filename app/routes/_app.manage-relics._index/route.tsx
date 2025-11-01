@@ -1,5 +1,5 @@
-import { useId, useMemo, useState } from 'react'
-import { Form } from 'react-router'
+import { useId, useMemo } from 'react'
+import { Form, useSearchParams, useSubmit } from 'react-router'
 import { ChevronRight, ChevronLeft, Ellipsis } from 'lucide-react'
 import { Button } from '~/components/forms/Button'
 import { CheckboxGroup } from '~/components/forms/Checkbox'
@@ -23,30 +23,29 @@ export const clientLoader = ({ request }: Route.LoaderArgs) => {
     type: url.searchParams.getAll('type'),
     size: url.searchParams.getAll('size'),
     effectIds: url.searchParams.getAll('effectIds'),
+    page: url.searchParams.get('page'),
   })
 
   return data
 }
 
-export default function Page() {
+export default function Page({ loaderData }: Route.ComponentProps) {
   const id = useId()
   const { relics: rawRelics, setRelics } = useRelicsStore()
   const relics = useMemo(() => (rawRelics).map((r) => Relic.new(r)), [rawRelics])
+  const submit = useSubmit()
+  const [, setSearchParams] = useSearchParams()
+
+  console.log(loaderData)
 
   const [volume, setVolume] = usePersistedState('_app.manage-relics._index/volume', volumes[0])
 
-  const [page, setPage] = useState(1)
-  const [colors, setColors] = useState<Set<RelicColorBase>>(new Set())
-  const [sizes, setSizes] = useState<Set<typeof Relic.prototype.size>>(new Set())
-  const [types, setTypes] = useState<Set<typeof Relic.prototype.type>>(new Set())
-  const [effectIdsList, setEffectIdsList] = useState<string[]>([])
-
   const filteredRelics = useMemo(() => {
     return relics.reduce<Relic[]>((acc, r) => {
-      const colorCond = (colors.size === 0 || colors.has(r.color))
-      const sizeCond = (sizes.size === 0 || sizes.has(r.size))
-      const typeCond = (types.size === 0 || (types.has('depths') ? r.dn : !r.dn))
-      const effectCond = effectIdsList.length === 0 || effectIdsList.some((effectIds) => effectIds.split(',').some((id) => r.normalizedEffectIds.includes(Number(id))))
+      const colorCond = (loaderData.color.length === 0 || loaderData.color.includes(r.color))
+      const sizeCond = (loaderData.size.length === 0 || loaderData.size.includes(r.size))
+      const typeCond = (loaderData.type.length === 0 || (loaderData.type.includes('depths') ? r.dn : !r.dn))
+      const effectCond = loaderData.effectIds.length === 0 || loaderData.effectIds.some((effectIds) => effectIds.split(',').some((id) => r.normalizedEffectIds.includes(Number(id))))
 
       if (colorCond && sizeCond && typeCond && effectCond) {
         return [...acc, r]
@@ -54,7 +53,7 @@ export default function Page() {
 
       return acc
     }, [])
-  }, [relics, colors, sizes, types, effectIdsList])
+  }, [relics, loaderData])
 
   return (
     <section
@@ -63,13 +62,22 @@ export default function Page() {
     >
       <h3 id={id} className="sr-only">遺物一覧</h3>
 
-      <Form className="mt-4">
+      <Form
+        className="mt-4"
+        method="GET"
+        onChange={(event) => {
+          const formData = new FormData(event.currentTarget)
+
+          formData.delete('page')
+
+          submit(formData, { method: 'GET' })
+        }}
+      >
         <div className="flex items-end gap-x-8">
           <CheckboxGroup
             label="特色"
             name="color"
-            value={colors}
-            onChange={(color) => setColors((prev) => toggleSet(prev, color as RelicColorBase))}
+            defaultValue={loaderData.color}
             items={[
               { label: '赤色', value: RelicColorBase.Red },
               { label: '青色', value: RelicColorBase.Blue },
@@ -81,8 +89,7 @@ export default function Page() {
           <CheckboxGroup
             label="種別"
             name="type"
-            value={types}
-            onChange={(type) => setTypes((prev) => toggleSet(prev, type as typeof Relic.prototype.type))}
+            defaultValue={loaderData.type}
             items={[
               { label: '通常', value: 'normal' },
               { label: '深層', value: 'depths' },
@@ -92,8 +99,7 @@ export default function Page() {
           <CheckboxGroup
             label="大きさ"
             name="size"
-            value={sizes}
-            onChange={(size) => setSizes((prev) => toggleSet(prev, size as typeof Relic.prototype.size))}
+            defaultValue={loaderData.size}
             items={[
               { label: '小', value: 'small' },
               { label: '中', value: 'medium' },
@@ -102,10 +108,17 @@ export default function Page() {
           />
 
           <EffectSelectionPanel
-            effectIds={effectIdsList}
-            onChange={({ effectIds, checked }) => {
-              setEffectIdsList((prev) => toggle(prev, effectIds, () => checked))
-              setPage(1)
+            key={loaderData.effectIds.join(',')}
+            defaultValue={loaderData.effectIds}
+            onChange={(effectIds) => {
+              setSearchParams((prev) => {
+                prev.delete('effectIds')
+                prev.delete('page')
+                effectIds.forEach((id) => {
+                  prev.append('effectIds', String(id))
+                })
+                return prev
+              })
             }}
           />
 
@@ -113,11 +126,7 @@ export default function Page() {
             type="reset"
             variant="outline"
             size="sm"
-            onClick={() => {
-              setColors(new Set())
-              setTypes(new Set())
-              setEffectIdsList([])
-            }}
+            onClick={() => submit(null, { method: 'GET' })}
           >
             リセット
           </Button>
@@ -125,7 +134,7 @@ export default function Page() {
       </Form>
 
       <ol className="grid h-full grid-cols-6 gap-4 overflow-y-auto">
-        {filteredRelics.slice((page - 1) * volume, page * volume).map((relic) => (
+        {filteredRelics.slice((loaderData.page - 1) * volume, loaderData.page * volume).map((relic) => (
           <li
             key={relic.id}
             className="contents"
@@ -136,11 +145,11 @@ export default function Page() {
                 <button
                   className="text-left"
                   onClick={() => {
-                    setColors(new Set([relic.color]))
-                    setTypes(new Set([relic.dn ? 'depths' : 'normal']))
-                    setSizes(new Set())
-                    setEffectIdsList([String(item.id)])
-                    console.log('clicked effect item', item, relic)
+                    const formData = new FormData()
+                    formData.append('color', relic.color)
+                    formData.append('type', relic.dn ? 'depths' : 'normal')
+                    formData.append('effectIds', String(item.id))
+                    submit(formData, { method: 'GET' })
                   }}
                   type="button"
                 >
@@ -190,13 +199,25 @@ export default function Page() {
           variant="outline"
           size="sm"
           type="button"
-          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-          isDisabled={page === 1}
+          onClick={() => {
+            setSearchParams((prev) => {
+              const nextPage = Math.max(loaderData.page - 1, 1)
+
+              if (nextPage === 1) {
+                prev.delete('page')
+              } else {
+                prev.set('page', String(nextPage))
+              }
+
+              return prev
+            })
+          }}
+          isDisabled={loaderData.page === 1}
           aria-label="前のページ"
         >
           <ChevronLeft />
         </Button>
-        {`${(page - 1) * volume + 1}-${Math.min(page * volume, filteredRelics.length)} / ${filteredRelics.length}`}
+        {`${(loaderData.page - 1) * volume + 1}-${Math.min(loaderData.page * volume, filteredRelics.length)} / ${filteredRelics.length}`}
         <select
           value={volume}
           onChange={(e) => setVolume(Number(e.target.value))}
@@ -212,8 +233,10 @@ export default function Page() {
           variant="outline"
           size="sm"
           type="button"
-          onClick={() => setPage((prev) => Math.min(prev + 1, Math.ceil(filteredRelics.length / volume)))}
-          isDisabled={page === Math.ceil(filteredRelics.length / volume)}
+          onClick={() => {
+            setSearchParams((prev) => ({ ...prev, page: Math.min(loaderData.page + 1, Math.ceil(filteredRelics.length / volume)) }))
+          }}
+          isDisabled={loaderData.page === Math.ceil(filteredRelics.length / volume)}
           aria-label="次のページ"
         >
           <ChevronRight />
@@ -221,22 +244,4 @@ export default function Page() {
       </div>
     </section>
   )
-}
-
-function toggleSet<T>(set: Set<T>, value: T): Set<T> {
-  const newSet = new Set(set)
-  if (newSet.has(value)) {
-    newSet.delete(value)
-  } else {
-    newSet.add(value)
-  }
-  return newSet
-}
-
-function toggle<T>(array: T[], value: T, cond: () => boolean): T[] {
-  if (cond()) {
-    return [...array, value]
-  } else {
-    return array.filter((v) => v !== value)
-  }
 }
