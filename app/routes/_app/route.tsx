@@ -8,6 +8,7 @@ export default function Layout() {
   const navLinks = [
     { href: '/', label: 'シミュレーター' },
     { href: '/manage-relics', label: `遺物管理 (${formatter.format(relicsCount)})` },
+    { href: '/bosses', label: `ボス情報` },
   ]
 
   return (
