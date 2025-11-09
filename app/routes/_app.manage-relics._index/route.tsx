@@ -1,5 +1,5 @@
-import { useId, useMemo } from 'react'
-import { Form, useSearchParams, useSubmit } from 'react-router'
+import { useId, useMemo, useRef } from 'react'
+import { Form, useSubmit } from 'react-router'
 import { ChevronRight, ChevronLeft, Ellipsis } from 'lucide-react'
 import { Button } from '~/components/forms/Button'
 import { CheckboxGroup } from '~/components/forms/Checkbox'
@@ -31,12 +31,10 @@ export const clientLoader = ({ request }: Route.LoaderArgs) => {
 
 export default function Page({ loaderData }: Route.ComponentProps) {
   const id = useId()
+  const formRef = useRef<HTMLFormElement>(null)
   const { relics: rawRelics, setRelics } = useRelicsStore()
   const relics = useMemo(() => (rawRelics).map((r) => Relic.new(r)), [rawRelics])
   const submit = useSubmit()
-  const [, setSearchParams] = useSearchParams()
-
-  console.log(loaderData)
 
   const [volume, setVolume] = usePersistedState('_app.manage-relics._index/volume', volumes[0])
 
@@ -55,6 +53,13 @@ export default function Page({ loaderData }: Route.ComponentProps) {
     }, [])
   }, [relics, loaderData])
 
+  const revalidate = (mutate: (formData: FormData) => void) => {
+    const formData = new FormData(formRef.current ?? undefined)
+
+    mutate(formData)
+    submit(formData, { method: 'GET' })
+  }
+
   return (
     <section
       aria-labelledby={id}
@@ -63,14 +68,13 @@ export default function Page({ loaderData }: Route.ComponentProps) {
       <h3 id={id} className="sr-only">遺物一覧</h3>
 
       <Form
+        ref={formRef}
         className="mt-4"
         method="GET"
-        onChange={(event) => {
-          const formData = new FormData(event.currentTarget)
-
-          formData.delete('page')
-
-          submit(formData, { method: 'GET' })
+        onChange={() => {
+          revalidate((formData) => {
+            formData.delete('page')
+          })
         }}
       >
         <div className="flex items-end gap-x-8">
@@ -111,16 +115,22 @@ export default function Page({ loaderData }: Route.ComponentProps) {
             key={loaderData.effectIds.join(',')}
             defaultValue={loaderData.effectIds}
             onChange={(effectIds) => {
-              setSearchParams((prev) => {
-                prev.delete('effectIds')
-                prev.delete('page')
-                effectIds.forEach((id) => {
-                  prev.append('effectIds', String(id))
-                })
-                return prev
+              revalidate((formData) => {
+                formData.delete('effectIds')
+                formData.delete('page')
+
+                effectIds.forEach((id) => formData.append('effectIds', id))
               })
             }}
           />
+          {loaderData.effectIds.map((effectId) => (
+            <input
+              key={effectId}
+              type="hidden"
+              name="effectIds"
+              value={effectId}
+            />
+          ))}
 
           <Button
             type="reset"
@@ -200,16 +210,14 @@ export default function Page({ loaderData }: Route.ComponentProps) {
           size="sm"
           type="button"
           onClick={() => {
-            setSearchParams((prev) => {
+            revalidate((formData) => {
               const nextPage = Math.max(loaderData.page - 1, 1)
 
               if (nextPage === 1) {
-                prev.delete('page')
+                formData.delete('page')
               } else {
-                prev.set('page', String(nextPage))
+                formData.set('page', String(nextPage))
               }
-
-              return prev
             })
           }}
           isDisabled={loaderData.page === 1}
@@ -234,7 +242,9 @@ export default function Page({ loaderData }: Route.ComponentProps) {
           size="sm"
           type="button"
           onClick={() => {
-            setSearchParams((prev) => ({ ...prev, page: Math.min(loaderData.page + 1, Math.ceil(filteredRelics.length / volume)) }))
+            revalidate((formData) => {
+              formData.set('page', String(Math.min(loaderData.page + 1, Math.ceil(filteredRelics.length / volume))))
+            })
           }}
           isDisabled={loaderData.page === Math.ceil(filteredRelics.length / volume)}
           aria-label="次のページ"
