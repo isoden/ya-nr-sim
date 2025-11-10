@@ -76,10 +76,10 @@ export const BuildCriteria: React.FC<Props> = ({ effectsMeta, notEffectsMeta, se
 
   const shouldHideItem = (item: { id: string; name: string; children?: { id: string; name: string }[] }) => {
     // 子要素がある場合、子要素のいずれかが選択されているかチェック
-    const hasSelectedChild = item.children?.some((child) => effects[child.id]?.value != null)
+    const hasSelectedChild = item.children?.some((child) => checkedEffects[child.id] === 'checked')
 
     // 選択モードの場合、自身または子要素が選択されていなければ非表示
-    const isUnselectedInShowMode = showSelectedOnly && effects[item.id]?.value == null && !hasSelectedChild
+    const isUnselectedInShowMode = showSelectedOnly && checkedEffects[item.id] !== 'checked' && !hasSelectedChild
 
     // 検索モードの場合、名前が一致しなければ非表示
     const isFilteredOut = filterText !== '' && !item.name.includes(filterText)
