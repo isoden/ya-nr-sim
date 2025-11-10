@@ -4,7 +4,8 @@ import { type Vessel } from '~/data/vessels'
 import { createExclusionConstraints, createConstraints, normalizeRequiredEffects } from './constraints'
 import { createExclusionVariables, createVariables } from './variables'
 import { createBuild } from './createBuild'
-import type { Args, Result, Build } from './types'
+import { satisfiesCategoryConstraints } from './categoryFilter'
+import type { Args, Result, Build, RequiredEffects } from './types'
 
 /**
  * 検索パラメーターに合致する器と遺物の組み合わせを検索する
@@ -16,6 +17,8 @@ import type { Args, Result, Build } from './types'
  * - 指定された効果を指定された数以上持つ遺物を装備
  * - 同じ遺物は1つしか装備できない
  * - 重複するビルドは除外
+ * さらに、以下の制約をアプリケーション側でチェックする：
+ * - カテゴリ制約: 同じカテゴリの効果は左側のスロット優先(戦技など) {@link satisfiesCategoryConstraints}
  *
  * @param vessels - 器の一覧
  * @param relics - 所持遺物一覧（JSON形式）
@@ -41,6 +44,7 @@ export async function simulate({ vessels, relics: relicsJSON, requiredEffects, n
       constraints,
       vessels,
       relics,
+      requiredEffects: normalizedRequiredEffects,
     })
 
     return {
@@ -59,9 +63,10 @@ export async function simulate({ vessels, relics: relicsJSON, requiredEffects, n
  * solverを再帰的に呼び出す（スコアベース最適化対応）
  * 各再帰呼び出しで：
  * 1. 現在の制約でスコア最大化の最適解を見つける
- * 2. 見つかったビルドを結果に追加
- * 3. 重複排除の制約を追加して再帰呼び出し
- * 4. 解が見つからなくなるまで(or remainingが0になるまで)繰り返す
+ * 2. 見つかったビルドがカテゴリ制約を満たすかチェック
+ * 3. 満たす場合は結果に追加、満たさない場合は除外して次を探す
+ * 4. 重複排除の制約を追加して再帰呼び出し
+ * 5. 解が見つからなくなるまで(or remainingが0になるまで)繰り返す
  */
 function solveRecursively({
   builds = [],
@@ -70,6 +75,7 @@ function solveRecursively({
   constraints,
   vessels,
   relics,
+  requiredEffects,
 }: {
   builds?: Build[]
   remaining: number
@@ -77,6 +83,7 @@ function solveRecursively({
   constraints: Map<string, Constraint>
   vessels: Vessel[]
   relics: Relic[]
+  requiredEffects: RequiredEffects
 }): Build[] {
   if (remaining === 0) return builds
 
@@ -91,19 +98,40 @@ function solveRecursively({
   if (result.status === 'optimal') {
     const build = createBuild(result.variables, vessels, relics)
 
+    // カテゴリ制約をチェック
+    const satisfiesCategory = satisfiesCategoryConstraints(build, requiredEffects)
+
     // 重複排除の制約を追加（remainingをビルドIDとして使用）
     // 既存の変数と制約に新しい制約を追加
-    const updatedVariables = createExclusionVariables(variables, build.relics, remaining)
-    const updatedConstraints = createExclusionConstraints(constraints, build.relics, remaining)
+    // sortedRelicsからnullを除外して遺物リストを取得
+    const buildRelics = build.sortedRelics.filter((r): r is Relic => r !== null)
+    const updatedVariables = createExclusionVariables(variables, buildRelics, remaining)
+    const updatedConstraints = createExclusionConstraints(constraints, buildRelics, remaining)
 
-    return solveRecursively({
-      builds: [...builds, build],
-      remaining: remaining - 1,
-      variables: updatedVariables,
-      constraints: updatedConstraints,
-      vessels,
-      relics,
-    })
+    if (satisfiesCategory) {
+      // カテゴリ制約を満たす場合、ビルドを追加して次を探す
+      return solveRecursively({
+        builds: [...builds, build],
+        remaining: remaining - 1,
+        variables: updatedVariables,
+        constraints: updatedConstraints,
+        vessels,
+        relics,
+        requiredEffects,
+      })
+    } else {
+      // カテゴリ制約を満たさない場合、このビルドを除外して次を探す
+      // remainingは減らさない（有効なビルド数を確保するため）
+      return solveRecursively({
+        builds,
+        remaining,
+        variables: updatedVariables,
+        constraints: updatedConstraints,
+        vessels,
+        relics,
+        requiredEffects,
+      })
+    }
   } else if (result.status === 'infeasible') {
     if (builds.length > 0) return builds
   }

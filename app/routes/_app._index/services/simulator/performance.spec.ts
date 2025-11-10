@@ -3,6 +3,7 @@ import { performance } from 'perf_hooks'
 import { vesselsByCharacterMap } from '~/data/vessels'
 import { simulate } from './simulator'
 import { fakeRelic } from '~/test/mocks/relic'
+import { $e } from '~/test/helpers/relicEffect'
 
 // 環境別の閾値設定
 const isCI = process.env.CI === 'true'
@@ -53,7 +54,7 @@ describe.skip('Performance Regression Tests', () => {
       const result = await simulate({
         vessels,
         relics: smallRelics,
-        requiredEffects: [{ effectIds: [7000300], count: 1 }],
+        requiredEffects: [{ effectIds: [$e`筋力+1`], count: 1 }],
         notEffects: [],
         excludeDepthsRelics: false,
         volume: 5,
@@ -68,8 +69,8 @@ describe.skip('Performance Regression Tests', () => {
         vessels,
         relics: mediumRelics,
         requiredEffects: [
-          { effectIds: [7000300, 7000301], count: 2 },
-          { effectIds: [7000400], count: 1 },
+          { effectIds: [$e`筋力+1`, $e`筋力+2`], count: 2 },
+          { effectIds: [$e`技量+1`], count: 1 },
         ],
         notEffects: [],
         excludeDepthsRelics: false,
@@ -102,7 +103,7 @@ describe.skip('Performance Regression Tests', () => {
       const result = await simulate({
         vessels,
         relics: allRelevantRelics,
-        requiredEffects: [{ effectIds: [7000300], count: 1 }],
+        requiredEffects: [{ effectIds: [$e`筋力+1`], count: 1 }],
         notEffects: [],
         excludeDepthsRelics: false,
         volume: 5,
@@ -116,7 +117,7 @@ describe.skip('Performance Regression Tests', () => {
       const result = await simulate({
         vessels,
         relics: filteredRelics,
-        requiredEffects: [{ effectIds: [7000300], count: 1 }],
+        requiredEffects: [{ effectIds: [$e`筋力+1`], count: 1 }],
         notEffects: [],
         excludeDepthsRelics: false,
         volume: 5,

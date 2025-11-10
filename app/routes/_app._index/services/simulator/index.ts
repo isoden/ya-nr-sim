@@ -11,7 +11,7 @@ export async function simulate(args: Args) {
   if (result.success) {
     result.data = result.data.map((build) => ({
       ...build,
-      relics: build.relics.map((relic) => Relic.new(relic)),
+      sortedRelics: build.sortedRelics.map((relic) => (relic ? Relic.new(relic) : null)),
     }))
     return result
   }

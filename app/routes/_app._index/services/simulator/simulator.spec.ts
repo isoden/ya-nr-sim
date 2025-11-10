@@ -3,12 +3,13 @@ import { SlotColor, vesselsByCharacterMap } from '~/data/vessels'
 import { RelicColorBase } from '~/data/relics'
 import { fakeRelic } from '~/test/mocks/relic'
 import { getVesselBySlots } from '~/test/helpers/vessel'
+import { $e } from '~/test/helpers/relicEffect'
 import { simulate } from './simulator'
 
 describe('マッチするパターン', () => {
   test('マッチするパターン', async () => {
     const vessels = vesselsByCharacterMap['revenant']
-    const red = fakeRelic({ color: RelicColorBase.Red, effects: [7082600] })
+    const red = fakeRelic({ color: RelicColorBase.Red, effects: [$e`聖印の武器種を3つ以上装備していると最大FP上昇`] })
     const relics = [red]
 
     const result = await simulate({
@@ -16,7 +17,7 @@ describe('マッチするパターン', () => {
       relics,
       requiredEffects: [
         {
-          effectIds: [7082600],
+          effectIds: [$e`聖印の武器種を3つ以上装備していると最大FP上昇`],
           count: 1,
         },
       ],
@@ -31,10 +32,7 @@ describe('マッチするパターン', () => {
       data: [
         {
           vessel: vessels.find((v) => v.name.includes('復讐者の盃')),
-          relics: [relics[0]],
-          relicsIndexes: {
-            [red.id]: 0,
-          },
+          sortedRelics: [relics[0], null, null, null, null, null],
         },
       ],
     })
@@ -42,9 +40,9 @@ describe('マッチするパターン', () => {
 
   test('グループ内の異なる効果IDでマッチする', async () => {
     const vessels = vesselsByCharacterMap['revenant']
-    const red = fakeRelic.red({ effects: [7000300] }) // 筋力+1
-    const blue = fakeRelic.blue({ effects: [7000301] }) // 筋力+2
-    const green = fakeRelic.green({ effects: [7000302] }) // 筋力+3
+    const red = fakeRelic.red({ effects: [$e`筋力+1`] })
+    const blue = fakeRelic.blue({ effects: [$e`筋力+2`] })
+    const green = fakeRelic.green({ effects: [$e`筋力+3`] })
     const relics = [red, blue, green]
 
     const result = await simulate({
@@ -52,7 +50,7 @@ describe('マッチするパターン', () => {
       relics,
       requiredEffects: [
         {
-          effectIds: [7000300, 7000301, 7000302], // 筋力+1~+3のどれか
+          effectIds: [$e`筋力+1`, $e`筋力+2`, $e`筋力+3`], // 筋力+1~+3のどれか
           count: 3,
         },
       ],
@@ -65,13 +63,7 @@ describe('マッチするパターン', () => {
       data: [
         {
           vessel: vessels.find((v) => v.name.includes('復讐者の高杯')),
-          // TODO: 並び順に関係なく、含まれていればOKになるようにする
-          relics: [relics[1], relics[2], relics[0]],
-          relicsIndexes: {
-            [blue.id]: 0,
-            [green.id]: 1,
-            [red.id]: 2,
-          },
+          sortedRelics: [relics[1], relics[2], relics[0], null, null, null],
         },
       ],
     })
@@ -80,15 +72,15 @@ describe('マッチするパターン', () => {
   describe('ビルドの遺物の並び順', () => {
     test('遺物を献器のスロットの色順に並べ替える', async () => {
       const vessels = [getVesselBySlots([SlotColor.Red, SlotColor.Blue, SlotColor.Yellow])]
-      const blue = fakeRelic({ color: RelicColorBase.Blue, effects: [7126000] })
-      const yellow = fakeRelic({ color: RelicColorBase.Yellow, effects: [7126000] })
-      const red = fakeRelic({ color: RelicColorBase.Red, effects: [7126000] })
+      const blue = fakeRelic({ color: RelicColorBase.Blue, effects: [$e`出撃時に「星光の欠片」を持つ`] })
+      const yellow = fakeRelic({ color: RelicColorBase.Yellow, effects: [$e`出撃時に「星光の欠片」を持つ`] })
+      const red = fakeRelic({ color: RelicColorBase.Red, effects: [$e`出撃時に「星光の欠片」を持つ`] })
       const relics = [blue, yellow, red]
 
       const result = await simulate({
         vessels,
         relics,
-        requiredEffects: [{ effectIds: [7126000], count: 3 }],
+        requiredEffects: [{ effectIds: [$e`出撃時に「星光の欠片」を持つ`], count: 3 }],
         notEffects: [],
         excludeDepthsRelics: false,
       })
@@ -99,12 +91,7 @@ describe('マッチするパターン', () => {
         data: [
           {
             vessel: vessels[0],
-            relics: [red, blue, yellow],
-            relicsIndexes: {
-              [red.id]: 0,
-              [blue.id]: 1,
-              [yellow.id]: 2,
-            },
+            sortedRelics: [red, blue, yellow, null, null, null],
           },
         ],
       })
@@ -112,15 +99,15 @@ describe('マッチするパターン', () => {
 
     test('自由枠は最後に並べ替える', async () => {
       const vessels = [getVesselBySlots([SlotColor.Red, SlotColor.Green, SlotColor.Free])]
-      const green = fakeRelic({ color: RelicColorBase.Green, effects: [7126000] })
-      const yellow = fakeRelic({ color: RelicColorBase.Yellow, effects: [7126000] })
-      const red = fakeRelic({ color: RelicColorBase.Red, effects: [7126000] })
+      const green = fakeRelic({ color: RelicColorBase.Green, effects: [$e`出撃時に「星光の欠片」を持つ`] })
+      const yellow = fakeRelic({ color: RelicColorBase.Yellow, effects: [$e`出撃時に「星光の欠片」を持つ`] })
+      const red = fakeRelic({ color: RelicColorBase.Red, effects: [$e`出撃時に「星光の欠片」を持つ`] })
       const relics = [green, yellow, red]
 
       const result = await simulate({
         vessels,
         relics,
-        requiredEffects: [{ effectIds: [7126000], count: 3 }],
+        requiredEffects: [{ effectIds: [$e`出撃時に「星光の欠片」を持つ`], count: 3 }],
         notEffects: [],
         excludeDepthsRelics: false,
       })
@@ -131,12 +118,7 @@ describe('マッチするパターン', () => {
         data: [
           {
             vessel: vessels[0],
-            relics: [red, green, yellow],
-            relicsIndexes: {
-              [red.id]: 0,
-              [green.id]: 1,
-              [yellow.id]: 2,
-            },
+            sortedRelics: [red, green, yellow, null, null, null],
           },
         ],
       })
@@ -144,15 +126,15 @@ describe('マッチするパターン', () => {
 
     test('同じ色の遺物はID順に並べ替える', async () => {
       const vessels = [getVesselBySlots([SlotColor.Yellow, SlotColor.Yellow, SlotColor.Yellow])]
-      const yellow1 = fakeRelic({ id: '1', color: RelicColorBase.Yellow, effects: [7126000] })
-      const yellow2 = fakeRelic({ id: '2', color: RelicColorBase.Yellow, effects: [7126000] })
-      const yellow3 = fakeRelic({ id: '3', color: RelicColorBase.Yellow, effects: [7126000] })
+      const yellow1 = fakeRelic({ id: '1', color: RelicColorBase.Yellow, effects: [$e`出撃時に「星光の欠片」を持つ`] })
+      const yellow2 = fakeRelic({ id: '2', color: RelicColorBase.Yellow, effects: [$e`出撃時に「星光の欠片」を持つ`] })
+      const yellow3 = fakeRelic({ id: '3', color: RelicColorBase.Yellow, effects: [$e`出撃時に「星光の欠片」を持つ`] })
       const relics = [yellow3, yellow1, yellow2]
 
       const result = await simulate({
         vessels,
         relics,
-        requiredEffects: [{ effectIds: [7126000], count: 3 }],
+        requiredEffects: [{ effectIds: [$e`出撃時に「星光の欠片」を持つ`], count: 3 }],
         notEffects: [],
         excludeDepthsRelics: false,
       })
@@ -163,12 +145,7 @@ describe('マッチするパターン', () => {
         data: [
           {
             vessel: vessels[0],
-            relics: [yellow1, yellow2, yellow3],
-            relicsIndexes: {
-              [yellow1.id]: 0,
-              [yellow2.id]: 1,
-              [yellow3.id]: 2,
-            },
+            sortedRelics: [yellow1, yellow2, yellow3, null, null, null],
           },
         ],
       })
@@ -176,17 +153,109 @@ describe('マッチするパターン', () => {
   })
 })
 
+describe('カテゴリ制約', () => {
+  test('必要な効果が左側優先ルールで無効化される場合はマッチしない', async () => {
+    // arrange: 黄色遺物と緑遺物にそれぞれ戦技カテゴリの効果を持たせる
+    const vessels = [getVesselBySlots([SlotColor.Yellow, SlotColor.Green, SlotColor.Green])]
+    const yellow = fakeRelic.yellow({ effects: [$e`出撃時の武器の戦技を「輝剣の円陣」にする`, $e`最大HP上昇(+10%)`] }) // category: 戦技
+    const green = fakeRelic.green({ effects: [$e`出撃時の武器の戦技を「グラビタス」にする`] }) // category: 戦技
+    const relics = [yellow, green]
+
+    // act: グラビタスと最大HP上昇の両方を要求
+    const result = await simulate({
+      vessels,
+      relics,
+      requiredEffects: [
+        { effectIds: [$e`最大HP上昇(+10%)`], count: 1 },
+        { effectIds: [$e`出撃時の武器の戦技を「グラビタス」にする`], count: 1 },
+      ],
+      notEffects: [],
+      excludeDepthsRelics: false,
+      volume: 5,
+    })
+
+    // assert: 最大HP上昇を組み込むには黄色遺物が必要だが、
+    // 左側優先ルールにより輝剣の円陣が有効になりグラビタスが無効化されるため、マッチしない
+    expect(result).toEqual(noSolutionFound)
+  })
+
+  test('カテゴリ重複があっても、必要な効果が左側で有効になる場合はマッチする', async () => {
+    // arrange: 黄色遺物と緑遺物にそれぞれ戦技カテゴリの効果を持たせる
+    const vessels = [getVesselBySlots([SlotColor.Yellow, SlotColor.Green, SlotColor.Green])]
+    const yellow = fakeRelic.yellow({ effects: [$e`出撃時の武器の戦技を「輝剣の円陣」にする`] }) // category: 戦技
+    const green = fakeRelic.green({ effects: [$e`出撃時の武器の戦技を「グラビタス」にする`, $e`最大HP上昇(+10%)`] }) // category: 戦技
+    const relics = [yellow, green]
+
+    // act: 輝剣の円陣と最大HP上昇を要求
+    const result = await simulate({
+      vessels,
+      relics,
+      requiredEffects: [
+        { effectIds: [$e`最大HP上昇(+10%)`], count: 1 },
+        { effectIds: [$e`出撃時の武器の戦技を「輝剣の円陣」にする`], count: 1 },
+      ],
+      notEffects: [],
+      excludeDepthsRelics: false,
+      volume: 5,
+    })
+
+    // assert: 戦技が重複するが、左側の輝剣の円陣が有効になり、
+    // 要求されている効果は満たされるためマッチする
+    expect(result).toEqual({
+      success: true,
+      data: [
+        {
+          vessel: vessels[0],
+          sortedRelics: [yellow, green, null, null, null, null],
+        },
+      ],
+    })
+  })
+
+  test('カテゴリが異なる効果は重複可能', async () => {
+    // arrange
+    const vessels = [getVesselBySlots([SlotColor.Yellow, SlotColor.Green])]
+    const yellow = fakeRelic.yellow({ effects: [$e`出撃時の武器の戦技を「輝剣の円陣」にする`] }) // category: 戦技
+    const green = fakeRelic.green({ effects: [$e`出撃時の武器に魔力攻撃力を付加`] }) // category: 属性・状態異常付与
+    const relics = [yellow, green]
+
+    // act
+    const result = await simulate({
+      vessels,
+      relics,
+      requiredEffects: [
+        { effectIds: [$e`出撃時の武器の戦技を「輝剣の円陣」にする`], count: 1 },
+        { effectIds: [$e`出撃時の武器に魔力攻撃力を付加`], count: 1 },
+      ],
+      notEffects: [],
+      excludeDepthsRelics: false,
+      volume: 1,
+    })
+
+    // assert: カテゴリが異なれば両方含まれる
+    expect(result).toEqual({
+      success: true,
+      data: [
+        {
+          vessel: vessels[0],
+          sortedRelics: [yellow, green, null, null, null, null],
+        },
+      ],
+    })
+  })
+})
+
 describe('効果の重複ルール', () => {
   test('stacksWithSelf=trueの効果は重複可能', async () => {
     const vessels = vesselsByCharacterMap['revenant']
-    const relic1 = fakeRelic.red({ effects: [7000300] }) // 筋力+1 (stacksWithSelf: true)
-    const relic2 = fakeRelic.blue({ effects: [7000301] }) // 筋力+2 (stacksWithSelf: true)
+    const relic1 = fakeRelic.red({ effects: [$e`筋力+1`] }) // stacksWithSelf: true
+    const relic2 = fakeRelic.blue({ effects: [$e`筋力+2`] }) // stacksWithSelf: true
     const relics = [relic1, relic2]
 
     const result = await simulate({
       vessels,
       relics,
-      requiredEffects: [{ effectIds: [7000300, 7000301], count: 2 }],
+      requiredEffects: [{ effectIds: [$e`筋力+1`, $e`筋力+2`], count: 2 }],
       notEffects: [],
       excludeDepthsRelics: false,
     })
@@ -197,11 +266,7 @@ describe('効果の重複ルール', () => {
       data: [
         {
           vessel: vessels.find((v) => v.name.includes('復讐者の高杯')),
-          relics: [relic2, relic1],
-          relicsIndexes: {
-            [relic2.id]: 0,
-            [relic1.id]: 2,
-          },
+          sortedRelics: [relic2, null, relic1, null, null, null],
         },
       ],
     })
@@ -209,14 +274,14 @@ describe('効果の重複ルール', () => {
 
   test('stacksAcrossLevels=trueの効果は同じIDは1つまで', async () => {
     const vessels = vesselsByCharacterMap['revenant']
-    const relic1 = fakeRelic.red({ effects: [7090000] }) // 敵を倒した時のアーツゲージ蓄積増加 (stacksAcrossLevels: true)
-    const relic2 = fakeRelic.blue({ effects: [7090000] }) // 同じ効果ID
+    const relic1 = fakeRelic.red({ effects: [$e`敵を倒した時のアーツゲージ蓄積増加`] }) // stacksAcrossLevels: true
+    const relic2 = fakeRelic.blue({ effects: [$e`敵を倒した時のアーツゲージ蓄積増加`] }) // 同じ効果ID
     const relics = [relic1, relic2]
 
     const result = await simulate({
       vessels,
       relics,
-      requiredEffects: [{ effectIds: [7090000], count: 2 }],
+      requiredEffects: [{ effectIds: [$e`敵を倒した時のアーツゲージ蓄積増加`], count: 2 }],
       notEffects: [],
       excludeDepthsRelics: false,
     })
@@ -225,20 +290,20 @@ describe('効果の重複ルール', () => {
     // 2つのビルドが見つかるが、どちらも1つの遺物のみ
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.data.every((build) => build.relics.length === 1)).toBe(true)
+      expect(result.data.every((build) => build.sortedRelics.filter((relic) => relic !== null).length === 1)).toBe(true)
     }
   })
 
   test('重複不可の効果(stacksWithSelf: false)は制約で1個に制限される', async () => {
     const vessels = vesselsByCharacterMap['revenant']
-    const relic1 = fakeRelic.red({ effects: [10001] }) // 攻撃を受けると攻撃力上昇 (stacksWithSelf: false)
-    const relic2 = fakeRelic.blue({ effects: [10001] }) // 同じ効果ID
+    const relic1 = fakeRelic.red({ effects: [$e`攻撃を受けると攻撃力上昇`] }) // stacksWithSelf: false
+    const relic2 = fakeRelic.blue({ effects: [$e`攻撃を受けると攻撃力上昇`] }) // 同じ効果ID
     const relics = [relic1, relic2]
 
     const result = await simulate({
       vessels,
       relics,
-      requiredEffects: [{ effectIds: [10001], count: 2 }],
+      requiredEffects: [{ effectIds: [$e`攻撃を受けると攻撃力上昇`], count: 2 }],
       notEffects: [],
       excludeDepthsRelics: false,
     })
@@ -246,7 +311,7 @@ describe('効果の重複ルール', () => {
     // assert: 制約により1つまでしか装備できない
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.data.every((build) => build.relics.length === 1)).toBe(true)
+      expect(result.data.every((build) => build.sortedRelics.filter((relic) => relic !== null).length === 1)).toBe(true)
     }
   })
 })
@@ -262,11 +327,11 @@ describe('マッチしないパターン', () => {
       excludeDepthsRelics: false,
     })
 
-    expect(result.success).toBe(false)
+    expect(result).toEqual(noSolutionFound)
   })
 
   function setup() {
-    const effectId = 7126000
+    const effectId = $e`出撃時に「星光の欠片」を持つ`
     const vessels = vesselsByCharacterMap['revenant']
     const relics = [fakeRelic({ color: RelicColorBase.Blue, effects: [effectId] })]
 
@@ -287,18 +352,18 @@ test('深層の遺物はフリースロットに装備できない', async () =>
     ]),
   ]
   // 深層青の遺物（対応する色スロットなし）
-  const relics = [fakeRelic.deepBlue({ effects: [7126000] })]
+  const relics = [fakeRelic.deepBlue({ effects: [$e`出撃時に「星光の欠片」を持つ`] })]
 
   const result = await simulate({
     vessels,
     relics,
-    requiredEffects: [{ effectIds: [7126000], count: 1 }],
+    requiredEffects: [{ effectIds: [$e`出撃時に「星光の欠片」を持つ`], count: 1 }],
     notEffects: [],
     excludeDepthsRelics: false,
   })
 
   // assert: 深層の遺物はフリースロットに装備できないため失敗する
-  expect(result.success).toBe(false)
+  expect(result).toEqual(noSolutionFound)
 })
 
 test('通常の遺物はフリースロットに装備できる', async () => {
@@ -314,13 +379,13 @@ test('通常の遺物はフリースロットに装備できる', async () => {
     ]),
   ]
   // 青の遺物（対応する色スロットなし、フリーのみ利用可能）
-  const normalBlue = fakeRelic.blue({ effects: [7126000] })
+  const normalBlue = fakeRelic.blue({ effects: [$e`出撃時に「星光の欠片」を持つ`] })
   const relics = [normalBlue]
 
   const result = await simulate({
     vessels,
     relics,
-    requiredEffects: [{ effectIds: [7126000], count: 1 }],
+    requiredEffects: [{ effectIds: [$e`出撃時に「星光の欠片」を持つ`], count: 1 }],
     notEffects: [],
     excludeDepthsRelics: false,
   })
@@ -331,10 +396,7 @@ test('通常の遺物はフリースロットに装備できる', async () => {
     data: [
       {
         vessel: vessels[0],
-        relics: [normalBlue],
-        relicsIndexes: {
-          [normalBlue.id]: 2, // フリースロットのインデックス
-        },
+        sortedRelics: [null, null, normalBlue, null, null, null],
       },
     ],
   })
@@ -343,8 +405,8 @@ test('通常の遺物はフリースロットに装備できる', async () => {
 describe('stacksAcrossLevels統合テスト', () => {
   test('カンマ区切りで複数効果を指定した場合、どれでもマッチする', async () => {
     const vessels = vesselsByCharacterMap['revenant']
-    const relic1 = fakeRelic.red({ effects: [7000300] }) // 筋力+1 (stacksWithSelf: true)
-    const relic2 = fakeRelic.blue({ effects: [7000301] }) // 筋力+2 (stacksWithSelf: true)
+    const relic1 = fakeRelic.red({ effects: [$e`筋力+1`] }) // stacksWithSelf: true
+    const relic2 = fakeRelic.blue({ effects: [$e`筋力+2`] }) // stacksWithSelf: true
     const relics = [relic1, relic2]
 
     // カンマ区切りで複数効果を指定（count: 2なので両方必要）
@@ -352,7 +414,7 @@ describe('stacksAcrossLevels統合テスト', () => {
       vessels,
       relics,
       requiredEffects: [
-        { effectIds: [7000300, 7000301, 7000302], count: 2 },
+        { effectIds: [$e`筋力+1`, $e`筋力+2`, $e`筋力+3`], count: 2 },
       ],
       notEffects: [],
       excludeDepthsRelics: false,
@@ -362,14 +424,14 @@ describe('stacksAcrossLevels統合テスト', () => {
     // 両方の遺物が選択される
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.data[0]?.relics.length).toBe(2)
+      expect(result.data[0]?.sortedRelics.filter((relic) => relic !== null).length).toBe(2)
     }
   })
 
   test('stacksAcrossLevelsでない効果は統合されない', async () => {
     const vessels = vesselsByCharacterMap['revenant']
-    const relic1 = fakeRelic.red({ effects: [7000300] }) // 筋力+1 (stacksWithSelf: true)
-    const relic2 = fakeRelic.blue({ effects: [7000301] }) // 筋力+2 (stacksWithSelf: true)
+    const relic1 = fakeRelic.red({ effects: [$e`筋力+1`] }) // stacksWithSelf: true
+    const relic2 = fakeRelic.blue({ effects: [$e`筋力+2`] }) // stacksWithSelf: true
     const relics = [relic1, relic2]
 
     // 個別選択 - 統合されないので別々の制約として扱われる
@@ -377,8 +439,8 @@ describe('stacksAcrossLevels統合テスト', () => {
       vessels,
       relics,
       requiredEffects: [
-        { effectIds: [7000300], count: 1 },
-        { effectIds: [7000301], count: 1 },
+        { effectIds: [$e`筋力+1`], count: 1 },
+        { effectIds: [$e`筋力+2`], count: 1 },
       ],
       notEffects: [],
       excludeDepthsRelics: false,
@@ -387,7 +449,7 @@ describe('stacksAcrossLevels統合テスト', () => {
 
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.data[0]?.relics.length).toBe(2) // 2つの遺物が選択される
+      expect(result.data[0]?.sortedRelics.filter((relic) => relic !== null).length).toBe(2)
     }
   })
 })
@@ -396,9 +458,9 @@ describe('リグレッションテスト', () => {
   test('複数の効果グループを同時に要求した際のマッチング (Issue: 効果係数の重複カウント)', async () => {
     // arrange
     const vessels = vesselsByCharacterMap['wylder']
-    const vitality = fakeRelic.red({ effects: [7000000] }) // 生命力+1
-    const magic1 = fakeRelic.blue({ effects: [7090000] }) // 敵を倒した時のアーツゲージ蓄積増加+0
-    const magic2 = fakeRelic.yellow({ effects: [6090000] }) // 敵を倒した時のアーツゲージ蓄積増加+1
+    const vitality = fakeRelic.red({ effects: [$e`生命力+1`] })
+    const magic1 = fakeRelic.blue({ effects: [$e`敵を倒した時のアーツゲージ蓄積増加`] })
+    const magic2 = fakeRelic.yellow({ effects: [$e`敵を倒した時のアーツゲージ蓄積増加+1`] })
     const relics = [vitality, magic1, magic2]
 
     // act
@@ -407,11 +469,11 @@ describe('リグレッションテスト', () => {
       relics,
       requiredEffects: [
         {
-          effectIds: [7000000, 7000001, 7000002], // 生命力効果のいずれか
+          effectIds: [$e`生命力+1`, $e`生命力+2`, $e`生命力+3`], // 生命力効果のいずれか
           count: 1,
         },
         {
-          effectIds: [7090000, 6090000], // マジックスプレッド効果のいずれか
+          effectIds: [$e`敵を倒した時のアーツゲージ蓄積増加`, $e`敵を倒した時のアーツゲージ蓄積増加+1`], // アーツゲージ蓄積増加のいずれか
           count: 2,
         },
       ],
@@ -426,12 +488,7 @@ describe('リグレッションテスト', () => {
       data: [
         {
           vessel: vessels.find((v) => v.name.includes('追跡者の高杯')),
-          relics: [vitality, magic2, magic1],
-          relicsIndexes: {
-            [vitality.id]: 0,
-            [magic2.id]: 1,
-            [magic1.id]: 2,
-          },
+          sortedRelics: [vitality, magic2, magic1, null, null, null],
         },
       ],
     })
@@ -440,7 +497,7 @@ describe('リグレッションテスト', () => {
   test('単一効果グループでは正常に動作する', async () => {
     // arrange
     const vessels = vesselsByCharacterMap['wylder']
-    const vitality = fakeRelic.red({ effects: [7000000] })
+    const vitality = fakeRelic.red({ effects: [$e`生命力+1`] })
 
     // act
     const result = await simulate({
@@ -448,7 +505,7 @@ describe('リグレッションテスト', () => {
       relics: [vitality],
       requiredEffects: [
         {
-          effectIds: [7000000, 7000001, 7000002],
+          effectIds: [$e`生命力+1`, $e`生命力+2`, $e`生命力+3`],
           count: 1,
         },
       ],
@@ -463,12 +520,11 @@ describe('リグレッションテスト', () => {
       data: [
         {
           vessel: vessels.find((v) => v.name.includes('追跡者の器')),
-          relics: [vitality],
-          relicsIndexes: {
-            [vitality.id]: 0,
-          },
+          sortedRelics: [vitality, null, null, null, null, null],
         },
       ],
     })
   })
 })
+
+const noSolutionFound = { success: false, error: new Error('No solution found') }

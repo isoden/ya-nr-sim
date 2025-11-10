@@ -107,15 +107,13 @@ function Success({ builds, excludeDepthsRelics }: { builds: Build[]; excludeDept
 
         <ul className="mt-4 grid grid-cols-3 gap-4">
           {item.vessel.slots.slice(0, sliceEnd).map((slot, index) => {
-            const relic = item.relics.find((r) => item.relicsIndexes[r.id] === index)
+            const relic = item.sortedRelics[index]
 
             return (
               <li key={index} className="contents">
                 {relic
                   ? <RelicInfo relic={relic} />
-                  : (
-                      <EmptySlot color={slot} />
-                    )}
+                  : <EmptySlot color={slot} />}
               </li>
             )
           })}

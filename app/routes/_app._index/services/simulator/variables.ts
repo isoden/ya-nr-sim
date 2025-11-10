@@ -15,7 +15,9 @@ import { calculateRelicScore } from './scoring'
  *
  * 各変数は制約を表現する係数を持つ：
  * - 器の変数: スロット制約の係数（負の値）
- * - 遺物の変数: スロット制約の係数（正の値）、効果制約の係数
+ * - 遺物の変数: スロット制約の係数（正の値）、効果制約の係数、スコア係数
+ *
+ * 注: カテゴリ制約はSolver側ではなくアプリケーション側でフィルタリングする {@link ./categoryFilter.ts}
  */
 export function createVariables(
   vessels: Vessel[],

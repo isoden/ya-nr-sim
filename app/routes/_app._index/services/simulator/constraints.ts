@@ -71,6 +71,8 @@ export function normalizeRequiredEffects(requiredEffects: RequiredEffects): Requ
  * - Freeスロット制約: Freeスロット数制限
  * - 効果制約: 指定された効果を指定された数以上
  * - 重複防止制約: 同じ遺物は1つしか装備できない
+ *
+  * 注: カテゴリ制約はSolver側ではなくアプリケーション側でフィルタリングする {@link ./categoryFilter.ts}
  */
 export function createConstraints(
   vessels: Vessel[],
@@ -139,6 +141,8 @@ export function createConstraints(
   for (const relic of relics) {
     constraints.set(`relic.${relic.id}`, lessEq(1))
   }
+
+  // 注: カテゴリ制約はアプリケーション側でフィルタリングするため、ここでは制約を追加しない
 
   return constraints
 }

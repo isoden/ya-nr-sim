@@ -114,7 +114,7 @@ function weaponOptions(name: string): OptionItem[] {
     `${name}の攻撃でHP回復`,
     `${name}の攻撃でFP回復`,
     `${name}の武器種を3つ以上装備していると攻撃力上昇`,
-    `潜在する力から、「${name}」を見つけやすくなる`,
+    `潜在する力から、${name}を見つけやすくなる`,
   )
 }
 
@@ -650,6 +650,7 @@ function generateTypeDefinitions(): string {
   name: string
   maxStacks: number
   hasDemeritEffect?: boolean
+  category?: string
   children?: RelicCategoryItem[]
 }
 

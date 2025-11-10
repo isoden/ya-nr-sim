@@ -26,11 +26,7 @@ test('ビルドの遺物を器の色順に並べる', () => {
   // assert
   expect(build).toEqual({
     vessel: vesselToUse,
-    relics: [blue, green],
-    relicsIndexes: {
-      [blue.id]: 0,
-      [green.id]: 1,
-    },
+    sortedRelics: [blue, green, null, null, null, null],
   })
 })
 
@@ -56,11 +52,7 @@ test('色が同じ場合はID順に並べる', async () => {
   // assert
   expect(build).toEqual({
     vessel: vesselToUse,
-    relics: [red1, red2],
-    relicsIndexes: {
-      [red1.id]: 0,
-      [red2.id]: 1,
-    },
+    sortedRelics: [red1, red2, null, null, null, null],
   })
 })
 
@@ -93,13 +85,6 @@ test('深き夜の献器対応', async () => {
   // assert
   expect(build).toEqual({
     vessel: vesselToUse,
-    relics: [blue, green, red, deepYellow, deepGreen],
-    relicsIndexes: {
-      [blue.id]: 0,
-      [green.id]: 1,
-      [red.id]: 2,
-      [deepYellow.id]: 4,
-      [deepGreen.id]: 5,
-    },
+    sortedRelics: [blue, green, red, null, deepYellow, deepGreen],
   })
 })

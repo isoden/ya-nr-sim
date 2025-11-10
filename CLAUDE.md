@@ -270,14 +270,8 @@ npm ci
 
 ### ビルドシミュレーション機能の拡張
 
-1. **計算ロジック**: `app/routes/_app._index/services/simulator/` 内で実装
-2. **ワーカー処理**: 重い計算は `worker.ts` で実行
-3. **型定義**: `types.ts` でインターフェース定義
-4. **テスト**: `.spec.ts` で計算ロジックをテスト
 
-- **制約定義**: `constraints.ts` - yalpsによる制約条件
-- **効果統合**: `consolidateRelicEffectGroups` - 効果グループの統合処理
-- **スコアリング**: `scoring.ts` - ビルド評価システム
+詳細な仕様・アルゴリズムは @app/routes/_app._index/services/simulator/README.md を参照してください。
 
 ### 遺物・ゲームデータの追加
 
