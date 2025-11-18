@@ -32,7 +32,20 @@ describe('normalizeRequiredEffects', () => {
       expect(result).toEqual([{ effectIds: [$e`致命の一撃強化+1`], count: 1, weights: undefined }])
     })
 
-    test('複数の stacksWithSelf: false の効果がある場合、それぞれ個別に分離される', () => {
+    test('stacksWithSelf: false の効果が１つの場合、分離されない', () => {
+      // 敵を倒した時のアーツゲージ蓄積増加, 敵を倒した時のアーツゲージ蓄積増加+1 はどちらも stacksWithSelf: false
+      const requiredEffects: RequiredEffects = [
+        { effectIds: [$e`敵を倒した時のアーツゲージ蓄積増加`, $e`敵を倒した時のアーツゲージ蓄積増加+1`], count: 1 },
+      ]
+
+      const result = normalizeRequiredEffects(requiredEffects)
+
+      expect(result).toEqual([
+        { effectIds: [$e`敵を倒した時のアーツゲージ蓄積増加`, $e`敵を倒した時のアーツゲージ蓄積増加+1`], count: 1, weights: undefined },
+      ])
+    })
+
+    test('stacksWithSelf: false の効果が複数ある場合、それぞれ個別に分離される', () => {
       // 敵を倒した時のアーツゲージ蓄積増加, 敵を倒した時のアーツゲージ蓄積増加+1 はどちらも stacksWithSelf: false
       const requiredEffects: RequiredEffects = [
         { effectIds: [$e`敵を倒した時のアーツゲージ蓄積増加`, $e`敵を倒した時のアーツゲージ蓄積増加+1`], count: 2 },

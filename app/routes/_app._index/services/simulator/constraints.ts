@@ -38,23 +38,29 @@ export function normalizeRequiredEffects(requiredEffects: RequiredEffects): Requ
       continue
     }
 
-    // stacksWithSelf: false の効果は、それぞれ個別に count: 1 で分離
-    for (const effectId of nonStackableEffectIds) {
-      result.push({
-        effectIds: [effectId],
-        count: 1,
-        weights: weights ? [weights[effectIds.indexOf(effectId)]] : undefined,
-      })
-    }
+    // stacksWithSelf: false の効果が存在し、かつ count > 1 の場合のみ分離
+    if (nonStackableEffectIds.length > 0 && count > 1) {
+      // stacksWithSelf: false の効果は、それぞれ個別に count: 1 で分離
+      for (const effectId of nonStackableEffectIds) {
+        result.push({
+          effectIds: [effectId],
+          count: 1,
+          weights: weights ? [weights[effectIds.indexOf(effectId)]] : undefined,
+        })
+      }
 
-    // 残りのカウントを stacksWithSelf: true の効果で構成
-    const remainingCount = count - nonStackableEffectIds.length
-    if (stackableEffectIds.length > 0 && remainingCount > 0) {
-      result.push({
-        effectIds: stackableEffectIds,
-        count: remainingCount,
-        weights: weights ? stackableEffectIds.map((id) => weights[effectIds.indexOf(id)]) : undefined,
-      })
+      // 残りのカウントを stacksWithSelf: true の効果で構成
+      const remainingCount = count - nonStackableEffectIds.length
+      if (stackableEffectIds.length > 0 && remainingCount > 0) {
+        result.push({
+          effectIds: stackableEffectIds,
+          count: remainingCount,
+          weights: weights ? stackableEffectIds.map((id) => weights[effectIds.indexOf(id)]) : undefined,
+        })
+      }
+    } else {
+      // count === 1 の場合、または stacksWithSelf: false の効果がない場合は分離不要
+      result.push({ effectIds, count, weights })
     }
   }
 
