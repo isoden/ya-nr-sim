@@ -40,16 +40,15 @@ export const ImportDialog: React.FC = () => {
       <dialog
         ref={dialogRef}
         className={`
-          fixed inset-0 m-auto w-full max-w-2xl rounded border border-zinc-800
-          bg-primary-dark p-6 shadow-lg
+          fixed inset-0 m-auto w-full max-w-2xl rounded-sm border
+          border-zinc-800 bg-primary-dark p-6 shadow-lg
           backdrop:backdrop-blur-xs
         `}
-        // eslint-disable-next-line react/no-unknown-property
         closedby="any"
       >
         <textarea
           className={`
-            min-h-80 w-full rounded border border-zinc-600
+            min-h-80 w-full rounded-sm border border-zinc-600
             bg-[color-mix(in_srgb,var(--color-primary-dark),white_5%)] font-mono
             text-white
             focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2

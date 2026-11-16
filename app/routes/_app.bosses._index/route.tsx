@@ -44,18 +44,14 @@ export default function Route({ loaderData }: Route.ComponentProps) {
 
       <div className="grid overflow-y-auto">
 
-        <table className={`
-          text-sm
-          [--border-color:theme(colors.zinc.800)]
-        `}
-        >
+        <table className="text-sm [--border-color:var(--color-zinc-800)]">
           <thead className={`
             sticky top-0 left-0 bg-primary-dark
-            shadow-[0_1px_0_0_theme(colors.zinc.800)]
+            shadow-[0_1px_0_0_var(--color-zinc-800)]
           `}
           >
             <tr>
-              <th className="px-3 py-3 text-left">
+              <th className="p-3 text-left">
                 ボス
               </th>
               {[
@@ -71,7 +67,7 @@ export default function Route({ loaderData }: Route.ComponentProps) {
               ].map((label, i) => (
                 <th
                   key={label}
-                  className={twMerge(`w-20 px-3 py-3`, highlightCol === i && `
+                  className={twMerge(`w-20 p-3`, highlightCol === i && `
                     bg-white/5
                   `)}
                   onPointerEnter={() => setHighlightCol(i)}
@@ -93,8 +89,7 @@ export default function Route({ loaderData }: Route.ComponentProps) {
                 <tr>
                   <td
                     className={`
-                      border-b border-(--border-color) bg-black/30 px-3 py-3
-                      font-bold
+                      border-b border-(--border-color) bg-black/30 p-3 font-bold
                     `}
                     colSpan={11}
                   >
@@ -104,7 +99,7 @@ export default function Route({ loaderData }: Route.ComponentProps) {
                 </tr>
                 {bosses.map((boss) => (
                   <tr key={boss}>
-                    <td className="border-b border-(--border-color) px-3 py-3">
+                    <td className="border-b border-(--border-color) p-3">
                       <a className="mr-1" href={`https://kamikouryaku.net/nightreign_eldenring/?${boss}`} rel="noreferrer">{boss}</a>
                       {(day === 3 && boss !== Boss.Heolstor) && (
                         <>
@@ -129,8 +124,7 @@ export default function Route({ loaderData }: Route.ComponentProps) {
                         <td
                           key={i}
                           className={twMerge(`
-                            border-b border-(--border-color) px-3 py-3
-                            text-center
+                            border-b border-(--border-color) p-3 text-center
                           `, highlightCol === i && 'bg-white/5')}
                         >
                           {value}

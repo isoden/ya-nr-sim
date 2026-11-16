@@ -21,8 +21,8 @@ export type Args = {
   volume?: number
 }
 
-export type Result
-  = | {
+export type Result =
+  | {
     success: true
     data: Build[]
   }

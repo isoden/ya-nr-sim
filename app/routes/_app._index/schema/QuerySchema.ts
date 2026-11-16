@@ -36,7 +36,8 @@ const QuerySchema = v.object({
     /**
      * 厳密には `'on' | undefined` だが、 `v.optional(v.literal('on'), v.transform(...))` とすると optional の場合に transform が呼ばれないため literal チェックを外す
      */
-    v.optional(v.string(), 'off'), v.transform((input) => input === 'on'),
+    v.optional(v.string(), 'off'),
+    v.transform((input) => input === 'on'),
   ),
 })
 

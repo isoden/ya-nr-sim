@@ -1,5 +1,7 @@
 import {
-  Button, UNSTABLE_Toast as RAToast, UNSTABLE_ToastContent as ToastContent,
+  Button,
+  UNSTABLE_Toast as RAToast,
+  UNSTABLE_ToastContent as ToastContent,
   type QueuedToast,
 } from 'react-aria-components'
 import type { ToastItem } from './types'

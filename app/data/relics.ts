@@ -77,8 +77,7 @@ export class Relic {
    */
   get pairedEffects(): [{ id: number; name: string }, { id: number; name: string }[]][] {
     const { normalIds = [], demeritIds = [] } = Object.groupBy(this.normalizedEffectIds, (id) =>
-      id in demeritDepthsRelicEffectMap ? 'demeritIds' : 'normalIds',
-    )
+      id in demeritDepthsRelicEffectMap ? 'demeritIds' : 'normalIds')
 
     const pairedEffects = normalIds.reduce<[{ id: number; name: string }, { id: number; name: string }[]][]>(
       (resolved, effectId) => {

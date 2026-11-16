@@ -64,7 +64,7 @@ export const SearchForm: React.FC<Props> = ({ defaultValues }) => {
             </label>
             <select
               {...getSelectProps(fields.charId)}
-              className="rounded border border-zinc-600 p-1"
+              className="rounded-sm border border-zinc-600 p-1"
             >
               {characterList.map((item) => (
                 <option key={item.id} value={item.id}>

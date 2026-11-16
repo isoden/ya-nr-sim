@@ -24,7 +24,7 @@ export const BuildList: React.FC<Props> = ({ resultKey, excludeDepthsRelics, res
     <section
       className={`
         overflow-y-scroll rounded-lg border border-gray-400/10 bg-zinc-950/20
-        p-6 shadow
+        p-6 shadow-sm
       `}
       tabIndex={0}
     >

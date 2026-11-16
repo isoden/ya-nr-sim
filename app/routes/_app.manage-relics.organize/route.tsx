@@ -40,8 +40,7 @@ export default function Page() {
     if (flattenEffectIds.length > 0) {
       for (const entries of Object.values(grouped)) {
         entries?.sort((entryA, entryB) =>
-          compareRedundantRelics(entryA[0], entryB[0], flattenEffectIds),
-        )
+          compareRedundantRelics(entryA[0], entryB[0], flattenEffectIds))
       }
     }
 
