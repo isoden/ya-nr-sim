@@ -22,7 +22,8 @@ export const FormSchema = v.object(
       ),
       {},
     ),
-    excludeDepthsRelics: v.boolean(),
+    // 未チェックのチェックボックスはフィールド自体が送信されないため、省略時は false とする
+    excludeDepthsRelics: v.optional(v.boolean(), false),
   },
   (issue) => (issue.expected === '"effects"' && issue.received === 'undefined' ? EffectsRequired : issue.message),
 )
