@@ -71,7 +71,7 @@ function Success({ builds, excludeDepthsRelics }: { builds: Build[]; excludeDept
   return builds.map((item, i) => {
     return (
       <div
-        key={`${item.vessel.name}.${i}`}
+        key={`${item.vessel.id}:${item.sortedRelics.map((relic) => relic?.id ?? '-').join(',')}`}
         // TODO: use column-rule instead
         className={`
           before:mb-6 before:block before:h-px before:w-full
@@ -92,6 +92,8 @@ function Success({ builds, excludeDepthsRelics }: { builds: Build[]; excludeDept
             {item.vessel.slots.slice(0, sliceEnd).map((slot, i) => {
               return (
                 <li
+                  // スロットは同色が重複し並び替えも起きないため、位置そのものが識別子になる
+                  // eslint-disable-next-line @eslint-react/no-array-index-key
                   key={`${slot}.${i}`}
                   className={`
                     relative size-5
@@ -110,6 +112,8 @@ function Success({ builds, excludeDepthsRelics }: { builds: Build[]; excludeDept
             const relic = item.sortedRelics[index]
 
             return (
+              // スロットは同色が重複し並び替えも起きないため、位置そのものが識別子になる
+              // eslint-disable-next-line @eslint-react/no-array-index-key
               <li key={index} className="contents">
                 {relic
                   ? <RelicInfo relic={relic} />

@@ -17,6 +17,8 @@ export const RelicEffectsList: React.FC<Props> = ({ relic, ignoredEffectIds = []
   return (
     <ul className={twMerge(`flex flex-col gap-y-2`, className)}>
       {relic.pairedEffects.map(([mainEffect, subEffects], index) => (
+        // 別名の効果 ID は正規化で同じ ID になり重複しうるため、位置で区別する
+        // eslint-disable-next-line @eslint-react/no-array-index-key
         <li key={`${mainEffect.id}.${index}`} className="mt-1">
           <div className={ignoredEffectIds.includes(mainEffect.id)
             ? `text-zinc-200/50`
@@ -31,6 +33,8 @@ export const RelicEffectsList: React.FC<Props> = ({ relic, ignoredEffectIds = []
             `}
             >
               {subEffects.map((effect, subIndex) => (
+                // 別名の効果 ID は正規化で同じ ID になり重複しうるため、位置で区別する
+                // eslint-disable-next-line @eslint-react/no-array-index-key
                 <li key={`${effect.id}.${subIndex}`}>{effect.name}</li>
               ))}
             </ul>

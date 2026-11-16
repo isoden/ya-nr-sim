@@ -109,28 +109,16 @@ export default function Route({ loaderData }: Route.ComponentProps) {
                         </>
                       )}
                     </td>
-                    {
-                      [
-                        join(bossTable[boss].魔),
-                        join(bossTable[boss].炎),
-                        join(bossTable[boss].雷),
-                        join(bossTable[boss].聖),
-                        join(bossTable[boss].血),
-                        join(bossTable[boss].毒),
-                        join(bossTable[boss].腐),
-                        join(bossTable[boss].冷),
-                        join(bossTable[boss].眠),
-                      ].map((value, i) => (
-                        <td
-                          key={i}
-                          className={twMerge(`
-                            border-b border-(--border-color) p-3 text-center
-                          `, highlightCol === i && 'bg-white/5')}
-                        >
-                          {value}
-                        </td>
-                      ))
-                    }
+                    {attributeKeys.map((attribute, i) => (
+                      <td
+                        key={attribute}
+                        className={twMerge(`
+                          border-b border-(--border-color) p-3 text-center
+                        `, highlightCol === i && 'bg-white/5')}
+                      >
+                        {join(bossTable[boss][attribute])}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
@@ -141,6 +129,9 @@ export default function Route({ loaderData }: Route.ComponentProps) {
     </div>
   )
 }
+
+/** 表の列順に並べた属性キー（ヘッダーの並びと一致させる） */
+const attributeKeys = ['魔', '炎', '雷', '聖', '血', '毒', '腐', '冷', '眠'] as const satisfies (keyof (typeof bossTable)[Boss])[]
 
 function join(array: string | string[]): string {
   return (Array.isArray(array) ? array : [array]).join(' / ')
