@@ -54,5 +54,5 @@ const button = tv({
 })
 
 export const Button: React.FC<Props> = ({ variant = 'primary', size = 'md', className, isDisabled, ...buttonProps }) => {
-  return <AriaButton className={cn(button({ variant, size, isDisabled }), className)({ twMerge: true })} isDisabled={isDisabled} {...buttonProps} />
+  return <AriaButton className={cn(button({ variant, size, isDisabled }), className)} isDisabled={isDisabled} {...buttonProps} />
 }
