@@ -290,5 +290,5 @@ npm run build      # プロダクションビルド
 ### よくある問題
 
 - **React Router型エラー**: `.react-router/types/` の自動生成型を確認
-- **Web Worker**: Vite設定の `worker.plugins` を確認
+- **Web Worker**: パスエイリアスは Vite の `resolve.tsconfigPaths` で解決（Worker にも適用）
 - **localStorage**: `StringifiedRelicsSchema` でのパース失敗
