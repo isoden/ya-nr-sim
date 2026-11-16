@@ -29,7 +29,7 @@ jobs:
         with:
           name: client-build
           path: build/client
-      - run: npx cf deploy build/client --message "$GITHUB_SHA"
+      - run: pnpm exec cf deploy build/client --message "$GITHUB_SHA"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

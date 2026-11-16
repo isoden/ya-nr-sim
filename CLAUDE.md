@@ -86,36 +86,36 @@ scripts/                   # 開発・ビルドスクリプト
 ### 開発サーバー起動
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 ### コード品質チェック
 
 ```bash
-npm run lint          # ESLint 実行
-npm run lint:fix      # ESLint 自動修正
-npm run typecheck     # TypeScript 型チェック
+pnpm lint          # ESLint 実行
+pnpm lint:fix      # ESLint 自動修正
+pnpm typecheck     # TypeScript 型チェック
 ```
 
 ### テスト実行
 
 ```bash
-npm run test          # テスト watch モード
-npm run test:run      # テスト単発実行
-npm run coverage:run  # カバレッジレポート生成
+pnpm test          # テスト watch モード
+pnpm test:run      # テスト単発実行
+pnpm coverage:run  # カバレッジレポート生成
 ```
 
 ### ベンチマーク実行
 
 ```bash
-npm run bench         # ベンチマーク watch モード
-npm run bench:run     # ベンチマーク単発実行
+pnpm bench         # ベンチマーク watch モード
+pnpm bench:run     # ベンチマーク単発実行
 ```
 
 ### ビルド
 
 ```bash
-npm run build         # プロダクションビルド
+pnpm build         # プロダクションビルド
 ```
 
 CI（`.github/workflows/build.yml`）では lint / typecheck / test を並列実行してからビルドする。
@@ -123,7 +123,7 @@ CI（`.github/workflows/build.yml`）では lint / typecheck / test を並列実
 ### データ生成
 
 ```bash
-npm run generate:relic-data  # 遺物データの自動生成（relicCategories, relicEffectGroups）
+pnpm generate:relic-data  # 遺物データの自動生成（relicCategories, relicEffectGroups）
 ```
 
 ## コード規約
@@ -235,9 +235,9 @@ test('テスト名', async () => {
 ### セットアップ
 
 ```bash
-# Node.js（バージョンは mise.toml で管理）
+# Node.js・pnpm（バージョンは mise.toml で管理）
 mise install
-npm ci
+pnpm install
 ```
 
 ### エラーハンドリング
@@ -248,7 +248,7 @@ npm ci
 ### パフォーマンス
 
 - **Web Workers**: 重いシミュレーション計算をメインスレッド外で実行
-- **ベンチマーク**: `npm run bench` でパフォーマンス測定
+- **ベンチマーク**: `pnpm bench` でパフォーマンス測定
 
 ## よくあるタスク
 
@@ -277,15 +277,15 @@ npm ci
 ### 遺物・ゲームデータの追加
 
 1. **データ定義**: `app/data/relicEffects.ts` または `app/data/relics.ts` に追加
-2. **自動生成**: `npm run generate:relic-data` でカテゴリ・グループデータを再生成
+2. **自動生成**: `pnpm generate:relic-data` でカテゴリ・グループデータを再生成
 
 ## デバッグ・トラブルシューティング
 
 ```bash
-npm run typecheck  # TypeScript型チェック
-npm run lint:fix   # ESLint自動修正
-npm run test       # テスト実行
-npm run build      # プロダクションビルド
+pnpm typecheck  # TypeScript型チェック
+pnpm lint:fix   # ESLint自動修正
+pnpm test       # テスト実行
+pnpm build      # プロダクションビルド
 ```
 
 ### よくある問題

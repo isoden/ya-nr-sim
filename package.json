@@ -8,10 +8,10 @@
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
     "lint": "eslint .",
-    "lint:fix": "npm run lint -- --fix",
+    "lint:fix": "pnpm lint --fix",
     "test": "vitest",
     "test:run": "vitest run",
-    "coverage:run": "npm run test:run -- --coverage",
+    "coverage:run": "pnpm test:run --coverage",
     "bench": "vitest bench",
     "bench:run": "vitest bench --run",
     "generate:relic-data": "tsx scripts/generate-relic-data.ts"
