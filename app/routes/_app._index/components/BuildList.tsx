@@ -71,7 +71,9 @@ function Success({ builds, excludeDepthsRelics }: { builds: Build[]; excludeDept
   return builds.map((item, i) => {
     return (
       <div
-        key={`${item.vessel.id}:${item.sortedRelics.map((relic) => relic?.id ?? '-').join(',')}`}
+        // 検索ごとに Suspense の key でリスト全体が作り直され、並び替えは起きないため位置で識別する
+        // eslint-disable-next-line @eslint-react/no-array-index-key
+        key={`${item.vessel.name}.${i}`}
         // TODO: use column-rule instead
         className={`
           before:mb-6 before:block before:h-px before:w-full
