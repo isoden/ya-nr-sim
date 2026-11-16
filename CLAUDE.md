@@ -234,7 +234,7 @@ test('テスト名', async () => {
 ### セットアップ
 
 ```bash
-# Node.js 24.x（mise推奨）
+# Node.js（バージョンは mise.toml で管理）
 mise install
 npm ci
 ```

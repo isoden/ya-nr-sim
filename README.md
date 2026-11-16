@@ -2,6 +2,10 @@
 
 Yet another ELDEN RING NIGHTREIGN build simulator
 
+## Requirements
+
+- Node.js (version is defined in `mise.toml`; run `mise install`)
+
 ## Installation
 
 Install the dependencies:
