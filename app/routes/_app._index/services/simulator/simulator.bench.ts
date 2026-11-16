@@ -1,11 +1,11 @@
-import { bench, describe } from 'vitest'
+import { describe, test } from 'vitest'
 import { vesselsByCharacterMap } from '~/data/vessels'
 import { simulate } from './simulator'
 import { fakeRelic } from '~/test/mocks/relic'
 
 describe('Simulator Performance Benchmarks', () => {
   // 軽量ケース: 遺物数少・制約シンプル
-  bench('small dataset (10 relics, 1 effect)', async () => {
+  defineBench('small dataset (10 relics, 1 effect)', async () => {
     const vessels = vesselsByCharacterMap['revenant']
     const relics = generateLargeRelicSet(10, {
       requiredEffectRatio: 0.5, // 50%が要求効果を持つ
@@ -22,7 +22,7 @@ describe('Simulator Performance Benchmarks', () => {
   })
 
   // 中程度ケース: 現実的なデータサイズ
-  bench('medium dataset (100 relics, 3 effects)', async () => {
+  defineBench('medium dataset (100 relics, 3 effects)', async () => {
     const vessels = vesselsByCharacterMap['revenant']
     const relics = generateLargeRelicSet(100, {
       requiredEffectRatio: 0.3, // 30%が要求効果を持つ
@@ -42,7 +42,7 @@ describe('Simulator Performance Benchmarks', () => {
   })
 
   // 重量ケース: 大規模データセット
-  bench('large dataset (500 relics, complex constraints)', async () => {
+  defineBench('large dataset (500 relics, complex constraints)', async () => {
     const vessels = vesselsByCharacterMap['revenant']
     const relics = generateLargeRelicSet(500, {
       requiredEffectRatio: 0.2, // 20%が要求効果を持つ
@@ -63,7 +63,7 @@ describe('Simulator Performance Benchmarks', () => {
   })
 
   // 極端ケース: フィルタリング効果の測定
-  bench('extreme filtering case (1000 relics, very few relevant)', async () => {
+  defineBench('extreme filtering case (1000 relics, very few relevant)', async () => {
     const vessels = vesselsByCharacterMap['revenant']
     const relics = generateLargeRelicSet(1000, {
       requiredEffectRatio: 0.05, // 5%のみが要求効果を持つ
@@ -80,7 +80,7 @@ describe('Simulator Performance Benchmarks', () => {
   })
 
   // 最悪ケース: ほぼ全ての遺物が関連
-  bench('worst case (300 relics, most relevant)', async () => {
+  defineBench('worst case (300 relics, most relevant)', async () => {
     const vessels = vesselsByCharacterMap['revenant']
     const relics = generateLargeRelicSet(300, {
       requiredEffectRatio: 0.9, // 90%が要求効果を持つ
@@ -109,4 +109,14 @@ function generateLargeRelicSet(
 ) {
   // TODO: requiredEffectRatio に基づいて遺物の効果を調整
   return Array.from({ length: count }, (_, i) => fakeRelic({ id: `${i + 1}` }))
+}
+
+/**
+ * Vitest 5 の bench fixture を使ってベンチマークを 1 件登録する。
+ * bench fixture は test() のコンテキストからしか取得できないため、test() で包む。
+ */
+function defineBench(name: string, fn: () => Promise<unknown>) {
+  test(name, async ({ bench }) => {
+    await bench(name, fn).run()
+  })
 }
