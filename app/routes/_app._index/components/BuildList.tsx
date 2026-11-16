@@ -24,7 +24,7 @@ export const BuildList: React.FC<Props> = ({ resultKey, excludeDepthsRelics, res
     <section
       className={`
         overflow-y-scroll rounded-lg border border-gray-400/10 bg-zinc-950/20
-        p-6 shadow
+        p-6 shadow-sm
       `}
       tabIndex={0}
     >
@@ -71,6 +71,8 @@ function Success({ builds, excludeDepthsRelics }: { builds: Build[]; excludeDept
   return builds.map((item, i) => {
     return (
       <div
+        // 検索ごとに Suspense の key でリスト全体が作り直され、並び替えは起きないため位置で識別する
+        // eslint-disable-next-line @eslint-react/no-array-index-key
         key={`${item.vessel.name}.${i}`}
         // TODO: use column-rule instead
         className={`
@@ -92,6 +94,8 @@ function Success({ builds, excludeDepthsRelics }: { builds: Build[]; excludeDept
             {item.vessel.slots.slice(0, sliceEnd).map((slot, i) => {
               return (
                 <li
+                  // スロットは同色が重複し並び替えも起きないため、位置そのものが識別子になる
+                  // eslint-disable-next-line @eslint-react/no-array-index-key
                   key={`${slot}.${i}`}
                   className={`
                     relative size-5
@@ -110,6 +114,8 @@ function Success({ builds, excludeDepthsRelics }: { builds: Build[]; excludeDept
             const relic = item.sortedRelics[index]
 
             return (
+              // スロットは同色が重複し並び替えも起きないため、位置そのものが識別子になる
+              // eslint-disable-next-line @eslint-react/no-array-index-key
               <li key={index} className="contents">
                 {relic
                   ? <RelicInfo relic={relic} />

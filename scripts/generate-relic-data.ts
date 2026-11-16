@@ -68,8 +68,7 @@ function createOptionFromName(name: string): OptionItem {
     children: relatedItems.map((item) =>
       item.name === name
         ? { id: exactMatch.id, name: item.name, maxStacks: countMaxStacks(item) }
-        : createOptionFromName(item.name),
-    ),
+        : createOptionFromName(item.name)),
   }
 }
 

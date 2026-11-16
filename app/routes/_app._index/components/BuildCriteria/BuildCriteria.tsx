@@ -60,8 +60,7 @@ export const BuildCriteria: React.FC<Props> = ({ effectsMeta, notEffectsMeta, se
           ...(children?.map<[string, boolean]>(({ id }) => [id, false]) ?? []),
         ]),
       ]),
-    ),
-  )
+    ))
   const [prevSelectedCharId, setPrevSelectedCharId] = useState(selectedCharId)
 
   if (selectedCharId !== prevSelectedCharId) {
@@ -113,7 +112,7 @@ export const BuildCriteria: React.FC<Props> = ({ effectsMeta, notEffectsMeta, se
           onChange={setShowSelectedOnly}
           className={`
             text-sm
-            has-[:disabled]:opacity-60
+            has-disabled:opacity-60
           `}
         >
           選択した効果のみ表示
@@ -152,8 +151,8 @@ export const BuildCriteria: React.FC<Props> = ({ effectsMeta, notEffectsMeta, se
                 <div
                   className={twMerge(
                     `
-                      group relative border-zinc-700 bg-zinc-800 shadow
-                      not-[:first-child]:border-t
+                      group relative border-zinc-700 bg-zinc-800 shadow-sm
+                      not-first:border-t
                     `,
                     invisible && 'collapse-fallback',
                   )}
@@ -163,7 +162,7 @@ export const BuildCriteria: React.FC<Props> = ({ effectsMeta, notEffectsMeta, se
                     className={`
                       sticky top-0 z-10 flex w-full items-center bg-inherit py-2
                       pr-2 pl-4 leading-0
-                      shadow-[0_1px_0_0_theme(colors.zinc.700)]
+                      shadow-[0_1px_0_0_var(--color-zinc-700)]
                     `}
                   >
                     <span className="text-sm font-bold" aria-hidden="true">
@@ -194,7 +193,7 @@ export const BuildCriteria: React.FC<Props> = ({ effectsMeta, notEffectsMeta, se
                                   sticky top-10 z-20 flex items-center gap-4
                                   border-t border-t-zinc-700 bg-zinc-800 py-2
                                   pr-2 pl-6
-                                  shadow-[0_1px_0_0_theme(colors.zinc.700)]
+                                  shadow-[0_1px_0_0_var(--color-zinc-700)]
                                   disabled:text-current/60
                                 `,
                                 children.filter(shouldHideItem).length === children.length && `
@@ -341,8 +340,7 @@ const EffectItem: React.FC<{
   notEffects: { [effectIds: string]: FieldMetadata<string | undefined> }
   checkedEffects: CheckedEffects
   setCheckedEffects: React.Dispatch<React.SetStateAction<CheckedEffects>>
-}> = ({ item, effects, notEffects, checkedEffects, setCheckedEffects,
-}) => {
+}> = ({ item, effects, notEffects, checkedEffects, setCheckedEffects }) => {
   const hasChildEffectSelected = item.children?.some((child) => checkedEffects[child.id] === 'checked')
   const isShowingCount = item.maxStacks > 1 || item.children?.some((child) => child.maxStacks > 1)
 
@@ -381,7 +379,7 @@ const EffectItem: React.FC<{
         ? (
             <input
               className={`
-                ml-auto rounded border border-zinc-600 text-right
+                ml-auto rounded-sm border border-zinc-600 text-right
                 disabled:border-zinc-800 disabled:text-gray-500/50
               `}
               defaultValue={1}
@@ -443,7 +441,7 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
       <input
         ref={inputRef}
         type="text"
-        className="rounded border border-white/50 px-2 py-1"
+        className="rounded-sm border border-white/50 px-2 py-1"
         placeholder="効果名で絞り込む"
         value={value}
         onChange={(event) => {

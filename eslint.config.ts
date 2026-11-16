@@ -4,7 +4,7 @@ import js from '@eslint/js'
 import { includeIgnoreFile } from '@eslint/compat'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
-import react from 'eslint-plugin-react'
+import eslintReact from '@eslint-react/eslint-plugin'
 import reactHooks from 'eslint-plugin-react-hooks'
 import betterTailwindcss from 'eslint-plugin-better-tailwindcss'
 import stylistic from '@stylistic/eslint-plugin'
@@ -22,11 +22,6 @@ export default defineConfig([
     plugins: { js, '@stylistic': stylistic },
     extends: ['js/recommended'],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
-    settings: {
-      react: {
-        version: 'detect',
-      },
-    },
     rules: {
       '@stylistic/member-delimiter-style': ['error', {
         multiline: {
@@ -40,8 +35,10 @@ export default defineConfig([
     },
   },
   tseslint.configs.recommended,
-  react.configs.flat.recommended,
-  react.configs.flat['jsx-runtime'],
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [eslintReact.configs['recommended-typescript']],
+  },
   reactHooks.configs.flat['recommended-latest'],
   {
     files: ['**/*.{jsx,tsx}'],
@@ -57,8 +54,7 @@ export default defineConfig([
     },
     rules: {
       ...betterTailwindcss.configs['recommended-error'].rules,
-      'better-tailwindcss/no-unregistered-classes': 'off',
-      'react/prop-types': 'off',
+      'better-tailwindcss/no-unknown-classes': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {

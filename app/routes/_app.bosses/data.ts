@@ -102,7 +102,8 @@ export const bossTable: Record<Boss, Record<
   | '腐'
   | '冷'
   | '眠',
-  Effects | Effects[]>> = {
+  Effects | Effects[]
+>> = {
   [Boss['亜人の女王＆亜人の剣聖']]: {
     魔: Effects['－'],
     炎: Effects['◯'],

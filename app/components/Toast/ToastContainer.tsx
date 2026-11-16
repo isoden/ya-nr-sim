@@ -1,5 +1,4 @@
-import { UNSTABLE_ToastRegion as ToastRegion,
-} from 'react-aria-components'
+import { UNSTABLE_ToastRegion as ToastRegion } from 'react-aria-components'
 import { Toast } from './Toast'
 import { queue } from './queue'
 

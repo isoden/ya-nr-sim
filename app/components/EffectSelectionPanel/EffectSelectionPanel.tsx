@@ -49,10 +49,9 @@ export const EffectSelectionPanel: React.FC<Props> = ({ defaultValue, onChange }
       </Button>
       <dialog
         ref={ref}
-        // eslint-disable-next-line react/no-unknown-property
         closedby="any"
         className={`
-          fixed top-8 right-0 bottom-auto left-0 m-auto w-full max-w-2xl rounded
+          fixed inset-x-0 top-8 bottom-auto m-auto w-full max-w-2xl rounded-sm
           border border-zinc-800 bg-primary-dark text-white shadow-lg
           backdrop:backdrop-blur-xs
         `}
@@ -74,7 +73,7 @@ export const EffectSelectionPanel: React.FC<Props> = ({ defaultValue, onChange }
             </button>
             {selectedMainCategory && (
               <>
-                <ChevronRight className="h-4 w-4 text-zinc-500" />
+                <ChevronRight className="size-4 text-zinc-500" />
                 <button
                   type="button"
                   className="hover:text-zinc-300"
@@ -86,7 +85,7 @@ export const EffectSelectionPanel: React.FC<Props> = ({ defaultValue, onChange }
             )}
             {selectedSubCategory && (
               <>
-                <ChevronRight className="h-4 w-4 text-zinc-500" />
+                <ChevronRight className="size-4 text-zinc-500" />
                 <span className="text-zinc-300">{selectedSubCategory}</span>
               </>
             )}
@@ -109,15 +108,16 @@ export const EffectSelectionPanel: React.FC<Props> = ({ defaultValue, onChange }
                   <button
                     type="button"
                     className={`
-                      hover:bg-brand-dark-50 hover:border-zinc-600
-                      w-full rounded border border-zinc-700 bg-brand-dark-100
+                      hover:bg-brand-dark-50
+                      w-full rounded-sm border border-zinc-700 bg-brand-dark-100
                       px-4 py-3 text-left text-sm transition-colors
+                      hover:border-zinc-600
                     `}
                     onClick={() => setSelectedMainCategory(category)}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{category}</span>
-                      <ChevronRight className="h-5 w-5 text-zinc-500" />
+                      <ChevronRight className="size-5 text-zinc-500" />
                     </div>
                   </button>
                 </li>
@@ -133,15 +133,16 @@ export const EffectSelectionPanel: React.FC<Props> = ({ defaultValue, onChange }
                   <button
                     type="button"
                     className={`
-                      hover:bg-brand-dark-50 hover:border-zinc-600
-                      w-full rounded border border-zinc-700 bg-brand-dark-100
+                      hover:bg-brand-dark-50
+                      w-full rounded-sm border border-zinc-700 bg-brand-dark-100
                       px-4 py-3 text-left text-sm transition-colors
+                      hover:border-zinc-600
                     `}
                     onClick={() => setSelectedSubCategory(category)}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{category}</span>
-                      <ChevronRight className="h-5 w-5 text-zinc-500" />
+                      <ChevronRight className="size-5 text-zinc-500" />
                     </div>
                   </button>
                 </li>

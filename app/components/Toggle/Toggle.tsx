@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useId } from 'react'
+import React, { createContext, use, useId } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 const ToggleContext = createContext<{ id: string; open: boolean; setOpen: (open: boolean) => void } | undefined>(
@@ -15,9 +15,9 @@ const ToggleRoot: React.FC<RootProps> = ({ children, open, onOpenChange: setOpen
   const id = useId()
 
   return (
-    <ToggleContext.Provider value={{ id, open, setOpen }}>
+    <ToggleContext value={{ id, open, setOpen }}>
       {typeof children === 'function' ? children({ open }) : children}
-    </ToggleContext.Provider>
+    </ToggleContext>
   )
 }
 
@@ -28,7 +28,7 @@ type ButtonProps = {
 }
 
 const ToggleButton: React.FC<ButtonProps> = ({ children, className, disabled }) => {
-  const { id, open, setOpen } = useContext(ToggleContext)!
+  const { id, open, setOpen } = use(ToggleContext)!
 
   return (
     <button
@@ -49,7 +49,7 @@ type ContentProps = React.PropsWithChildren<{
 }>
 
 const ToggleContent: React.FC<ContentProps> = ({ children, className }) => {
-  const { id, open } = useContext(ToggleContext)!
+  const { id, open } = use(ToggleContext)!
 
   return (
     <div
