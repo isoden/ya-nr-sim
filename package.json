@@ -4,7 +4,6 @@
   "type": "module",
   "scripts": {
     "build": "react-router build",
-    "build:ci": "concurrently \"npm:lint:fix\" \"npm:typecheck\" \"npm:test:run\" && npm run build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
@@ -53,7 +52,6 @@
     "@types/react-dom": "^19.3.0",
     "@vitest/coverage-v8": "^5.1.0",
     "cf": "1.0.0-rc.0",
-    "concurrently": "^10.0.7",
     "eslint": "^10.15.0",
     "eslint-plugin-better-tailwindcss": "^4.11.0",
     "eslint-plugin-react-hooks": "^7.1.1",
