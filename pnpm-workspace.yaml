@@ -1,0 +1,32 @@
+allowBuilds:
+  esbuild: true
+  workerd: true
+# npm からの移行時点で lockfile にあった公開 1 日未満のバージョン。2026-11-17T17:01Z 以降は不要になるので削除する
+minimumReleaseAgeExclude:
+  - '@cloudflare/build-output-utils@1.0.0-rc.0'
+  - '@cloudflare/config@1.0.0-rc.0'
+  - '@cloudflare/runtime-types@0.1.29'
+  - '@cloudflare/workerd-darwin-64@1.20261116.1'
+  - '@cloudflare/workerd-darwin-arm64@1.20261116.1'
+  - '@cloudflare/workerd-linux-64@1.20261116.1'
+  - '@cloudflare/workerd-linux-arm64@1.20261116.1'
+  - '@cloudflare/workerd-windows-64@1.20261116.1'
+  - '@eslint-react/ast@5.30.3'
+  - '@eslint-react/core@5.30.3'
+  - '@eslint-react/eslint-plugin@5.30.3'
+  - '@eslint-react/eslint@5.30.3'
+  - '@eslint-react/jsx@5.30.3'
+  - '@eslint-react/shared@5.30.3'
+  - '@eslint-react/var@5.30.3'
+  - '@stylistic/eslint-plugin@6.0.1'
+  - '@testing-library/user-event@14.6.12'
+  - cf@1.0.0-rc.0
+  - eslint-plugin-react-dom@5.30.3
+  - eslint-plugin-react-jsx@5.30.3
+  - eslint-plugin-react-naming-convention@5.30.3
+  - eslint-plugin-react-rsc@5.30.3
+  - eslint-plugin-react-web-api@5.30.3
+  - eslint-plugin-react-x@5.30.3
+  - miniflare@5.20261116.0-beta
+  - type-fest@6.0.0
+  - workerd@1.20261116.1

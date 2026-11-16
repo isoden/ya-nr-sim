@@ -121,7 +121,7 @@
 
 - **Web Worker**: 重い計算処理をメインスレッド外で実行
 - **Comlink**: 型安全な Worker 通信
-- **ベンチマーク**: `npm run bench` で測定可能
+- **ベンチマーク**: `pnpm bench` で測定可能
 
 ## テスト
 
@@ -133,9 +133,9 @@
 - `createBuild.spec.ts` - ビルド生成のテスト
 
 ```bash
-npm run test              # テスト watch モード
-npm run test:run          # テスト単発実行
-npm run coverage:run      # カバレッジレポート生成
+pnpm test              # テスト watch モード
+pnpm test:run          # テスト単発実行
+pnpm coverage:run      # カバレッジレポート生成
 ```
 
 ## 開発ガイド
@@ -150,7 +150,7 @@ npm run coverage:run      # カバレッジレポート生成
 ### パフォーマンス改善
 
 1. `simulator.bench.ts` でベンチマークを作成
-2. `npm run bench` で現状を測定
+2. `pnpm bench` で現状を測定
 3. 最適化を実施
 4. 再度測定して改善を確認
 

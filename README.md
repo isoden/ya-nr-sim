@@ -4,14 +4,14 @@ Yet another ELDEN RING NIGHTREIGN build simulator
 
 ## Requirements
 
-- Node.js (version is defined in `mise.toml`; run `mise install`)
+- Node.js and pnpm (versions are defined in `mise.toml`; run `mise install`)
 
 ## Installation
 
 Install the dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 ## Development
@@ -19,7 +19,7 @@ npm install
 Start the development server with HMR:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 ## Building for Production
@@ -27,5 +27,5 @@ npm run dev
 Create a production build:
 
 ```bash
-npm run build
+pnpm build
 ```

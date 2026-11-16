@@ -16,12 +16,12 @@ jobs:
       - uses: ./.github/actions/setup
       - parallel:
           - name: Lint
-            run: npm run lint
+            run: pnpm lint
           - name: Typecheck
-            run: npm run typecheck
+            run: pnpm typecheck
           - name: Test
-            run: npm run test:run
-      - run: npm run build
+            run: pnpm test:run
+      - run: pnpm build
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: client-build
