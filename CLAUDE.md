@@ -116,8 +116,9 @@ npm run bench:run     # ベンチマーク単発実行
 
 ```bash
 npm run build         # プロダクションビルド
-npm run build:ci      # CI用ビルド (lint + typecheck + test + build)
 ```
+
+CI（`.github/workflows/build.yml`）では lint / typecheck / test を並列実行してからビルドする。
 
 ### データ生成
 
