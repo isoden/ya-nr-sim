@@ -553,10 +553,28 @@ export const relicCategories: NestedItems = [
             ],
           },
           {
+            id: '7006600',
+            name: '近接攻撃力上昇',
+            hasDemeritEffect: false,
+            maxStacks: 6,
+          },
+          {
+            id: '7006700',
+            name: '戦技攻撃力上昇',
+            hasDemeritEffect: false,
+            maxStacks: 6,
+          },
+          {
             id: '7040000',
             name: '通常攻撃の1段目強化',
             hasDemeritEffect: false,
             maxStacks: 6,
+          },
+          {
+            id: '7037600',
+            name: '攻撃連続時、攻撃力上昇',
+            hasDemeritEffect: false,
+            maxStacks: 1,
           },
           {
             id: '7040200,7040201',
@@ -660,6 +678,12 @@ export const relicCategories: NestedItems = [
           {
             id: '10001',
             name: '攻撃を受けると攻撃力上昇',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+          {
+            id: '7037700',
+            name: '状態異常ゲージがある時、徐々に攻撃力上昇',
             hasDemeritEffect: false,
             maxStacks: 1,
           },
@@ -942,6 +966,12 @@ export const relicCategories: NestedItems = [
       {
         category: '魔術／祈祷',
         children: [
+          {
+            id: '7006400',
+            name: '魔術／祈祷、効果時間延長',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
           {
             id: '7043400',
             name: '輝剣の魔術を強化',
@@ -1466,6 +1496,12 @@ export const relicCategories: NestedItems = [
             ],
           },
           {
+            id: '7260900',
+            name: '周囲で腐敗状態の発生時、HP持続回復',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+          {
             id: '6611400',
             name: '聖杯瓶の回復量上昇',
             hasDemeritEffect: false,
@@ -1495,6 +1531,12 @@ export const relicCategories: NestedItems = [
                 maxStacks: 6,
               },
             ],
+          },
+          {
+            id: '7006500',
+            name: 'FP持続回復',
+            hasDemeritEffect: false,
+            maxStacks: 1,
           },
           {
             id: '10000',
@@ -1583,6 +1625,12 @@ export const relicCategories: NestedItems = [
             maxStacks: 1,
           },
           {
+            id: '7170100',
+            name: '被ダメージ時、腐敗の状態異常を付加',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+          {
             id: '7030700',
             name: 'ガード中、敵に狙われやすくなる',
             hasDemeritEffect: false,
@@ -1591,6 +1639,12 @@ export const relicCategories: NestedItems = [
           {
             id: '7035400',
             name: 'ジェスチャー「あぐら」により、発狂が蓄積',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+          {
+            id: '7037800',
+            name: 'カット率低下時、稀に敵から受ける攻撃を無効化',
             hasDemeritEffect: false,
             maxStacks: 1,
           },
@@ -1921,6 +1975,81 @@ export const relicCategories: NestedItems = [
         ],
       },
       {
+        category: '出撃時の武器（魔術／祈祷）',
+        children: [
+          {
+            id: '7360600',
+            name: '出撃時の武器の魔術を「魔術の輝剣」にする',
+            hasDemeritEffect: false,
+            category: '出撃時の武器の魔術/祈祷を「〇〇」にする',
+            maxStacks: 1,
+          },
+          {
+            id: '7360900',
+            name: '出撃時の武器の魔術を「カーリアの大剣」にする',
+            hasDemeritEffect: false,
+            category: '出撃時の武器の魔術/祈祷を「〇〇」にする',
+            maxStacks: 1,
+          },
+          {
+            id: '7361200',
+            name: '出撃時の武器の魔術を「夜のつぶて」にする',
+            hasDemeritEffect: false,
+            category: '出撃時の武器の魔術/祈祷を「〇〇」にする',
+            maxStacks: 1,
+          },
+          {
+            id: '7361500',
+            name: '出撃時の武器の魔術を「溶岩弾」にする',
+            hasDemeritEffect: false,
+            category: '出撃時の武器の魔術/祈祷を「〇〇」にする',
+            maxStacks: 1,
+          },
+          {
+            id: '7362100',
+            name: '出撃時の武器の魔術を「罰の茨」にする',
+            hasDemeritEffect: false,
+            category: '出撃時の武器の魔術/祈祷を「〇〇」にする',
+            maxStacks: 1,
+          },
+          {
+            id: '7370300',
+            name: '出撃時の武器の祈祷を「黄金の怒り」にする',
+            hasDemeritEffect: false,
+            category: '出撃時の武器の魔術/祈祷を「〇〇」にする',
+            maxStacks: 1,
+          },
+          {
+            id: '7370400',
+            name: '出撃時の武器の祈祷を「雷の槍」にする',
+            hasDemeritEffect: false,
+            category: '出撃時の武器の魔術/祈祷を「〇〇」にする',
+            maxStacks: 1,
+          },
+          {
+            id: '7370600',
+            name: '出撃時の武器の祈祷を「火よ！」にする',
+            hasDemeritEffect: false,
+            category: '出撃時の武器の魔術/祈祷を「〇〇」にする',
+            maxStacks: 1,
+          },
+          {
+            id: '7370900',
+            name: '出撃時の武器の祈祷を「獣爪」にする',
+            hasDemeritEffect: false,
+            category: '出撃時の武器の魔術/祈祷を「〇〇」にする',
+            maxStacks: 1,
+          },
+          {
+            id: '7371500',
+            name: '出撃時の武器の祈祷を「竜炎」にする',
+            hasDemeritEffect: false,
+            category: '出撃時の武器の魔術/祈祷を「〇〇」にする',
+            maxStacks: 1,
+          },
+        ],
+      },
+      {
         category: '出撃時のアイテム',
         children: [
           {
@@ -2099,6 +2228,12 @@ export const relicCategories: NestedItems = [
           {
             id: '6621200',
             name: '出撃時に「青色の結晶雫」を持つ',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+          {
+            id: '6623200',
+            name: '出撃時に「緑溢れの結晶雫」を持つ',
             hasDemeritEffect: false,
             maxStacks: 1,
           },
@@ -2603,7 +2738,7 @@ export const relicCategories: NestedItems = [
         children: [
           {
             id: '7034400',
-            name: '【執行者】スキル中の攻撃力上昇、攻撃時にHP減少',
+            name: '【執行者】スキル中の攻撃力上昇、攻撃時にカット率低下',
             hasDemeritEffect: false,
             maxStacks: 1,
           },
@@ -2634,6 +2769,100 @@ export const relicCategories: NestedItems = [
           {
             id: '6500700',
             name: '【執行者】アビリティ発動時、HPをゆっくりと回復',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+        ],
+      },
+      {
+        category: '学者',
+        children: [
+          {
+            id: '7036200',
+            name: '【学者】スキルの進捗率の低下を抑制',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+          {
+            id: '7036300',
+            name: '【学者】スキル使用時、対象に含まれた味方の攻撃力上昇',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+          {
+            id: '7036500',
+            name: '【学者】スキルによる標本が増える度、ルーンを取得',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+          {
+            id: '7036400',
+            name: '【学者】アーツでリンクした敵対象に、継続ダメージ',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+          {
+            id: '6647200',
+            name: '【学者】精神力上昇、生命力低下',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+          {
+            id: '6647300',
+            name: '【学者】持久力/技量上昇、知力/神秘低下',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+          {
+            id: '6500800',
+            name: '【学者】スキルを自身に使用時、FP消費軽減',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+        ],
+      },
+      {
+        category: '葬儀屋',
+        children: [
+          {
+            id: '7036800',
+            name: '【葬儀屋】アーツ発動時、攻撃力上昇',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+          {
+            id: '7037300',
+            name: '【葬儀屋】アーツ発動時、触れた味方のHP回復',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+          {
+            id: '7036900',
+            name: '【葬儀屋】連撃の最終攻撃命中時、攻撃力上昇',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+          {
+            id: '7037000',
+            name: '【葬儀屋】祈祷を使用して、自身に補助効果発生時物理攻撃力上昇',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+          {
+            id: '6647400',
+            name: '【葬儀屋】技量上昇、生命力/信仰低下',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+          {
+            id: '6647500',
+            name: '【葬儀屋】精神力/信仰上昇、筋力低下',
+            hasDemeritEffect: false,
+            maxStacks: 1,
+          },
+          {
+            id: '6500900',
+            name: '【葬儀屋】アーツ発動後、スキル再使用可能',
             hasDemeritEffect: false,
             maxStacks: 1,
           },

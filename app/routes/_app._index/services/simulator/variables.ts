@@ -1,6 +1,6 @@
 import type { Coefficients } from 'yalps'
 import { type Relic, type RelicJSON, RelicColorExtended } from '~/data/relics'
-import { type Vessel, SlotColor } from '~/data/vessels'
+import { type Vessel, SlotColor, freeSlotColorOf, freeSlotColors } from '~/data/vessels'
 import type { RequiredEffects } from './types'
 import { calculateRelicScore } from './scoring'
 
@@ -39,7 +39,6 @@ export function createVariables(
     const blueSlots = vessel.slots.filter((slot) => slot === SlotColor.Blue).length
     const greenSlots = vessel.slots.filter((slot) => slot === SlotColor.Green).length
     const yellowSlots = vessel.slots.filter((slot) => slot === SlotColor.Yellow).length
-    const freeSlots = vessel.slots.filter((slot) => slot === SlotColor.Free).length
 
     const deepRedSlots = vessel.slots.filter((slot) => slot === SlotColor.DeepRed).length
     const deepBlueSlots = vessel.slots.filter((slot) => slot === SlotColor.DeepBlue).length
@@ -74,9 +73,12 @@ export function createVariables(
     }
 
     // Freeスロット制約を設定
-    // Freeスロットは独立した制約として扱い、どの色の遺物でも装備可能
-    if (freeSlots > 0) {
-      vesselVars[`freeSlot.${vessel.id}`] = -freeSlots
+    // 色を問わず装備できるが、Free は通常遺物のみ、DeepFree は深層遺物のみ（{@link freeSlotColorOf}）
+    for (const freeSlotColor of freeSlotColors) {
+      const freeSlotCount = vessel.slots.filter((slot) => slot === freeSlotColor).length
+      if (freeSlotCount > 0) {
+        vesselVars[`freeSlot.${freeSlotColor}`] = -freeSlotCount
+      }
     }
 
     variables.set(`vessel.${vessel.id}`, vesselVars)
@@ -93,7 +95,8 @@ export function createVariables(
     }
 
     const hasMatchingSlot = vessels.some((vessel) => vessel.slots.includes(relic.colorExtended))
-    const hasAnyFreeSlot = vessels.some((vessel) => vessel.slots.includes(SlotColor.Free))
+    const freeSlotColor = freeSlotColorOf(relic.type)
+    const hasAnyFreeSlot = vessels.some((vessel) => vessel.slots.includes(freeSlotColor))
 
     // 遺物のスコアを計算（重み付き効果に基づく）
     const relicScore = calculateRelicScore(relic, requiredEffects)
@@ -127,21 +130,17 @@ export function createVariables(
       variables.set(`relic.${relic.id}.color`, colorSlotVars)
     }
 
-    // Freeスロット用変数（Freeスロットがある場合かつ通常遺物の場合のみ）
-    if (hasAnyFreeSlot && relic.type === 'normal') {
+    // Freeスロット用変数（遺物の種類に対応するFreeスロットがある場合のみ）
+    if (hasAnyFreeSlot) {
       const freeSlotVars: Record<string, number> = {
-        [`relic.${relic.type}`]: 1, // 通常遺物の選択制約用
+        [`relic.${relic.type}`]: 1, // 遺物の選択制約用
         [`relic.${relic.id}`]: 1, // 同じ遺物の重複防止用
         score: relicScore, // スコア最適化用係数
       }
 
       // Freeスロット制約
-      for (const vessel of vessels) {
-        const freeSlotCount = vessel.slots.filter((slot) => slot === SlotColor.Free).length
-        if (freeSlotCount > 0) {
-          freeSlotVars[`freeSlot.${vessel.id}`] = 1
-        }
-      }
+      // 献器ごとに制約を分けると、選ばれなかった献器の制約で free 変数が 0 に固定されるため、色ごとに1本にまとめる
+      freeSlotVars[`freeSlot.${freeSlotColor}`] = 1
 
       // 効果制約（個別効果）
       for (const effectId of relic.normalizedEffectIds) {

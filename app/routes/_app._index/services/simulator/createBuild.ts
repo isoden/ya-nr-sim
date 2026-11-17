@@ -1,6 +1,6 @@
 import { invariant } from 'es-toolkit'
 import type { Relic } from '~/data/relics'
-import { SlotColor, type Vessel } from '~/data/vessels'
+import { freeSlotColorOf, type SlotColor, type Vessel } from '~/data/vessels'
 import type { Build } from './types'
 
 const enum SlotType {
@@ -61,8 +61,8 @@ export function createBuild(variables: [string, number][], vessels: Vessel[], re
   buildRelics.sort((a, b) => {
     const aSlotType = relicSlotMap.get(a.id)!
     const bSlotType = relicSlotMap.get(b.id)!
-    const aColor = aSlotType === SlotType.Free ? SlotColor.Free : a.colorExtended
-    const bColor = bSlotType === SlotType.Free ? SlotColor.Free : b.colorExtended
+    const aColor = aSlotType === SlotType.Free ? freeSlotColorOf(a.type) : a.colorExtended
+    const bColor = bSlotType === SlotType.Free ? freeSlotColorOf(b.type) : b.colorExtended
 
     // スロットインデックスで比較（左から右へ）
     const aSlotIndex = build.vessel.slots.indexOf(aColor)
@@ -82,7 +82,7 @@ export function createBuild(variables: [string, number][], vessels: Vessel[], re
   // ソート済みのbuildRelicsをスロット順に配置
   for (const relic of buildRelics) {
     const slotType = relicSlotMap.get(relic.id)
-    const targetColor = slotType === SlotType.Free ? SlotColor.Free : relic.colorExtended
+    const targetColor = slotType === SlotType.Free ? freeSlotColorOf(relic.type) : relic.colorExtended
 
     // その色の次の空きスロットを探す
     const startIndex = colorIndexMap.get(targetColor) ?? 0

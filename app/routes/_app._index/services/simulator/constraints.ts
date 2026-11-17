@@ -1,6 +1,6 @@
 import { type Constraint, equalTo, lessEq } from 'yalps'
 import { type Relic, type RelicJSON, RelicColorExtended, relicEffectMap } from '~/data/relics'
-import { type Vessel, SlotColor } from '~/data/vessels'
+import { freeSlotColors } from '~/data/vessels'
 import type { RequiredEffects } from './types'
 
 /**
@@ -81,7 +81,6 @@ export function normalizeRequiredEffects(requiredEffects: RequiredEffects): Requ
   * 注: カテゴリ制約はSolver側ではなくアプリケーション側でフィルタリングする {@link ./categoryFilter.ts}
  */
 export function createConstraints(
-  vessels: Vessel[],
   relics: Relic[],
   requiredEffects: RequiredEffects,
 ): Map<string, Constraint> {
@@ -109,11 +108,8 @@ export function createConstraints(
   // Freeスロット制約
   // Freeスロットに装備された遺物数 ≤ Freeスロット数
   // 器の変数の係数が負の値で設定されているため、制約は0以下とする
-  for (const vessel of vessels) {
-    const freeSlotCount = vessel.slots.filter((slot) => slot === SlotColor.Free).length
-    if (freeSlotCount > 0) {
-      constraints.set(`freeSlot.${vessel.id}`, lessEq(0))
-    }
+  for (const freeSlotColor of freeSlotColors) {
+    constraints.set(`freeSlot.${freeSlotColor}`, lessEq(0))
   }
 
   // 効果制約（指定された数と等しい）

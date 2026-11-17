@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { fakeRelic } from '~/test/mocks/relic'
-import { RelicColorExtended, RelicColorBase } from './relics'
+import { demeritDepthsRelicEffectMap, normalizeEffectId, relicEffectMap, RelicColorExtended, RelicColorBase } from './relics'
 
 describe('Relic#name', () => {
   describe('遺物(通常)', () => {
@@ -72,6 +72,95 @@ describe('Relic#normalizedEffectIds', () => {
     expect(relic.effects).toEqual([7126000, 7126001, 7126002])
     expect(relic.normalizedEffectIds).toEqual([7126000, 7126000, 7126000])
   })
+})
+
+describe('normalizeEffectId', () => {
+  test.each([
+    [11000, 7033200],
+    [11002, 7032400],
+    [12002, 7012000],
+    [16002, 7010900],
+    [17002, 7032900],
+    [19001, 7036300],
+    [7001409, 7001402],
+    [7006300, 6611100],
+  ])('効果ID %d を、 重複する効果ID %d に変換する', (id, expected) => {
+    // act
+    const actual = normalizeEffectId(id)
+
+    // assert
+    expect(actual).toBe(expected)
+  })
+})
+
+describe('遺物効果の定義', () => {
+  // 実セーブに現れる効果ID
+  test.each([
+    11000,
+    11002,
+    12002,
+    16002,
+    17002,
+    19001,
+    6500800,
+    6647200,
+    6647300,
+    6647400,
+    6647500,
+    7001409,
+    7006300,
+    7006400,
+    7006500,
+    7006600,
+    7006700,
+    7036200,
+    7036300,
+    7036400,
+    7036500,
+    7036800,
+    7036900,
+    7037000,
+    7037300,
+    7037600,
+    7037700,
+    7037800,
+    7170100,
+    7260900,
+    7361200,
+    7362100,
+    7370300,
+    7370600,
+    7370900,
+    7371500,
+    // 検索UIのカテゴリで選択できる効果ID
+    6500900,
+    6623200,
+    7360600,
+    7360900,
+    7361500,
+    7370400,
+  ])('効果ID %d が正規化後に定義されている', (id) => {
+    // act
+    const normalizedId = normalizeEffectId(id)
+
+    // assert
+    expect(relicEffectMap[normalizedId] ?? demeritDepthsRelicEffectMap[normalizedId]).toBeDefined()
+  })
+
+  test.each([7360600, 7360900, 7361200, 7361500, 7362100, 7370300, 7370400, 7370600, 7370900, 7371500])(
+    '魔術/祈祷を置き換える効果ID %d は、 戦技の置き換えとは別のカテゴリに属する',
+    (id) => {
+      // arrange
+      const weaponSkillCategory = relicEffectMap[7122700].category
+
+      // act
+      const { category } = relicEffectMap[id]
+
+      // assert
+      expect(category).toBeDefined()
+      expect(category).not.toBe(weaponSkillCategory)
+    },
+  )
 })
 
 describe('Relic#pairedEffectIds', () => {
