@@ -7,6 +7,8 @@ export const characterMap = {
   revenant: { id: 'revenant', name: '復讐者' },
   recluse: { id: 'recluse', name: '隠者' },
   executor: { id: 'executor', name: '執行者' },
+  scholar: { id: 'scholar', name: '学者' },
+  undertaker: { id: 'undertaker', name: '葬儀屋' },
 } as const satisfies Record<string, { id: string; name: string }>
 
 export const characterList = Object.values(characterMap)

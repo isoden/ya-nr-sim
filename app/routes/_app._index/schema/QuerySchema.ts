@@ -1,19 +1,10 @@
 import * as v from 'valibot'
 import { setWith } from 'es-toolkit/compat'
-import { characterMap } from '~/data/characters'
+import { characterList } from '~/data/characters'
 import { Relic } from '~/data/relics'
 
 const QuerySchema = v.object({
-  charId: v.picklist([
-    characterMap.wylder.id,
-    characterMap.guardian.id,
-    characterMap.ironeye.id,
-    characterMap.duchess.id,
-    characterMap.raider.id,
-    characterMap.revenant.id,
-    characterMap.recluse.id,
-    characterMap.executor.id,
-  ]),
+  charId: v.picklist(characterList.map(({ id }) => id)),
   effects: v.record(
     v.string(),
     v.pipe(

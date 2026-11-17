@@ -5,7 +5,22 @@ export type SlotColor = (typeof SlotColor)[keyof typeof SlotColor]
 export const SlotColor = {
   ...RelicColorExtended,
   Free: 'Free',
+  DeepFree: 'DeepFree',
 } as const satisfies Record<string, string>
+
+/** 色を問わず遺物を装備できるフリースロットの色 */
+export const freeSlotColors = [SlotColor.Free, SlotColor.DeepFree] as const
+
+/**
+ * 遺物の種類ごとに、装備できるフリースロットの色を返す
+ *
+ * 通常の遺物は通常のフリースロットに、深層の遺物は深層のフリースロットにのみ装備できる。
+ *
+ * @param relicType - 遺物の種類
+ */
+export function freeSlotColorOf(relicType: 'normal' | 'depths'): typeof SlotColor.Free | typeof SlotColor.DeepFree {
+  return relicType === 'normal' ? SlotColor.Free : SlotColor.DeepFree
+}
 
 /**
  * 献器の定義
@@ -63,6 +78,10 @@ const sharedVessels = [
     name: '巨人樹の聖杯',
     slots: [SlotColor.Blue, SlotColor.Blue, SlotColor.Blue, SlotColor.DeepBlue, SlotColor.DeepBlue, SlotColor.DeepBlue],
   }),
+  Vessel.new({
+    name: '影樹の聖杯',
+    slots: [SlotColor.Red, SlotColor.Red, SlotColor.Red, SlotColor.DeepRed, SlotColor.DeepRed, SlotColor.DeepRed],
+  }),
 ]
 
 /** 追跡者の献器 */
@@ -114,6 +133,14 @@ const WylderVessels = [
       SlotColor.DeepYellow,
       SlotColor.DeepYellow,
     ],
+  }),
+  Vessel.new({
+    name: '朽ちた追跡者の盃',
+    slots: [SlotColor.Blue, SlotColor.Green, SlotColor.Yellow, SlotColor.DeepBlue, SlotColor.DeepGreen, SlotColor.DeepYellow],
+  }),
+  Vessel.new({
+    name: '忘れられた追跡者の盃',
+    slots: [SlotColor.Green, SlotColor.Green, SlotColor.Yellow, SlotColor.DeepRed, SlotColor.DeepGreen, SlotColor.DeepFree],
   }),
 ]
 
@@ -174,6 +201,14 @@ const GuardianVessels = [
       SlotColor.DeepYellow,
     ],
   }),
+  Vessel.new({
+    name: '朽ちた守護者の盃',
+    slots: [SlotColor.Yellow, SlotColor.Green, SlotColor.Green, SlotColor.DeepYellow, SlotColor.DeepGreen, SlotColor.DeepGreen],
+  }),
+  Vessel.new({
+    name: '忘れられた守護者の盃',
+    slots: [SlotColor.Green, SlotColor.Blue, SlotColor.Blue, SlotColor.DeepRed, SlotColor.DeepBlue, SlotColor.DeepFree],
+  }),
 ]
 
 /** 鉄の目の献器 */
@@ -226,6 +261,14 @@ const IroneyeVessels = [
       SlotColor.DeepRed,
     ],
   }),
+  Vessel.new({
+    name: '朽ちた鉄の目の盃',
+    slots: [SlotColor.Blue, SlotColor.Blue, SlotColor.Green, SlotColor.DeepBlue, SlotColor.DeepBlue, SlotColor.DeepGreen],
+  }),
+  Vessel.new({
+    name: '忘れられた鉄の目の盃',
+    slots: [SlotColor.Yellow, SlotColor.Blue, SlotColor.Red, SlotColor.DeepYellow, SlotColor.DeepGreen, SlotColor.DeepFree],
+  }),
 ]
 
 /** レディの献器 */
@@ -270,6 +313,14 @@ const DuchessVessels = [
       SlotColor.DeepGreen,
       SlotColor.DeepYellow,
     ],
+  }),
+  Vessel.new({
+    name: '朽ちたレディの盃',
+    slots: [SlotColor.Blue, SlotColor.Green, SlotColor.Green, SlotColor.DeepBlue, SlotColor.DeepGreen, SlotColor.DeepGreen],
+  }),
+  Vessel.new({
+    name: '忘れられたレディの盃',
+    slots: [SlotColor.Green, SlotColor.Yellow, SlotColor.Yellow, SlotColor.DeepRed, SlotColor.DeepGreen, SlotColor.DeepFree],
   }),
 ]
 
@@ -330,6 +381,14 @@ const RaiderVessels = [
       SlotColor.DeepBlue,
     ],
   }),
+  Vessel.new({
+    name: '朽ちた無頼漢の盃',
+    slots: [SlotColor.Yellow, SlotColor.Yellow, SlotColor.Green, SlotColor.DeepYellow, SlotColor.DeepYellow, SlotColor.DeepGreen],
+  }),
+  Vessel.new({
+    name: '忘れられた無頼漢の盃',
+    slots: [SlotColor.Yellow, SlotColor.Blue, SlotColor.Red, SlotColor.DeepRed, SlotColor.DeepGreen, SlotColor.DeepFree],
+  }),
 ]
 
 /** 復讐者の献器 */
@@ -381,6 +440,14 @@ const RevenantVessels = [
       SlotColor.DeepGreen,
       SlotColor.DeepRed,
     ],
+  }),
+  Vessel.new({
+    name: '朽ちた復讐者の盃',
+    slots: [SlotColor.Red, SlotColor.Red, SlotColor.Yellow, SlotColor.DeepRed, SlotColor.DeepRed, SlotColor.DeepYellow],
+  }),
+  Vessel.new({
+    name: '忘れられた復讐者の盃',
+    slots: [SlotColor.Green, SlotColor.Red, SlotColor.Red, SlotColor.DeepYellow, SlotColor.DeepGreen, SlotColor.DeepFree],
   }),
 ]
 
@@ -434,6 +501,14 @@ const RecluseVessels = [
       SlotColor.DeepRed,
     ],
   }),
+  Vessel.new({
+    name: '朽ちた隠者の盃',
+    slots: [SlotColor.Red, SlotColor.Red, SlotColor.Blue, SlotColor.DeepRed, SlotColor.DeepRed, SlotColor.DeepBlue],
+  }),
+  Vessel.new({
+    name: '忘れられた隠者の盃',
+    slots: [SlotColor.Yellow, SlotColor.Blue, SlotColor.Red, SlotColor.DeepBlue, SlotColor.DeepGreen, SlotColor.DeepFree],
+  }),
 ]
 
 /** 執行者の献器 */
@@ -476,8 +551,80 @@ const ExecutorVessels = [
       SlotColor.Red,
       SlotColor.DeepGreen,
       SlotColor.DeepGreen,
-      SlotColor.DeepRed,
+      SlotColor.DeepBlue,
     ],
+  }),
+  Vessel.new({
+    name: '朽ちた執行者の盃',
+    slots: [SlotColor.Red, SlotColor.Red, SlotColor.Yellow, SlotColor.DeepRed, SlotColor.DeepRed, SlotColor.DeepYellow],
+  }),
+  Vessel.new({
+    name: '忘れられた執行者の盃',
+    slots: [SlotColor.Green, SlotColor.Blue, SlotColor.Red, SlotColor.DeepYellow, SlotColor.DeepGreen, SlotColor.DeepFree],
+  }),
+]
+
+/** 学者の献器 */
+const ScholarVessels = [
+  Vessel.new({
+    name: '学者の器',
+    slots: [SlotColor.Red, SlotColor.Red, SlotColor.Yellow, SlotColor.DeepRed, SlotColor.DeepRed, SlotColor.DeepYellow],
+  }),
+  Vessel.new({
+    name: '学者の盃',
+    slots: [SlotColor.Blue, SlotColor.Green, SlotColor.Yellow, SlotColor.DeepBlue, SlotColor.DeepGreen, SlotColor.DeepYellow],
+  }),
+  Vessel.new({
+    name: '学者の高杯',
+    slots: [SlotColor.Red, SlotColor.Blue, SlotColor.Free, SlotColor.DeepRed, SlotColor.DeepYellow, SlotColor.DeepYellow],
+  }),
+  Vessel.new({
+    name: '煤けた学者の器',
+    slots: [SlotColor.Blue, SlotColor.Green, SlotColor.Green, SlotColor.DeepBlue, SlotColor.DeepGreen, SlotColor.DeepGreen],
+  }),
+  Vessel.new({
+    name: '封じられた学者の器',
+    slots: [SlotColor.Yellow, SlotColor.Red, SlotColor.Red, SlotColor.DeepGreen, SlotColor.DeepBlue, SlotColor.DeepBlue],
+  }),
+  Vessel.new({
+    name: '朽ちた学者の盃',
+    slots: [SlotColor.Blue, SlotColor.Blue, SlotColor.Green, SlotColor.DeepBlue, SlotColor.DeepBlue, SlotColor.DeepGreen],
+  }),
+  Vessel.new({
+    name: '忘れられた学者の盃',
+    slots: [SlotColor.Yellow, SlotColor.Green, SlotColor.Blue, SlotColor.DeepRed, SlotColor.DeepGreen, SlotColor.DeepFree],
+  }),
+]
+
+/** 葬儀屋の献器 */
+const UndertakerVessels = [
+  Vessel.new({
+    name: '葬儀屋の器',
+    slots: [SlotColor.Blue, SlotColor.Green, SlotColor.Green, SlotColor.DeepBlue, SlotColor.DeepGreen, SlotColor.DeepGreen],
+  }),
+  Vessel.new({
+    name: '葬儀屋の盃',
+    slots: [SlotColor.Red, SlotColor.Yellow, SlotColor.Yellow, SlotColor.DeepRed, SlotColor.DeepYellow, SlotColor.DeepYellow],
+  }),
+  Vessel.new({
+    name: '葬儀屋の高杯',
+    slots: [SlotColor.Green, SlotColor.Yellow, SlotColor.Free, SlotColor.DeepBlue, SlotColor.DeepGreen, SlotColor.DeepYellow],
+  }),
+  Vessel.new({
+    name: '煤けた葬儀屋の器',
+    slots: [SlotColor.Red, SlotColor.Red, SlotColor.Blue, SlotColor.DeepRed, SlotColor.DeepRed, SlotColor.DeepBlue],
+  }),
+  Vessel.new({
+    name: '封じられた葬儀屋の器',
+    slots: [SlotColor.Green, SlotColor.Green, SlotColor.Blue, SlotColor.DeepYellow, SlotColor.DeepRed, SlotColor.DeepRed],
+  }),
+  Vessel.new({
+    name: '朽ちた葬儀屋の盃',
+    slots: [SlotColor.Red, SlotColor.Blue, SlotColor.Blue, SlotColor.DeepRed, SlotColor.DeepBlue, SlotColor.DeepBlue],
+  }),
+  Vessel.new({
+    name: '忘れられた葬儀屋の盃',
+    slots: [SlotColor.Yellow, SlotColor.Yellow, SlotColor.Red, SlotColor.DeepBlue, SlotColor.DeepYellow, SlotColor.DeepFree],
   }),
 ]
 
@@ -490,4 +637,6 @@ export const vesselsByCharacterMap = {
   [characterMap.revenant.id]: [...RevenantVessels, ...sharedVessels],
   [characterMap.recluse.id]: [...RecluseVessels, ...sharedVessels],
   [characterMap.executor.id]: [...ExecutorVessels, ...sharedVessels],
+  [characterMap.scholar.id]: [...ScholarVessels, ...sharedVessels],
+  [characterMap.undertaker.id]: [...UndertakerVessels, ...sharedVessels],
 }

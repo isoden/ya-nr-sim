@@ -1,5 +1,5 @@
 import { expect, test, describe } from 'vitest'
-import { SlotColor, vesselsByCharacterMap } from '~/data/vessels'
+import { SlotColor, Vessel, vesselsByCharacterMap } from '~/data/vessels'
 import { RelicColorBase } from '~/data/relics'
 import { fakeRelic } from '~/test/mocks/relic'
 import { getVesselBySlots } from '~/test/helpers/vessel'
@@ -401,6 +401,101 @@ test('通常の遺物はフリースロットに装備できる', async () => {
     ],
   })
 })
+
+describe('深層フリースロット', () => {
+  const effectId = $e`出撃時に「星光の欠片」を持つ`
+
+  test('深層の遺物は深層フリースロットに装備できる', async () => {
+    // arrange: 深層青に対応する色スロットはなく、深層フリースロットのみ利用可能
+    const vessels = [
+      Vessel.new({ name: 'test', slots: [SlotColor.Red, SlotColor.Green, SlotColor.Free, SlotColor.DeepRed, SlotColor.DeepRed, SlotColor.DeepFree] }),
+    ]
+    const deepBlue = fakeRelic.deepBlue({ effects: [effectId] })
+
+    // act
+    const result = await simulate({
+      vessels,
+      relics: [deepBlue],
+      requiredEffects: [{ effectIds: [effectId], count: 1 }],
+      notEffects: [],
+      excludeDepthsRelics: false,
+    })
+
+    // assert
+    expect(result).toEqual({
+      success: true,
+      data: [{ vessel: vessels[0], sortedRelics: [null, null, null, null, null, deepBlue] }],
+    })
+  })
+
+  test('通常の遺物は深層フリースロットに装備できない', async () => {
+    // arrange: 青に対応する通常スロットはなく、深層フリースロットのみ空いている
+    const vessels = [
+      Vessel.new({ name: 'test', slots: [SlotColor.Red, SlotColor.Green, SlotColor.Yellow, SlotColor.DeepRed, SlotColor.DeepRed, SlotColor.DeepFree] }),
+    ]
+    const blue = fakeRelic.blue({ effects: [effectId] })
+
+    // act
+    const result = await simulate({
+      vessels,
+      relics: [blue],
+      requiredEffects: [{ effectIds: [effectId], count: 1 }],
+      notEffects: [],
+      excludeDepthsRelics: false,
+    })
+
+    // assert
+    expect(result).toEqual(noSolutionFound)
+  })
+
+  test('深層の遺物は深層フリースロットの数までしか装備できない', async () => {
+    // arrange
+    const vessels = [
+      Vessel.new({ name: 'test', slots: [SlotColor.Red, SlotColor.Green, SlotColor.Yellow, SlotColor.DeepRed, SlotColor.DeepRed, SlotColor.DeepFree] }),
+    ]
+    const relics = [fakeRelic.deepBlue({ effects: [effectId] }), fakeRelic.deepBlue({ effects: [effectId] })]
+
+    // act
+    const result = await simulate({
+      vessels,
+      relics,
+      requiredEffects: [{ effectIds: [effectId], count: 2 }],
+      notEffects: [],
+      excludeDepthsRelics: false,
+    })
+
+    // assert
+    expect(result).toEqual(noSolutionFound)
+  })
+})
+
+test.each([
+  ['通常', SlotColor.Free, fakeRelic.blue, 2],
+  ['深層', SlotColor.DeepFree, fakeRelic.deepBlue, 5],
+])(
+  '%sのフリースロットを持つ献器が候補に複数あっても、フリースロットに装備できる',
+  async (_, freeSlotColor, createRelic, freeSlotIndex) => {
+    // arrange: 青・深層青に対応する色スロットはなく、どちらの献器もフリースロットのみ利用可能
+    const slots: SlotColor[] = [SlotColor.Red, SlotColor.Green, SlotColor.Yellow, SlotColor.DeepRed, SlotColor.DeepRed, SlotColor.DeepGreen]
+    slots[freeSlotIndex] = freeSlotColor
+    const vessels = [Vessel.new({ name: 'test1', slots }), Vessel.new({ name: 'test2', slots })]
+    const effectId = $e`出撃時に「星光の欠片」を持つ`
+    const relic = createRelic({ effects: [effectId] })
+
+    // act
+    const result = await simulate({
+      vessels,
+      relics: [relic],
+      requiredEffects: [{ effectIds: [effectId], count: 1 }],
+      notEffects: [],
+      excludeDepthsRelics: false,
+      volume: 1,
+    })
+
+    // assert
+    expect(result.success).toBe(true)
+  },
+)
 
 describe('stacksAcrossLevels統合テスト', () => {
   test('カンマ区切りで複数効果を指定した場合、どれでもマッチする', async () => {

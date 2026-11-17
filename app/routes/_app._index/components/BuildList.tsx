@@ -168,4 +168,5 @@ const bgColorMap = {
   [SlotColor.DeepGreen]: 'bg-green-800',
   [SlotColor.DeepYellow]: 'bg-yellow-800',
   [SlotColor.Free]: 'bg-gray-500',
+  [SlotColor.DeepFree]: 'bg-gray-600',
 }

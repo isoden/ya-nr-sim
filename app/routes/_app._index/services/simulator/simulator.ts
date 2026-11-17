@@ -37,7 +37,7 @@ export async function simulate({ vessels, relics: relicsJSON, requiredEffects, n
     }, [])
     const normalizedRequiredEffects = normalizeRequiredEffects(requiredEffects)
     const variables = createVariables(vessels, relics, normalizedRequiredEffects)
-    const constraints = createConstraints(vessels, relics, normalizedRequiredEffects)
+    const constraints = createConstraints(relics, normalizedRequiredEffects)
     const builds = solveRecursively({
       remaining: volume,
       variables,
