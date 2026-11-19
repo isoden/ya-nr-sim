@@ -3,6 +3,7 @@ import { Await } from 'react-router'
 import { RelicInfo } from '~/components/RelicInfo/RelicInfo'
 import { SlotColor } from '~/data/vessels'
 import type { Build, Result } from '../services/simulator/types'
+import { iconUrlOf } from '~/assets/icons/slots'
 
 type Props = {
   resultKey: string
@@ -90,19 +91,19 @@ function Success({ builds, excludeDepthsRelics }: { builds: Build[]; excludeDept
             {' '}
             {item.vessel.name}
           </h3>
-          <ul className="flex gap-2">
+          <ul className="flex gap-0.5 opacity-80">
             {item.vessel.slots.slice(0, sliceEnd).map((slot, i) => {
               return (
                 <li
                   // スロットは同色が重複し並び替えも起きないため、位置そのものが識別子になる
                   // eslint-disable-next-line @eslint-react/no-array-index-key
                   key={`${slot}.${i}`}
-                  className={`
-                    relative size-5
-                    ${bgColorMap[slot]}
-                  `}
                 >
-                  <span className="sr-only">{slot}</span>
+                  <img
+                    src={iconUrlOf(slot)}
+                    className="size-7"
+                    alt={slot}
+                  />
                 </li>
               )
             })}
